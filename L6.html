@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#4c5fd5">
+<title>L6 机器学习 II（聚类 Clustering） · Data Analytics 半期复习</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div id="prog"></div>
+<header class="hero-lite"><div class="kin"><a class="back" href="index.html">← 总目录</a><h1>L6 · 机器学习 II（聚类 Clustering）</h1><span class="pill2">半期范围 · 重点</span><span class="sp"></span><span class="pill2">课件 72 页</span></div></header>
+<nav class="tabs"><a href="index.html">🏠 首页</a><a href="L1.html">L1 导论</a><a href="L2.html">L2 SQL</a><a href="L3.html">L3 相似 I</a><a href="L4.html">L4 相似 II</a><a href="L5.html">L5 ML I</a><a href="L6.html" class="active">L6 ML II</a><a href="L7.html">L7 降维</a><a href="L8.html" class="out">L8 可视化</a><a href="L9.html" class="out">L9 推荐</a><a href="index.html#cross">公式速查</a><a href="index.html#quiz">模拟卷</a><a href="index.html#plan">3 天计划</a><span class="sp"></span><button id="expand" data-open="0" type="button">展开全部答案</button><button id="theme" type="button" aria-label="切换深色模式">☾</button></nav>
+<main><section class="ch" id="l6">
+  <div class="ch-head">
+    <div class="ch-badge">L6</div>
+    <div>
+      <h2>机器学习 II：聚类<span class="en">Machine Learning II · Clustering</span><span class="ch-tag hot">高频</span></h2>
+      <p class="ch-sub">半期必考：k-means 手算一轮迭代；BFR 的 2d+1 统计量与马氏距离；CURE 的收缩。覆盖课件 p1–p72（层次聚类、k-means、BFR、CURE 四套算法）。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🎯 本节考什么</h3>
+    <ul class="kp">
+      <li><b>会算</b>：k-means 一轮"分配＋更新质心"；层次聚类首次合并哪两簇；BFR 的方差与合并 SUMSQ；马氏距离一步算；k-means++ 概率 D(p)²；维度灾难 (0.001)^(1/d)。</li>
+      <li><b>会背</b>：DS / CS / RS 三个集合的定义；2d+1 充分统计量；层次聚类三个停止条件；CURE 两遍扫描与 20% 收缩；选 k 的肘部法。</li>
+      <li><b>会区分</b>：centroid（人造点）vs clustroid（真实点）；单链 / 全链 / 平均 / 质心四种链接的失效形状；BFR（轴对齐正态椭圆）vs CURE（任意形状）。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>核心概念一：无监督学习与聚类的定位</h3>
+
+    <div class="concept">
+      <h4>无监督学习（Unsupervised Learning）</h4>
+      <p>数据只有 x₁,…,xₙ，<b>没有标签、没有预定义输出</b>，目标是"发现数据里有意思的结构、模式、关系"。课件特意强调这个目标是 <i>vaguely-posed</i>（含糊定义）。</p>
+      <p class="dim">这句"含糊"就是考点：监督学习有唯一正确答案，聚类没有。所以聚类题永远不会问"正确答案是什么"，只会问"用什么距离度量、k 怎么定、哪种链接方式、收敛到局部还是全局"。</p>
+    </div>
+
+    <div class="concept">
+      <h4>聚类（Clustering）的定义</h4>
+      <p>给定点集以及点与点之间的距离（或相似度），把点分成若干簇，使<b>同簇成员彼此接近/相似</b>，<b>不同簇成员不相似</b>。通常三个前提：点在<b>高维</b>空间；相似度由某个距离度量给出；所以欧氏（Euclidean）、余弦（Cosine）、Jaccard、编辑距离（edit distance）都可能被用上。</p>
+      <p class="dim">同一份数据换一个距离度量，得到的簇完全不同。所以做任何聚类题的第一步永远是判定"欧氏还是非欧氏"——它决定了能不能用质心、能不能用 k-means。</p>
+    </div>
+
+    <div class="concept">
+      <h4>课件的三个应用（会举例题）</h4>
+      <ul class="dot">
+        <li><b>天体</b>：Sloan Digital Sky Survey 的 20 亿个天体，用 7 个频段的辐射量表示成 7 维点，目标是聚成星系 / 近星 / 类星体。</li>
+        <li><b>音乐</b>：把一首歌表示成"听过它的顾客集合"，一位顾客是一维，取值 0/1；Spotify 上维度是数千万。相似的歌有相似的听众集合 ⇒ 典型非欧氏，用 Jaccard 更自然。</li>
+        <li><b>文档主题</b>：文档表示为 (x₁,…,x_k)，x_i = 1 当且仅当第 i 个词出现；k 可以无限（不限制词表）。词集相近的文档可能同一主题。</li>
+      </ul>
+      <p>课件 p11 的要点：同一份"集合"数据，你怎么看它，就决定了用什么距离——</p>
+      <table class="cmp">
+        <caption>同一个集合，三种看法 → 三种距离</caption>
+        <thead><tr><th>看法</th><th>距离 / 相似度</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td>集合当向量（sets as vectors）</td><td>余弦距离</td><td>看方向，不看长度</td></tr>
+          <tr><td>集合当集合（sets as sets）</td><td>Jaccard 距离</td><td>只看交集与并集</td></tr>
+          <tr><td>集合当点（sets as points）</td><td>欧氏距离</td><td>把 0/1 当坐标</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="concept">
+      <h4>欧氏 vs 非欧氏（决定一切的分界线）</h4>
+      <table class="cmp">
+        <thead><tr><th></th><th>欧氏 Euclidean</th><th>非欧氏 Non-Euclidean</th></tr></thead>
+        <tbody>
+          <tr><td>点是什么</td><td>实数坐标向量</td><td>点就是点本身（集合 / 序列 / 图）</td></tr>
+          <tr><td>能否求平均</td><td>能，平均即质心 centroid</td><td>没有"位置"概念，没有质心</td></tr>
+          <tr><td>距离</td><td>L2 范数、L1 范数</td><td>Jaccard、Hamming、余弦</td></tr>
+          <tr><td>怎么代表一个簇</td><td>质心</td><td>clustroid / 点的集合 / 内聚度</td></tr>
+        </tbody>
+      </table>
+      <p class="dim">记住一句：<b>质心是"算"出来的（可能不存在于数据中），clustroid 是"挑"出来的（一定是数据点）</b>。BFR、k-means 都建立在"能求平均"上，所以只能在欧氏。</p>
+    </div>
+
+    <div class="concept">
+      <h4>内存还是磁盘（决定用哪个算法）</h4>
+      <p>数据装得进内存 → 聚类简单直接，代表就是 <b>k-means</b>。数据驻留磁盘（disk-resident）→ 只能一次读一批进内存、聚完只保留<b>簇的摘要</b>，代表是 <b>BFR</b> 和 <b>CURE</b>。</p>
+      <p class="note">"为什么需要 BFR / CURE"的标准答案：k-means 每轮都要扫全部点，磁盘驻留时 I/O 无法接受；BFR / CURE 把每批点压成 O(k) 的摘要，代价是多加了分布假设。</p>
+    </div>
+
+  </div>
+
+  <div class="card">
+    <h3>核心概念二：维度灾难（Curse of Dimensionality）</h3>
+    <div class="concept">
+      <h4>为什么高维让聚类变难</h4>
+      <p>低维时"簇"肉眼可见；实际应用常常不是 2 维而是 10 维、10000 维。高维空间与直觉完全不同：<b>几乎所有点对之间都很远</b>，"最近邻"与"最远邻"的距离差距被压平，距离度量失去区分力，聚类（以及 KNN）随之退化。</p>
+      <p>课件给的量化实验（必考）：在 [0,1]^d 上均匀撒 10000 个点，问需要覆盖多大一块"边长"才能覆盖 0.1% 的数据（即拿到 10 个最近邻）。</p>
+      <div class="formula">
+        <span class="fm">边长 = (0.001)^(1/d) = 10^(−3/d)</span>
+        <span class="cap">d = 1 → 0.001；d = 2 → 0.032；d = 10 → 10^(−0.3) ≈ 0.50。</span>
+      </div>
+      <p class="dim">结论：<b>10 维时要覆盖 50% 的坐标范围才拿到 0.1% 的数据</b>（选择题就爱问这个 50%）。体积按边长^d 增长，维度越高必须铺得越开。</p>
+      <p>与聚类的关系：k-means 全靠"到质心的距离"，当所有点距离都差不多时 SSE 曲面变平坦、任何划分都差不多好，聚类失去意义；层次聚类同理（簇间距离趋同，合并顺序变得任意）。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>核心概念三：层次聚类（Hierarchical Clustering）</h3>
+    <div class="concept">
+      <h4>凝聚式（Agglomerative，自底向上）</h4>
+      <p>初始每个点自成一簇，然后<b>反复合并"最近"的两个簇</b>，直到只剩一个簇（或由停止条件截断）。反向的 divisive（自顶向下）从一簇开始递归切分，课件只提了一句。</p>
+      <p>课件明确说这一族方法有三个必须回答的问题，考试也按这三问出：</p>
+      <ol class="steps">
+        <li>（1）怎么表示一个含很多点的簇？</li>
+        <li>（2）怎么定义两个簇的"近"？</li>
+        <li>（3）什么时候停止合并？</li>
+        <li>合并顺序记录下来就是 dendrogram（树状图）。</li>
+      </ol>
+      <p class="dim">朴素实现每轮要在 O(N²) 个簇对里找最小、共约 N 轮，总代价 O(N³)，只能处理中小数据——这正是 BFR / CURE 存在的理由。</p>
+    </div>
+
+    <div class="concept">
+      <h4>欧氏情形：用质心（centroid）</h4>
+      <p>合并后簇的"位置"用质心代表：质心 = 簇内所有点的平均。簇间距离 = 质心之间的距离，合并质心最近的两簇。质心是"人造"的点，一般不是任何一个数据点。</p>
+      <p class="dim">课件 p23 的 6 点例子可当计算模板：簇 {(0,0),(1,2),(2,1)} 的质心 = ((0+1+2)/3, (0+2+1)/3) = (1,1)；簇 {(5,3),(4,1),(5,0)} 的质心 = (4.67, 1.33)；再比较两个质心的距离决定下一次合并。</p>
+    </div>
+
+    <div class="concept">
+      <h4>非欧氏情形：三条路 + clustroid</h4>
+      <p>非欧氏没有"位置"，所以只剩三种做法：(1) 挑一个真实点当代表 <b>clustroid</b>；(2) 把簇当成点的集合，用"跨簇最近点对"或"跨簇平均点距"定义簇间距离；(3) 用<b>内聚度 cohesion</b>：合并后 diameter（簇内最大点距）或平均点距越小越内聚，合并"最内聚"的那一对。</p>
+      <div class="formula">
+        <span class="fm">c = argmin_{c ∈ C} Σ_{x ∈ C} d(x, c)²</span>
+        <span class="cap">clustroid = 簇内"离其他点最近"的那个真实点。</span>
+      </div>
+      <p>课件给了"最近"的三种口径，都可以：<b>到其他点的最大距离最小</b>、<b>到其他点的平均距离最小</b>、<b>到其他点的距离平方和最小</b>（这三个都是上式换掉聚合方式）。求出 clustroid 后，就把它当成质心用。</p>
+      <p class="dim">对比记忆：质心可能落在簇外、可能是空的区域；clustroid 一定落在簇内的某个数据点上。这是选择题最爱的一对。</p>
+    </div>
+
+    <div class="concept">
+      <h4>四种链接方式与各自的失效形状</h4>
+      <table class="cmp">
+        <caption>合并准则 = 定义"簇间距离"的方式，选错就必然分错</caption>
+        <thead><tr><th>链接方式</th><th>簇间距离定义</th><th>偏好什么形状</th><th>什么时候翻车</th></tr></thead>
+        <tbody>
+          <tr><td>单链 Single Link</td><td>两簇<b>最近</b>点对的距离（min）</td><td>长条、链状、任意形状</td><td>噪声点会把两个本不相干的簇"串"起来（chaining）</td></tr>
+          <tr><td>全链 Complete Link</td><td>两簇<b>最远</b>点对的距离（max，即合并后 diameter）</td><td>紧凑的球状簇</td><td>长条簇被强行割断；对离群点极敏感</td></tr>
+          <tr><td>平均链接 Average Link</td><td>所有跨簇点对距离的平均</td><td>规模接近的均衡簇</td><td>对簇的大小差异敏感，两头不讨好</td></tr>
+          <tr><td>质心链接 Centroid Link</td><td>两簇质心之间的距离</td><td>凸的、形状相近的簇</td><td>非凸 / 同心 / 弯曲形状：质心几乎重合，无法分开</td></tr>
+        </tbody>
+      </table>
+      <p>课件用两张图演示"没有万能准则"：p30 里 A、B 的质心比 A、C 的质心更近，但 A、C 之间存在最近的成员点对 ⇒ 质心链接正确、最近点链接反而错；p31 反过来给一个密度分布的例子，最近点链接正确而质心链接出错。<b>结论：合并准则的好坏取决于簇的形状，而形状事先并不知道。</b></p>
+      <p class="dim">对照：课件"跨簇最小点距"= 单链，"跨簇平均点距"= 平均链接，"合并后 diameter 最小"（diameter 即簇内最大点距）= 全链。</p>
+      <figure class="sfig"><img src="slides/L6/p022.png" alt="L6 第22页课件原图" loading="lazy" decoding="async"><figcaption>凝聚式层次聚类的合并顺序：每次合并得到新质心，右侧 dendrogram 记录合并层级。</figcaption></figure>
+    </div>
+
+    <div class="concept">
+      <h4>什么时候停止合并</h4>
+      <ul class="dot">
+        <li>已经得到 k 个簇（前提是 k 已知）——最常见的停止条件。</li>
+        <li>diameter 超过阈值就停（簇开始"变胖"说明合错了）。</li>
+        <li>密度低于阈值就停（密度 = 点数 / diameter 或 点数 / 平均距离）。</li>
+        <li>合并会产生"坏簇"就停——典型信号：<b>diameter 突然跳升</b>。</li>
+        <li>干脆一直合到只剩 1 个簇，事后在 dendrogram 上横切来选 k。</li>
+      </ul>
+      <p class="dim"><span class="extra">课外补充：dendrogram 的纵轴是"合并时的簇间距离"，在某个高度横切一刀，切到几条竖线就是几个簇——这条读法课件只给了图、没给文字，但考试问"k=3 时怎么从树上看"就靠它。</span></p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>核心概念四：k-means</h3>
+    <div class="concept">
+      <h4>它是"问题"而不是"算法"</h4>
+      <p>课件原话：<i>It is a problem formulation, not an algorithm.</i> 问题是——给定欧氏空间/距离和簇数 k，找 k 个中心，使每个点到所属中心的距离平方和最小。这个精确最优解是 <b>NP-hard</b>；近似解就是 Lloyd's algorithm，也就是通常说的 k-means 算法。</p>
+      <div class="formula">
+        <span class="fm">J = Σ_{i=1..k} Σ_{x ∈ C_i} ‖x − μ_i‖²，μ_i = (1/|C_i|) Σ_{x ∈ C_i} x</span>
+        <span class="cap">目标函数（SSE，簇内平方和）；中心必须取均值，否则 J 不是最小。</span>
+      </div>
+      <p class="dim"><span class="extra">课外补充：为什么中心一定取均值？把 J 对 μ_i 求偏导置零得 2Σ(x − μ_i) = 0 ⇒ μ_i = 平均值。这一步是"更新"步骤的理论依据，简答题可以直接写。</span></p>
+    </div>
+    <div class="concept">
+      <h4>迭代步骤（考试按这个手算）</h4>
+      <ol class="steps">
+        <li>初始化：选 k 个初始中心（随机取 k 个数据点，或 k-means++）。</li>
+        <li>分配（assign）：对每个点，算它到 k 个当前质心的距离，归给最近的那个簇。</li>
+        <li>更新（update）：把每个簇的质心改成簇内所有点的平均。</li>
+        <li>重复 2–3，直到"点不再换簇、质心稳定"= 收敛。</li>
+      </ol>
+      <p>为什么一定会停：<span class="extra">课外补充：分配步与更新步都不会让 J 增加，而 N 个点的划分只有有限种 ⇒ 必然有限步停住；但停的是<b>局部最优</b>，SSE 可能远差于全局最优。</span></p>
+    </div>
+    <div class="concept">
+      <h4>初始化敏感 + k-means++</h4>
+      <p>课件明确：收敛<b>严重依赖初始中心的选择</b>，可以 performance arbitrarily badly（同一个数据集，初值选糟就得到完全错误的分割）。两种选初值策略：随机取 k 个点；k-means++。</p>
+      <p>k-means++ 的思路：先取一个小样本 S（|S| 是 k 乘以一个"与点数成对数关系"的因子），在 S 上用任意算法聚类，把得到的质心当种子。取点方式是<b>按随机顺序访问点，加入样本的概率正比于 D(p)²</b>，其中 D(p) 是 p 到"最近的已选点"的距离——越孤立的点越容易被选，于是 k 个种子会自动散开。</p>
+      <div class="formula">
+        <span class="fm">P(选中 p) = D(p)² / Σ_q D(q)²</span>
+        <span class="cap">概率 ∝ 距离平方（不是距离本身），这是最常见的公式陷阱。</span>
+      </div>
+    </div>
+    <div class="concept">
+      <h4>k 怎么选：肘部法</h4>
+      <p>对不同的 k 分别跑 k-means，画"平均到质心距离 vs k"曲线：曲线先是陡降，到真正的 k 之后下降变缓，拐点（肘部）就是最佳 k。k 太小 → 大量点到质心的距离很长；k 太大 → 平均距离几乎不再改善（只是把簇无意义地切碎）。</p>
+      <pre class="dia">avg.dist
+|\
+| \
+|  \_
+|    \___
+|        \_____  more k: no gain
++---------------- k
+      best k (elbow)</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>核心概念五：BFR（Bradley–Fayyad–Reina）</h3>
+    <div class="concept">
+      <h4>为什么要有 BFR</h4>
+      <p>BFR 是 k-means 的变体，专门处理<b>极大、驻留磁盘</b>的数据集：一次只读入"一内存"的一批点，处理后只保留统计摘要。目标是内存 O(簇数) 而不是 O(数据量)。</p>
+      <p>它的核心假设（也是它的软肋）：k 个簇在欧氏空间中<b>服从正态分布</b>，各维标准差可以不同，因此每个簇是<b>轴对齐的椭圆</b>。目标仍是找质心；点的最终归属可以在第二遍扫描数据时完成。</p>
+    </div>
+    <div class="concept">
+      <h4>三个集合：DS / CS / RS</h4>
+      <table class="cmp">
+        <thead><tr><th>集合</th><th>全称</th><th>判定</th><th>怎么处理</th></tr></thead>
+        <tbody>
+          <tr><td>DS</td><td>Discard set</td><td>离某个质心足够近</td><td>并入该簇、加进统计量，<b>原始点直接丢弃</b></td></tr>
+          <tr><td>CS</td><td>Compressed set</td><td>彼此靠得很紧，但离所有已有质心都远</td><td>压缩成统计量保存，<b>但还不分配给任何簇</b></td></tr>
+          <tr><td>RS</td><td>Retained set</td><td>孤立、既不够近也不够抱团</td><td><b>原样保留坐标</b>，等下一批一起再判</td></tr>
+        </tbody>
+      </table>
+      <p class="dim">一句话记：DS = 已归队并丢弃；CS = 抱团但没归队；RS = 散兵游勇，原样留着。</p>
+      <p>主循环（课件 6 步）：初始化 k 个质心 → 读入一批点 → 足够近的进 DS → 其余（含旧 RS）用内存算法聚类，成簇进 CS、离群进 RS → 累加 N/SUM/SUMSQ 并尝试合并 CS → 重复到读完；最后一轮把 CS、RS 并入最近簇。</p>
+      <figure class="sfig"><img src="slides/L6/p049.png" alt="L6 第49页课件原图" loading="lazy" decoding="async"><figcaption>BFR 的三个点集合示意：DS 归队后丢弃，CS 抱团未分配，RS 孤立点原样保留。</figcaption></figure>
+    </div>
+    <div class="concept">
+      <h4>2d+1 个充分统计量</h4>
+      <p>每个簇（DS）只需要三个东西：<b>N</b>（点数）、<b>SUM</b>（d 维向量，各维坐标之和）、<b>SUMSQ</b>（d 维向量，各维坐标平方之和）。1 + d + d = <b>2d+1</b> 个数，就能代表任意大小的簇——这就是"内存 O(簇数)"的来源。</p>
+      <div class="formula">
+        <span class="fm">μ_i = SUM_i / N</span>
+        <span class="fm">Var_i = SUMSQ_i / N − (SUM_i / N)²，σ_i = √Var_i</span>
+        <span class="cap">μ_i 是第 i 维的平均，σ_i 是该簇在第 i 维的标准差。</span>
+      </div>
+      <p class="dim">陷阱：SUMSQ_i − SUM_i²/N 是"平方偏差和"Σ(x−μ)²，<b>不是方差</b>；方差还要再除以 N。两个式子别混。</p>
+      <p>为什么是 2d+1 而不是更多：因为"轴对齐"假设等价于<b>各维独立</b>，协方差矩阵是对角阵，只需存 d 个方差而不是 d×d 个协方差。课件特意点明：<b>一旦放弃轴对齐（允许斜椭圆），就必须存完整 d×d 协方差矩阵，d 稍微大一点就爆内存</b>——这就是轴对齐假设的真正代价与理由。</p>
+    </div>
+    <div class="concept">
+      <h4>马氏距离（Mahalanobis Distance）</h4>
+      <p>判断"一个点是否足够近、可以进 DS"有两个办法：马氏距离小于阈值；或者"属于最近质心的似然足够高"。课件详细给了第一种。</p>
+      <ol class="steps">
+        <li>每一维先归一化：y_i = (x_i − c_i) / σ_i（σ_i 是该簇在第 i 维的标准差）。</li>
+        <li>把各维的 y_i 平方后求和。</li>
+        <li>开根号就是马氏距离。</li>
+      </ol>
+      <div class="formula">
+        <span class="fm">d_M(x, c) = √( Σ_i ((x_i − c_i) / σ_i)² )</span>
+        <span class="cap">先按簇自身尺度伸缩，再算普通欧氏距离——"远"由簇的胖瘦决定。</span>
+      </div>
+      <p>必背性质：若簇在 d 维上服从正态分布，则变换后<b>1 个标准差对应马氏距离 √d</b>；于是该簇 <b>68% 的点马氏距离 &lt; √d，95% 的点 &lt; 2√d</b>。所以阈值常取"2 个标准差"（≈2√d）。</p>
+      <p class="dim">直观（课件 p60 三张对比图）：欧氏距离的等距线是球；马氏距离的等距线是顺着簇分布形状拉长的椭圆。所以同一个点，用欧氏看"远"，用马氏可能"很正常"。</p>
+      <p>合并两个 CS 的判据：算出<b>合并后的方差</b>，低于阈值就合并。因为 N、SUM、SUMSQ 可以相加（N=N₁+N₂，SUM=SUM₁+SUM₂，SUMSQ=SUMSQ₁+SUMSQ₂），所以合并后的方差可以瞬间算出来，不用碰原始点。另有"按维度区别对待""考虑密度"等变体。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>核心概念六：CURE（Clustering Using REpresentatives）</h3>
+    <div class="concept">
+      <h4>它要解决 BFR 解决不了的问题</h4>
+      <p>CURE 只假设欧氏距离：<b>不限簇形状、不要求各维正态、不要求坐标轴固定</b>（斜的椭圆也行）。代价是 k（簇数）必须事先给定。核心差别：<b>不用一个质心代表簇，而用一组"代表点"（representative points）</b>来代表簇。</p>
+    </div>
+    <div class="concept">
+      <h4>两遍扫描（2-pass）</h4>
+      <ol class="steps">
+        <li>第一遍前段：从数据中随机抽一个样本，在内存里做<b>层次聚类</b>，合并准则是"两簇之间存在最近的一对点"（偏单链）。</li>
+        <li>为每个簇挑代表点：样本要<b>尽量分散</b>，例如每簇取 4 个彼此最远的点。</li>
+        <li><b>收缩（shrink）</b>：把每个代表点朝簇质心移动一个固定比例，课件举例 20%。</li>
+        <li>用"最近的一对代表点"作为簇间距离，继续合并，直到得到 k 个簇。</li>
+        <li>第二遍：重新扫描<b>全量</b>数据，每个点分配给"离它最近的那个代表点"所属的簇。</li>
+      </ol>
+      <div class="formula">
+        <span class="fm">p′ = p + 0.2 · (c − p)</span>
+        <span class="cap">p 是代表点，c 是簇质心：只走 1/5 的路程，不走到质心。</span>
+      </div>
+    </div>
+    <div class="concept">
+      <h4>收缩到底在解决什么（最容易被问"为什么"）</h4>
+      <p>采样足够大时，总有一些代表点会落在簇的<b>边界</b>上；把它们朝质心移，就把它们推进簇的内部。关键的不对称性：<b>大而散（loose）的簇，代表点离质心远，收缩移动的距离大；小而密（dense）的簇，代表点本来就靠质心，移动很小</b>——因为移动量正比于到质心的距离。</p>
+      <p>于是距离比较时，大散簇的"势力范围"被温柔地缩小了，它就不会把旁边一个<b>小而密</b>的簇吞掉。课件原话：favors a small, dense cluster that is near a larger dispersed cluster。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>三种方法总对比（简答题模板）</h3>
+    <table class="cmp">
+      <thead><tr><th>维度</th><th>k-means</th><th>BFR</th><th>CURE</th></tr></thead>
+      <tbody>
+        <tr><td>数据在哪</td><td>必须在内存</td><td>磁盘驻留，一次读一批</td><td>磁盘驻留，两遍扫描</td></tr>
+        <tr><td>簇的形状假设</td><td>凸 / 球状（Voronoi 划分）</td><td>轴对齐的正态椭圆</td><td>任意形状</td></tr>
+        <tr><td>簇怎么表示</td><td>一个质心</td><td>质心 + 2d+1 统计量</td><td>多个已收缩的代表点</td></tr>
+        <tr><td>需要给定 k 吗</td><td>需要</td><td>需要初始 k（可新增簇再合并）</td><td>需要</td></tr>
+        <tr><td>主要弱点</td><td>初始化敏感、局部最优</td><td>正态 + 轴对齐假设</td><td>两遍 I/O、代表点个数要调</td></tr>
+      </tbody>
+    </table>
+    <p class="dim">答题套路：内存还是磁盘 → 对簇形状的假设 → 每簇用什么摘要表示。</p>
+  </div>
+
+  <div class="trap">
+    <h3>⚠ 易错点 / 命题陷阱</h3>
+    <ul>
+      <li><b>质心 vs clustroid</b>：质心是平均出来的人造点（可能落在簇外、可能不是任何数据点）；clustroid 必须是簇内的真实数据点。<b>也没有万能合并准则</b>：单链会被噪声"串联"（chaining），质心链接在同心 / 非凸结构上必错——课件 p30、p31 是两个相反方向的例子，只背一个会被反例题打脸。</li>
+      <li><b>k-means 不保证全局最优</b>：它只保证收敛（点不再移动）。换初始中心，结果与 SSE 都可能不同，问"是否找到最优划分"答"不一定，只是局部最优"。</li>
+      <li><b>马氏距离里的 σ_i</b> 是"该簇在该维的标准差"，不是方差、也不是全局标准差；正态下 68% 对应 √d 而<b>不是</b> 1。同理维度灾难的边长是 (0.001)^(1/d)，d = 10 时约 0.50（覆盖一半范围才拿到 0.1% 数据）。</li>
+      <li><b>BFR 的点进 DS 后原始点被丢弃</b>，只剩 N / SUM / SUMSQ，不是"存到磁盘备用"；CURE 的收缩是代表点朝质心走 20%，不是把半径缩到 20%，也不是丢掉 20% 的点。</li>
+      <li><b>k-means++ 的抽样概率 ∝ D(p)²</b>，写成 ∝ D(p) 就错；且 D(p) 是到"最近的已选点"的距离，不是到第一个点的距离。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>🧠 随堂自测</h3>
+
+    <details class="q"><summary>Q1 计算：一维数据上某簇 N = 4，SUM = 10，SUMSQ = 30。求质心与方差；再把另一簇（N = 2，SUM = 8，SUMSQ = 36）并入，求合并后的质心与方差。</summary>
+      <div class="q-a">
+        <p><span class="ans">答案：</span>原簇：μ = 10/4 = 2.5；Var = 30/4 − 2.5² = 7.5 − 6.25 = 1.25，σ ≈ 1.118。</p>
+        <p>合并：N = 6，SUM = 18，SUMSQ = 66 ⇒ μ = 18/6 = 3；Var = 66/6 − 3² = 11 − 9 = 2，σ ≈ 1.414。</p>
+        <p>要点：合并只需把三个统计量分别相加，永远不用碰原始点——这就是 2d+1 的意义。</p>
+      </div>
+    </details>
+
+    <details class="q"><summary>Q2 计算：簇质心 c = (2,3)，该簇两维标准差 σ = (1,2)。新点 x = (4,5)。求马氏距离，并判断在 1 个标准差 / 2 个标准差阈值下（d = 2）是否接收该点。</summary>
+      <div class="q-a">
+        <p><span class="ans">答案：</span>y₁ = (4−2)/1 = 2，y₂ = (5−3)/2 = 1 ⇒ d_M = √(2² + 1²) = √5 ≈ 2.24。</p>
+        <p>正态下 1σ ↔ √d = √2 ≈ 1.41，2σ ↔ 2√d ≈ 2.83。所以 1σ 阈值下<b>拒绝</b>（2.24 &gt; 1.41），2σ 阈值下<b>接收</b>（2.24 &lt; 2.83）。</p>
+        <p>对照：普通欧氏距离 = √(2²+2²) ≈ 2.83，恰好卡在上限——用欧氏会得出"刚好边界"的错误直觉。</p>
+      </div>
+    </details>
+
+    <details class="q"><summary>Q3 计算：一维四点 0、1、5、6，初始质心 c₁ = 0、c₂ = 6。做一轮分配＋更新，再判断是否收敛。</summary>
+      <div class="q-a">
+        <p><span class="ans">答案：</span>分配：0→c₁（距 0）；1→c₁（距 1 &lt; 5）；5→c₂（距 1）；6→c₂（距 0）。</p>
+        <p>更新：μ₁ = (0+1)/2 = 0.5，μ₂ = (5+6)/2 = 5.5。</p>
+        <p>再分配：1 到 0.5 距离 0.5 &lt; 到 5.5 的 4.5 → 留 c₁；5 到 5.5 距离 0.5 &lt; 到 0.5 的 4.5 → 留 c₂。<b>点不再换簇 ⇒ 已收敛</b>。</p>
+        <p>SSE = 0.5² + 0.5² + 0.5² + 0.5² = 1。</p>
+      </div>
+    </details>
+
+    <details class="q"><summary>Q4 概念：k-means++ 中，三个候选点到"最近已选种子"的距离分别是 1、2、2，下一个种子被选中的概率各是多少？</summary>
+      <div class="q-a">
+        <p><span class="ans">答案：</span>权重是距离的平方：1² = 1，2² = 4，2² = 4，总和 9。</p>
+        <p>概率分别 1/9、4/9、4/9。注意第三个点与第二个点权重相同（虽然它们在同一"远"的程度），所以"距离为 2 的点"合计以 8/9 的概率当选。</p>
+      </div>
+    </details>
+  </div>
+
+  <div class="mnemonic"><b>记忆口诀</b>：聚类先问"距离和 k"；层次看三问（表示、近邻、停止），k-means 看初值；BFR 三集合记 2d+1、马氏距离除标准差；CURE 两遍扫描、代表点缩两成。</div>
+</section>
+<section class="sec" id="slides"><div class="ch-head"><h2>📽 逐页精讲 · 课件原文 72 页</h2><p class="ch-sub">每格 = 课件原页截图 + 中文讲解；标 <b>考点</b> 的页容易出题或容易错。宽屏时图在左、讲解在右；点顶部「页面目录」可跳到任意页。</p></div><details class="ptoc"><summary>📑 页面目录（72 页，点击展开可跳页）</summary><ol><li><a href="#p1">P1 · 本讲封面：机器学习 II</a></li><li><a href="#p2">P2 · 无监督学习的定义</a></li><li><a href="#p3">P3 · 监督 vs 无监督对比</a></li><li><a href="#p4">P4 · 聚类：小节标题</a></li><li><a href="#p5">P5 · 聚类的形式定义</a></li><li><a href="#p6">P6 · 簇与离群点示意</a></li><li><a href="#p7">P7 · 应用一：天体聚类</a></li><li><a href="#p8">P8 · 应用二：音乐分类</a></li><li><a href="#p9">P9 · 把歌曲看成高维空间中的点</a></li><li><a href="#p10">P10 · 应用三：文档找主题</a></li><li><a href="#p11">P11 · 同一集合的三种看法</a></li><li><a href="#p12">P12 · 配图：三种视角的图示</a></li><li><a href="#p13">P13 · 维度灾难：引入</a></li><li><a href="#p14">P14 · 维度灾难的定量计算</a></li><li><a href="#p15">P15 · 维度灾难的结论</a></li><li><a href="#p16">P16 · 两大类聚类方法</a></li><li><a href="#p17">P17 · 欧氏还是非欧氏</a></li><li><a href="#p18">P18 · 数据在内存还是磁盘</a></li><li><a href="#p19">P19 · 点分配 vs 层次：簇的形状</a></li><li><a href="#p20">P20 · 配图：层次聚类导入</a></li><li><a href="#p21">P21 · 层次聚类：核心操作与三问</a></li><li><a href="#p22">P22 · 欧氏情形：用质心</a></li><li><a href="#p23">P23 · 例子：6 个点与 dendrogram</a></li><li><a href="#p24">P24 · 非欧氏情形：三种做法</a></li><li><a href="#p25">P25 · 做法一：clustroid 的定义</a></li><li><a href="#p26">P26 · 质心 vs clustroid</a></li><li><a href="#p27">P27 · 做法二：用跨簇点对定义距离</a></li><li><a href="#p28">P28 · 做法三：内聚度 cohesion</a></li><li><a href="#p29">P29 · 什么时候停止合并</a></li><li><a href="#p30">P30 · 合并准则取决于簇形状</a></li><li><a href="#p31">P31 · 反例一：质心法对、最近点法错</a></li><li><a href="#p32">P32 · 反例二：最近点法对、质心法错</a></li><li><a href="#p33">P33 · 配图：过渡到 k-means</a></li><li><a href="#p34">P34 · k-means 是问题，不是算法</a></li><li><a href="#p35">P35 · k-means 的迭代步骤</a></li><li><a href="#p36">P36 · 初始化敏感</a></li><li><a href="#p37">P37 · k-means++ 的思路</a></li><li><a href="#p38">P38 · 图：第 1 轮后的簇</a></li><li><a href="#p39">P39 · 图：第 2 轮后的簇</a></li><li><a href="#p40">P40 · 图：迭代结束（收敛）</a></li><li><a href="#p41">P41 · 如何选择 k：肘部法</a></li><li><a href="#p42">P42 · 图：k 太小</a></li><li><a href="#p43">P43 · 图：k 正好</a></li><li><a href="#p44">P44 · 图：k 太大</a></li><li><a href="#p45">P45 · 小节标题：扩展到大数据</a></li><li><a href="#p46">P46 · BFR 的动机与假设</a></li><li><a href="#p47">P47 · 目标：内存 O(簇数) 与三集合</a></li><li><a href="#p48">P48 · 第 1 步：选初始质心</a></li><li><a href="#p49">P49 · 三个集合的定义</a></li><li><a href="#p50">P50 · 图：DS/CS/RS 三集合</a></li><li><a href="#p51">P51 · DS 的三个摘要量</a></li><li><a href="#p52">P52 · 2d+1 个充分统计量</a></li><li><a href="#p53">P53 · 处理一批点：第 3、4 步</a></li><li><a href="#p54">P54 · 第 5 步与最后一轮</a></li><li><a href="#p55">P55 · 再看三集合（状态变化）</a></li><li><a href="#p56">P56 · Q1/Q2：两个关键问题</a></li><li><a href="#p57">P57 · Q1：判断足够近的两种办法</a></li><li><a href="#p58">P58 · 马氏距离的三步算法</a></li><li><a href="#p59">P59 · 马氏距离的性质与阈值</a></li><li><a href="#p60">P60 · 图：欧氏 vs 马氏等距线</a></li><li><a href="#p61">P61 · Q2：两个 CS 要不要合并</a></li><li><a href="#p62">P62 · 小节标题：扩展到任意形状</a></li><li><a href="#p63">P63 · CURE 的假设与代价</a></li><li><a href="#p64">P64 · 图：salary–age 上的两个簇</a></li><li><a href="#p65">P65 · Pass 1：采样、代表点、收缩</a></li><li><a href="#p66">P66 · 图：采样后的两个簇</a></li><li><a href="#p67">P67 · 图：每簇挑 4 个远端代表点</a></li><li><a href="#p68">P68 · 图：代表点朝质心移动 20%</a></li><li><a href="#p69">P69 · Pass 2：按代表点重新分配</a></li><li><a href="#p70">P70 · 直觉：为什么收缩有用</a></li><li><a href="#p71">P71 · 全讲小结</a></li><li><a href="#p72">P72 · 尾页（L6 结束）</a></li></ol></details><article class="slide" id="p1"><div class="slide-h"><span class="pno">P1</span><h3>本讲封面：机器学习 II</h3></div><div class="slide-b"><img src="slides/L6/p001.png" alt="L6 第1页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>机器学习基础第二讲（Machine Learning Basics II）的封面，主题是聚类（clustering）。幻灯片主体参考 Stanford 的 Jure Leskovec。上一讲是监督学习，从这里开始进入无监督学习的部分。</p></div></div></article><article class="slide" id="p2"><div class="slide-h"><span class="pno">P2</span><h3>无监督学习的定义</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p002.png" alt="L6 第2页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这一页给无监督学习（Unsupervised Learning）下定义：数据集里没有标签（labels），也没有预设的输出，目标是去发现数据中有意思的模式、结构或关系。对比上一讲的监督学习，那里有明确的输入到标签的映射，可以对错；这里连对错都没有，所以课件用 vaguely-posed（含糊地）来形容目标本身。</p><p class="sx">🎯 考点：无监督=无标签、目标本身模糊，这正是聚类没有唯一正确答案的根源。</p></div></div></article><article class="slide" id="p3"><div class="slide-h"><span class="pno">P3</span><h3>监督 vs 无监督对比</h3></div><div class="slide-b"><img src="slides/L6/p003.png" alt="L6 第3页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页把两类学习并排画出来：supervised 一侧的样本带标签，学的是从特征到标签的映射；unsupervised 一侧只有 𝑥1,…,𝑥𝑛，没有 𝑦，所以只能找结构。课件特意标了 vaguely-posed，提醒你无监督的目标没法像分类那样定义得精确，评估标准要另外给（比如距离、密度）。</p></div></div></article><article class="slide" id="p4"><div class="slide-h"><span class="pno">P4</span><h3>聚类：小节标题</h3></div><div class="slide-b"><img src="slides/L6/p004.png" alt="L6 第4页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>进入聚类（Clustering）小节。这一节的组织顺序是：先给聚类的形式定义和三个应用例子（天体、音乐、文档主题），再讲高维空间带来的维度灾难，然后是层次聚类与 k-means 两条主线，最后讲把 k-means 扩展到大数据和任意形状的 BFR、CURE。考试重点也集中在这几块。</p></div></div></article><article class="slide" id="p5"><div class="slide-h"><span class="pno">P5</span><h3>聚类的形式定义</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p005.png" alt="L6 第5页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>聚类的定义：给定一堆点，以及点与点之间某种距离，把它们分成若干簇（cluster），要求同簇成员彼此接近或相似、不同簇成员不相似。三个通常前提：点在很高维的空间里；相似性由距离度量定义；度量可以是欧氏（Euclidean）、余弦（Cosine）、Jaccard、编辑距离（edit distance）。</p><p class="sx">🎯 同一份数据换距离度量，簇会完全不同——做题先写明用哪种距离。</p></div></div></article><article class="slide" id="p6"><div class="slide-h"><span class="pno">P6</span><h3>簇与离群点示意</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p006.png" alt="L6 第6页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页是一张散点示意图，把簇（cluster）与离群点（outlier）的差别画出来：两团密集的点是簇，另有一个孤零零的点被标成 outlier。要注意的是，聚类算法并不自动把它当噪声——k-means 会把它强行并进最近的簇，从而把那个簇的质心拉偏，这是 k-means 对离群点敏感的具体来源。</p><p class="sx">🎯 离群点不一定被判成噪声，k-means 会把它算进最近的簇。</p></div></div></article><article class="slide" id="p7"><div class="slide-h"><span class="pno">P7</span><h3>应用一：天体聚类</h3></div><div class="slide-b"><img src="slides/L6/p007.png" alt="L6 第7页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>第一个应用是天文：Sloan Digital Sky Survey 的星表里有 20 亿个天体（2 billion sky objects），每个天体用 7 个频段上的辐射量表示，所以是 7 维空间里的一个点。任务是把相似的物体聚起来，例如星系（galaxies）、近星（nearby stars）、类星体（quasars）。特点是维数只有 7 维并不算高，但点数达到 2×10⁹，单机一次算不完。</p></div></div></article><article class="slide" id="p8"><div class="slide-h"><span class="pno">P8</span><h3>应用二：音乐分类</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p008.png" alt="L6 第8页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>第二个应用：用户其实只喜欢少数几个音乐类型（genres），但这些类型并不会标在数据里，怎么自动找出来？课件给的办法是把一首歌表示成「听过它的顾客集合」。相似的歌有相似的听众集合，反之亦然。注意数据天然是集合，所以该用 Jaccard 一类的集合距离，而不是欧氏距离。</p><p class="sx">🎯 对象被表示成集合时，默认用 Jaccard 度量而不是欧氏。</p></div></div></article><article class="slide" id="p9"><div class="slide-h"><span class="pno">P9</span><h3>把歌曲看成高维空间中的点</h3></div><div class="slide-b"><img src="slides/L6/p009.png" alt="L6 第9页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>把上一页的说法几何化：给每一位顾客一个维度，一首歌就是空间里的一个点 (x1,…,xd)，其中 xi=1 当且仅当第 i 位顾客买过这首歌。Spotify 的顾客数千万，所以这是数千万维的 0/1 向量。任务是找出相似歌曲的簇。这一页是典型的高维稀疏数据，为后面的维度灾难埋下伏笔。</p></div></div></article><article class="slide" id="p10"><div class="slide-h"><span class="pno">P10</span><h3>应用三：文档找主题</h3></div><div class="slide-b"><img src="slides/L6/p010.png" alt="L6 第10页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>和音乐同构的例子：文档用词向量表示，(x1,…,xk) 中 xi=1 当且仅当第 i 个词出现在这篇文档里。课件特别说明 k 其实可以是无限大（不限制词表），这没关系——真实文档只出现极少数词，向量极其稀疏。词集相近的文档往往主题相同，于是找主题就变成把文档点集聚类。</p></div></div></article><article class="slide" id="p11"><div class="slide-h"><span class="pno">P11</span><h3>同一集合的三种看法</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p011.png" alt="L6 第11页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这一页是全讲的方法论页：同一份集合型数据（文档、歌曲的 0/1 向量），你怎么看待它，决定了该用哪个距离。当成向量（sets as vectors）用余弦距离，只比方向不比长度；当成集合（sets as sets）用 Jaccard 距离；当成空间中的点（sets as points）用欧氏距离。后面所有聚类都从这里选一个距离。</p><p class="sx">🎯 三选一必考：向量→余弦、集合→Jaccard、点→欧氏。</p></div></div></article><article class="slide" id="p12"><div class="slide-h"><span class="pno">P12</span><h3>配图：三种视角的图示</h3></div><div class="slide-b"><img src="slides/L6/p012.png" alt="L6 第12页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页抽不出文字，是纯配图，位置紧接上一页「同一集合的三种看法」、下一页「二维聚类看起来很容易」之前，功能是把刚才那三条距离定义画出来。看原图时对照上一页的三条对应关系即可：同一批数据用不同方式看待，点与点之间的远近关系就会变。</p></div></div></article><article class="slide" id="p13"><div class="slide-h"><span class="pno">P13</span><h3>维度灾难：引入</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p013.png" alt="L6 第13页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>问题意识：二维、小数据的时候聚类看起来很容易，而且大部分时候「看起来容易」并没有骗你。但真实应用往往不是 2 维而是 10 维、10000 维。高维空间和直觉完全不同——几乎任意两点之间都非常远，最近邻和最远邻的距离差不多，距离度量失去区分度，这就是维度灾难（Curse of Dimensionality）。</p><p class="sx">🎯 维度灾难的后果：距离失去区分力，最近邻和最远邻差不多远。</p></div></div></article><article class="slide" id="p14"><div class="slide-h"><span class="pno">P14</span><h3>维度灾难的定量计算</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p014.png" alt="L6 第14页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>用具体数字算一遍：在 [0,1] 上均匀撒 10000 个点，查询点在原点，要覆盖多大范围才能拿到 0.1% 的数据（即 10 个最近邻）？1 维只要走到 10/10000=0.001；2 维要一个体积 0.001 的正方形，边长 √0.001≈0.032；d 维要边长 (0.001)^(1/d)。代进去：10 维时 (0.001)^(0.1)=10^(−0.3)≈0.5，必须走遍 50% 的坐标范围。换句话说，维数越高，同样比例的最近邻越接近全表扫描。</p><p class="sx">🎯 必背数字：10 维要覆盖 50% 的范围才拿到 0.1% 的数据。</p></div></div></article><article class="slide" id="p15"><div class="slide-h"><span class="pno">P15</span><h3>维度灾难的结论</h3></div><div class="slide-b"><img src="slides/L6/p015.png" alt="L6 第15页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页是上一页计算的结论：高维下所有点彼此都很远。直观理解是体积随边长^d 指数增长，而点数只按体积线性增长——维度越高，要圈住同样比例的点，半径就必须放得越大，直到半径接近整个空间的尺度。于是「近」和「远」不再有区别，所有基于距离的算法（聚类、KNN）都被削弱。</p></div></div></article><article class="slide" id="p16"><div class="slide-h"><span class="pno">P16</span><h3>两大类聚类方法</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p016.png" alt="L6 第16页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>聚类方法分两大类。层次聚类（hierarchical）：凝聚式（agglomerative）自底向上，初始每个点自成一簇、反复合并最近的两簇；分裂式（divisive）自顶向下，从一个大簇开始递归切分。点分配（point assignment）：维护一组簇，每个点归到最近的簇。k-means 属于点分配，后面几页会告诉你该怎么选。</p><p class="sx">🎯 名字与方向要能对上：agglomerative=自底向上、divisive=自顶向下。</p></div></div></article><article class="slide" id="p17"><div class="slide-h"><span class="pno">P17</span><h3>欧氏还是非欧氏</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p017.png" alt="L6 第17页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>选方法前的第一个问题：空间是欧氏（Euclidean）还是非欧氏（non-Euclidean）？欧氏下点就是实数坐标向量，因此可以把一堆点平均成一个质心（centroid），距离用 L2 或 L1 范数。非欧氏下没有位置概念、也没有质心，只能换一种摘要方式，距离用 Jaccard、Hamming、余弦。</p><p class="sx">🎯 能否求平均（有无质心）是欧氏与非欧氏的分水岭。</p></div></div></article><article class="slide" id="p18"><div class="slide-h"><span class="pno">P18</span><h3>数据在内存还是磁盘</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p018.png" alt="L6 第18页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>第二个问题：数据装得进内存，还是只能驻留磁盘（disk-resident）？判断标准就是数据总量是否超出可用内存。装得下就简单直接，代表是 k-means；装不下就必须一次读一批进内存，聚完只保留每个簇的摘要，代表是 BFR 和 CURE。这一页是整个大数据聚类部分的总纲。</p><p class="sx">🎯 大数据聚类=分批读入+保留簇摘要，BFR/CURE 就是为此设计。</p></div></div></article><article class="slide" id="p19"><div class="slide-h"><span class="pno">P19</span><h3>点分配 vs 层次：簇的形状</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p019.png" alt="L6 第19页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页用图说明两类方法各自擅长的形状：点分配（k-means）适合漂亮、凸的簇；层次聚类在形状古怪时能赢。图里的反例是两个同心圆簇——注意它们的质心几乎完全重合，所以任何以质心为准则的方法都会失败。课件还补了一句 Aside：如果已经知道是同心结构，可以把点映射成它到圆心的距离，问题就退化成一维。</p><p class="sx">🎯 同心簇是质心类方法的死穴；层次聚类按最近点合并能分开。</p></div></div></article><article class="slide" id="p20"><div class="slide-h"><span class="pno">P20</span><h3>配图：层次聚类导入</h3></div><div class="slide-b"><img src="slides/L6/p020.png" alt="L6 第20页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页抽不出文字，是层次聚类正式开讲前的一张配图，位置在「点分配 vs 层次」之后、「层次聚类的核心操作」之前，起章节导入的作用：把上一页说的形状古怪的簇具体画出来，让你先看见层次聚类要处理的对象。看原图时对照上一页的两个同心圆例子即可。</p></div></div></article><article class="slide" id="p21"><div class="slide-h"><span class="pno">P21</span><h3>层次聚类：核心操作与三问</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p021.png" alt="L6 第21页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>层次聚类的核心操作只有一句：反复合并「最近」的两个簇。由此引出三个必须回答的问题——(1) 怎么表示一个含很多点的簇？(2) 怎么定义两个簇之间的「近」？(3) 什么时候停止合并？后面几页就围绕这三问展开，考试问层次聚类也基本按这三问来答。</p><p class="sx">🎯 三问必背：表示、近邻、停止。</p></div></div></article><article class="slide" id="p22"><div class="slide-h"><span class="pno">P22</span><h3>欧氏情形：用质心</h3></div><div class="slide-b"><img src="slides/L6/p022.png" alt="L6 第22页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>欧氏情形下前两问的答案很自然：(1) 每次合并后，用质心（centroid=簇内所有点的平均）代表这个簇的位置；(2) 簇间距离就是质心之间的距离，每次合并质心距离最短的那两簇。记住质心是人造点，一般并不落在任何数据点上。</p></div></div></article><article class="slide" id="p23"><div class="slide-h"><span class="pno">P23</span><h3>例子：6 个点与 dendrogram</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p023.png" alt="L6 第23页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页用 6 个点和一棵 dendrogram（树状图）演示合并过程。(0,0)、(1,2)、(2,1) 三个点先并成一簇，质心 = ((0+1+2)/3,(0+2+1)/3) = (1,1)；(5,3)、(4,1)、(5,0) 并成一簇，质心 = ((5+4+5)/3,(3+1+0)/3) ≈ (4.7,1.3)；另外两个质心 (1.5,1.5) 与 (4.5,0.5) 是中间阶段的结果。右侧的树记录每步把谁和谁合起来，树的高度就是合并那一刻的簇间距离，横切一刀切到几条线就是几个簇。</p><p class="sx">🎯 质心=各维坐标的平均，考试按坐标直接算。</p></div></div></article><article class="slide" id="p24"><div class="slide-h"><span class="pno">P24</span><h3>非欧氏情形：三种做法</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p024.png" alt="L6 第24页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>非欧氏下没有位置概念，唯一能谈的「位置」就是点本身。课件给三种做法：(1) 挑一个 clustroid，即簇内离其他点「最近」的那个真实点，把它当成质心用；(2) 把簇保持为点的集合，用跨簇点对的距离来定义簇间距离；(3) 定义内聚度 cohesion，每次合并「最内聚」的一对。</p><p class="sx">🎯 clustroid 一定是数据点，质心不一定——最高频的选择题。</p></div></div></article><article class="slide" id="p25"><div class="slide-h"><span class="pno">P25</span><h3>做法一：clustroid 的定义</h3></div><div class="slide-b"><img src="slides/L6/p025.png" alt="L6 第25页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>第一问的答案：clustroid = 簇内离其他点「最近」的数据点，公式 c = argmin_{c∈C} Σ_{x∈C} d(x,c)²。课件给了三种「最近」的口径：到其他点的最大距离最小、平均距离最小、距离平方和最小。三种口径会选出不同的点，考试要说清用的是哪一种；求出 clustroid 后就把它当成质心来定簇间距离。</p></div></div></article><article class="slide" id="p26"><div class="slide-h"><span class="pno">P26</span><h3>质心 vs clustroid</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p026.png" alt="L6 第26页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页把两者并排放：centroid 是簇内所有点的平均，是算出来的人造点；clustroid 是簇内真实存在的某个数据点，只是它离其他点最近。判断时先看数据是欧氏还是非欧氏——欧氏能求平均所以有质心，非欧氏没有位置概念，只能挑一个真实点。</p><p class="sx">🎯 送分判断：centroid 人造、clustroid 真实存在。</p></div></div></article><article class="slide" id="p27"><div class="slide-h"><span class="pno">P27</span><h3>做法二：用跨簇点对定义距离</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p027.png" alt="L6 第27页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>第二种做法不造代表点，直接把簇当成点的集合，用跨簇的点对来定义簇间距离：最小距离（两簇任意点对里最小的那一对）或者平均距离（所有跨簇点对距离的平均）。前者就是我们说的单链（single link），后者是平均链接（average link）。</p><p class="sx">🎯 跨簇最小点对=单链；跨簇所有点对平均=平均链接。</p></div></div></article><article class="slide" id="p28"><div class="slide-h"><span class="pno">P28</span><h3>做法三：内聚度 cohesion</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p028.png" alt="L6 第28页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>第三种做法：定义一个簇的「内聚度」，每次合并使合并后最内聚的那一对。课件给的内聚度都遵循越小越内聚：合并后簇的直径（diameter，簇内最大点距）、簇内点的平均距离、或者密度（点数除以直径或平均距离）。用直径当内聚度，就等价于所说的全链（complete link）。</p><p class="sx">🎯 用「直径」当内聚度=全链。</p></div></div></article><article class="slide" id="p29"><div class="slide-h"><span class="pno">P29</span><h3>什么时候停止合并</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p029.png" alt="L6 第29页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>第三问：什么时候停止？四条答案：(1) 已经得到 k 个簇（前提是 k 已知，这是最常见的做法）；(2) 满足某个停止准则，比如直径超过阈值、密度低于阈值；(3) 合并会产生坏簇就停，典型信号是直径突然跳升；(4) 干脆一直合到只剩一个簇，事后在 dendrogram 上横切来选 k。</p><p class="sx">🎯 最好用的信号是「直径突然跳升」。</p></div></div></article><article class="slide" id="p30"><div class="slide-h"><span class="pno">P30</span><h3>合并准则取决于簇形状</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p030.png" alt="L6 第30页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页提出一个关键认识：合并准则的好坏取决于簇的形状，而形状事先并不知道。课件准备比较两种准则——按质心（或 clustroid）之间的距离合并，和按两簇最近的一对成员点合并。下面两页各给一个反例，说明两者都会失手。</p><p class="sx">🎯 没有万能准则，两个方向的反例都要会。</p></div></div></article><article class="slide" id="p31"><div class="slide-h"><span class="pno">P31</span><h3>反例一：质心法对、最近点法错</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p031.png" alt="L6 第31页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>第一个反例：按质心合并是对的，按最近成员点合并会出错。看图里 A 和 B 的质心比 A 和 C 的质心更近，但最近的一对成员点却分别来自 A 和 C，于是最近点准则会先把 A、C 错误地并在一起。同一张图上两种准则结论相反，说明挑准则不能凭直觉。</p><p class="sx">🎯 考法：给一张图问两种准则各得到什么结果。</p></div></div></article><article class="slide" id="p32"><div class="slide-h"><span class="pno">P32</span><h3>反例二：最近点法对、质心法错</h3></div><div class="slide-b"><img src="slides/L6/p032.png" alt="L6 第32页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>与上一页相反：按最近成员点合并是对的，按质心合并会错。当一簇又大又散、另一簇小而密且紧挨着它时，质心之间的距离会把两者拉到一起，而实际上紧凑的那一簇应该独立成簇。结论是准则要配形状，而形状未知，只能靠经验或试。</p></div></div></article><article class="slide" id="p33"><div class="slide-h"><span class="pno">P33</span><h3>配图：过渡到 k-means</h3></div><div class="slide-b"><img src="slides/L6/p033.png" alt="L6 第33页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页抽不出文字，是层次聚类小节结束、k-means 开讲之间的过渡配图，位置紧接刚比完的两组反例。它的功能是收尾：把「合并准则依赖簇形状」这个结论用图再确认一次，然后转入点分配方法。对照上一页的图看即可。</p></div></div></article><article class="slide" id="p34"><div class="slide-h"><span class="pno">P34</span><h3>k-means 是问题，不是算法</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p034.png" alt="L6 第34页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>k-means 严格来说不是算法，而是一个问题的形式化：给定欧氏空间/距离和簇数 k，找 k 个簇中心，使每个点到其所属中心的距离平方和最小，目标函数 J = Σ_i Σ_{x∈C_i} ‖x−μ_i‖²。精确最优解是 NP-hard 的，所以实际用的是近似解法——Lloyd 算法，也就是平时说的 k-means。</p><p class="sx">🎯 概念题：k-means 是最小化平方距离和的 NP-hard 问题，Lloyd 是其近似算法。</p></div></div></article><article class="slide" id="p35"><div class="slide-h"><span class="pno">P35</span><h3>k-means 的迭代步骤</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p035.png" alt="L6 第35页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>算法：先选 k 个初始中心；然后重复两步直到收敛——(1) 分配：把每个点分给当前最近的质心；(2) 更新：把每个簇的质心改成簇内点的平均。收敛的定义是点不再在簇之间移动、质心稳定。注意更新必须等所有点都分配完再做，顺序不能反。</p><p class="sx">🎯 手算一轮就是「分配→更新」，再检查点有没有换簇。</p></div></div></article><article class="slide" id="p36"><div class="slide-h"><span class="pno">P36</span><h3>初始化敏感</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p036.png" alt="L6 第36页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>收敛结果严重依赖初始质心的选择，课件说可以 arbitrarily badly——同一份数据，初值选坏就得到完全错误的分割。两种初始化策略：随机取 k 个数据点，或者用 k-means++。另外要清楚：收敛只保证点不再移动，并不保证达到全局最优。</p><p class="sx">🎯 k-means 只收敛到局部最优，换初值结果和 SSE 都会变。</p></div></div></article><article class="slide" id="p37"><div class="slide-h"><span class="pno">P37</span><h3>k-means++ 的思路</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p037.png" alt="L6 第37页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>k-means++ 的做法：先抽一个很小的样本 S（|S| 是 k 乘以一个与总点数成对数关系的因子），在 S 上用任意算法聚类，把得到的质心当种子。抽样时按随机顺序访问点，加入样本的概率正比于 D(p)²，D(p) 是 p 到最近的已选点的距离——越孤立越容易被选中，种子就自动散开了。</p><p class="sx">🎯 概率 ∝ D(p)²；写成 ∝ D(p) 就错。</p></div></div></article><article class="slide" id="p38"><div class="slide-h"><span class="pno">P38</span><h3>图：第 1 轮后的簇</h3></div><div class="slide-b"><img src="slides/L6/p038.png" alt="L6 第38页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>图：k-means 第 1 轮之后的簇。x 是数据点，叉是质心。一维例子手算一轮：四个点 0、1、5、6，初始质心 c1=0、c2=6。分配：0 和 1 归 c1（距离 0、1），5 和 6 归 c2（距离 1、0）。更新：c1=(0+1)/2=0.5，c2=(5+6)/2=5.5。再分配：1 到 0.5 的距离 0.5 小于到 5.5 的 4.5，5 到 5.5 是 0.5 小于到 0.5 的 4.5，没有点换簇，收敛，SSE=4×0.5²=1。整轮迭代只做「分配」和「更新」两件事，顺序不能反；收敛的判据是没有点再换簇。</p></div></div></article><article class="slide" id="p39"><div class="slide-h"><span class="pno">P39</span><h3>图：第 2 轮后的簇</h3></div><div class="slide-b"><img src="slides/L6/p039.png" alt="L6 第39页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>第 2 轮之后的簇：质心已经被拉到各自簇的中间，簇的边界也基本稳定。对照上一页能看出每次迭代的方向——「取平均」总把质心往簇的密度中心拉。判断是否收敛其实就是看还有没有点换簇：没有点换簇，质心自然也就不再变，迭代即可停止。</p></div></div></article><article class="slide" id="p40"><div class="slide-h"><span class="pno">P40</span><h3>图：迭代结束（收敛）</h3></div><div class="slide-b"><img src="slides/L6/p040.png" alt="L6 第40页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>迭代结束时的簇：点不再换簇、质心不再移动，这就是收敛。整个过程是「重新划分→重算平均」的局部搜索，每轮代价很低（点数×k×维数），适合内存能装下的数据；一旦数据驻留磁盘，k-means 每轮扫全部点的开销就不可接受，要换 BFR。</p></div></div></article><article class="slide" id="p41"><div class="slide-h"><span class="pno">P41</span><h3>如何选择 k：肘部法</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p041.png" alt="L6 第41页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>怎么选 k？对不同 k 各跑一次，画「平均到质心距离」随 k 变化的曲线：平均距离先快速下降，到正确的 k 之后几乎不再下降，那个拐点（肘部）就是最好的 k。接下来三页分别画出 k 太小、正好、太大三种情况。注意 k-means 本身要求给定 k，所以这一步是必须的。</p><p class="sx">🎯 会读肘部曲线：拐点处取 k。</p></div></div></article><article class="slide" id="p42"><div class="slide-h"><span class="pno">P42</span><h3>图：k 太小</h3></div><div class="slide-b"><img src="slides/L6/p042.png" alt="L6 第42页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>图：k 取得太小。簇数不够时，一个大簇里塞进了本该分开的两团点，很多点到各自质心的距离很长，平均距离降不下去，而且合并出来的簇形状也不自然。这是欠拟合在聚类里的表现，对应肘部曲线左侧还在陡降的那一段。</p></div></div></article><article class="slide" id="p43"><div class="slide-h"><span class="pno">P43</span><h3>图：k 正好</h3></div><div class="slide-b"><img src="slides/L6/p043.png" alt="L6 第43页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>图：k 取得正好。每个簇内部的点都离质心比较近，平均到质心距离明显变小，簇与簇之间的边界也干净、基本没有跨界的点。这正是肘部曲线上拐点所在的位置，也就是曲线由陡变平的那个 k。可以拿它和左右两页对比：左边是大簇里混了两团，右边是一个好簇被劈成两半。</p></div></div></article><article class="slide" id="p44"><div class="slide-h"><span class="pno">P44</span><h3>图：k 太大</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p044.png" alt="L6 第44页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>图：k 取得太大。多出来的中心只是把已有簇再切小，课件强调这个区间里平均距离只有很小的改善（曲线几乎水平），但簇数变多、每个簇的含义变模糊，这就是聚类版的过拟合。判断题若问 k 越大是否越好，按这张曲线，过了拐点几乎没有收益。</p><p class="sx">🎯 k 太大=平均距离几乎不降，只是把簇切碎。</p></div></div></article><article class="slide" id="p45"><div class="slide-h"><span class="pno">P45</span><h3>小节标题：扩展到大数据</h3></div><div class="slide-b"><img src="slides/L6/p045.png" alt="L6 第45页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>小节标题：把 k-means 扩展到大数据。下面讲 BFR，它仍沿用 k-means 的框架（欧氏空间、找质心），但假设簇服从正态分布、只保留簇的统计摘要，从而能处理驻留磁盘的超大数据集。对比一下：k-means 每轮要扫全部点，BFR 只把数据读一遍。</p></div></div></article><article class="slide" id="p46"><div class="slide-h"><span class="pno">P46</span><h3>BFR 的动机与假设</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p046.png" alt="L6 第46页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>BFR（Bradley–Fayyad–Reina）是 k-means 的变体，专门处理非常大、驻留磁盘的数据集。它假设簇在欧氏空间中服从正态分布，各维标准差可以不同，因此每个簇在几何上是一个轴对齐的椭圆。目标仍是找质心，点的最终归属可以第二遍扫描再完成。</p><p class="sx">🎯 BFR 的假设：各维正态、轴对齐椭圆。</p></div></div></article><article class="slide" id="p47"><div class="slide-h"><span class="pno">P47</span><h3>目标：内存 O(簇数) 与三集合</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p047.png" alt="L6 第47页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>目标是把内存需求从 O(数据量) 降到 O(簇数)：不保存点，只保存点集的统计摘要。为此把点分成三类——丢弃集 DS（离某质心足够近，可摘要后丢弃）、压缩集 CS（彼此靠得紧但离所有质心都远，摘要保存但不分配）、保留集 RS（孤立点，原样留着）。</p><p class="sx">🎯 DS/CS/RS 三者的定义与区别几乎必考。</p></div></div></article><article class="slide" id="p48"><div class="slide-h"><span class="pno">P48</span><h3>第 1 步：选初始质心</h3></div><div class="slide-b"><img src="slides/L6/p048.png" alt="L6 第48页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>BFR 从磁盘一次读入「一内存」的点，之前批次的点大多已被统计量摘要。第 1 步从初始载入的这批点里选 k 个初始质心，课件给三种办法：随机取 k 个点；取一个小随机样本并最优地聚类；先随机取一个点，再取 k−1 个「尽量远离已选点」的点。</p></div></div></article><article class="slide" id="p49"><div class="slide-h"><span class="pno">P49</span><h3>三个集合的定义</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p049.png" alt="L6 第49页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>三集合定义页，配合下一页的图看更清楚。DS（Discard set）：离某个质心足够近、可以摘要后丢弃的点。CS（Compression set）：彼此靠得紧、但离任何已有质心都远的点组，被摘要保存但没有分配给任何簇。RS（Retained set）：孤立点，原样保留坐标，等下一批再判。</p><p class="sx">🎯 一句话记：DS 归队丢弃、CS 抱团未归队、RS 散兵原样留。</p></div></div></article><article class="slide" id="p50"><div class="slide-h"><span class="pno">P50</span><h3>图：DS/CS/RS 三集合</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p050.png" alt="L6 第50页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页把三个集合画在同一张图上：中间一大片点连同质心都在 DS 里；另外几小团被椭圆圈起来的点是 CS，它们离质心很远但自己很紧；几个零散的点是 RS。看懂这张图，就掌握了 BFR 的全部内存结构——每一批新点读进来，也都是往这三个集合里归。</p><p class="sx">🎯 看图题：判断某个点应归入 DS、CS 还是 RS。</p></div></div></article><article class="slide" id="p51"><div class="slide-h"><span class="pno">P51</span><h3>DS 的三个摘要量</h3></div><div class="slide-b"><img src="slides/L6/p051.png" alt="L6 第51页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>每个簇的丢弃集 DS 只用三个量摘要：点数 N；向量 SUM，第 i 个分量是该簇所有点在第 i 维坐标之和；向量 SUMSQ，第 i 个分量是这些坐标的平方和。有这三个量就能算质心和方差，完全不必保留任何原始点——因为质心就是 SUM/N，方差也能由 SUM 和 SUMSQ 直接算出。</p></div></div></article><article class="slide" id="p52"><div class="slide-h"><span class="pno">P52</span><h3>2d+1 个充分统计量</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p052.png" alt="L6 第52页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>2d+1 个数值就足以代表任意大小的簇（d 是维数，那个 1 是点数 N）：质心第 i 维 = SUMi/N；第 i 维方差 = SUMSQi/N − (SUMi/N)²，标准差是它的平方根。注意这算的是各维自己的方差而不是协方差，因为假设各维独立、簇是轴对齐的；课件还解释了不这么假设的代价：要存 d×d 的完整协方差矩阵，内存吃不消。</p><p class="sx">🎯 方差公式：SUMSQ/N − (SUM/N)²，别漏掉除以 N。</p></div></div></article><article class="slide" id="p53"><div class="slide-h"><span class="pno">P53</span><h3>处理一批点：第 3、4 步</h3></div><div class="slide-b"><img src="slides/L6/p053.png" alt="L6 第53页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>处理一批数据的第 3、4 步：第 3 步找出离某个质心「足够近」的点，把它们加进该簇、放入 DS——这些点近到可以摘要后直接丢弃；第 4 步把剩下的点（连同旧的 RS）用任意内存算法聚类，聚出来的簇放进 CS，仍然孤立的点放回 RS。</p></div></div></article><article class="slide" id="p54"><div class="slide-h"><span class="pno">P54</span><h3>第 5 步与最后一轮</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p054.png" alt="L6 第54页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>第 5 步：调整 DS 的统计量以计入新点——把 Ns、SUMs、SUMSQs 分别累加，同时考虑把新的 CS 合并进已有簇，否则 CS 会越积越多。如果这是最后一轮，再把所有 CS 和 RS 中的点都并进离它最近的簇，得到最终划分，之后任意新点都能按质心二遍分配。</p><p class="sx">🎯 统计量可以直接相加，这正是 2d+1 的效率来源。</p></div></div></article><article class="slide" id="p55"><div class="slide-h"><span class="pno">P55</span><h3>再看三集合（状态变化）</h3></div><div class="slide-b"><img src="slides/L6/p055.png" alt="L6 第55页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>再放一次三集合的图，因为处理完一批点后三个集合的内容会变：DS 变大（新点被摘要进来）、部分 CS 被合并进簇、RS 只留下仍然孤立的点。BFR 的循环就是：读一批点 → 归入三集合 → 累加统计量 → 尝试合并 CS → 再读下一批。</p></div></div></article><article class="slide" id="p56"><div class="slide-h"><span class="pno">P56</span><h3>Q1/Q2：两个关键问题</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p056.png" alt="L6 第56页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>前面讲完了 BFR 的流程，这页把里面藏着的两个判断问题明确提出来：Q1 怎么判断一个点「足够近」，可以加进某个簇并丢弃？Q2 怎么判断两个压缩集 CS 值得合并成一个？后面几页分别回答这两个问题，BFR 的正确性就靠它们。</p><p class="sx">🎯 两个答案要成对记住：用马氏距离判「近」、用合并后方差判「并」。</p></div></div></article><article class="slide" id="p57"><div class="slide-h"><span class="pno">P57</span><h3>Q1：判断足够近的两种办法</h3></div><div class="slide-b"><img src="slides/L6/p057.png" alt="L6 第57页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>Q1 的答案有两种：一是该点到簇的马氏距离（Mahalanobis distance）小于某个阈值；二是该点属于当前最近质心的似然足够高。课件详细展开了第一种，因为马氏距离只用到簇的均值和各维标准差，而这两个量正好是 BFR 已经存好的 SUM 和 SUMSQ。</p></div></div></article><article class="slide" id="p58"><div class="slide-h"><span class="pno">P58</span><h3>马氏距离的三步算法</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p058.png" alt="L6 第58页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>马氏距离其实就是按簇自身尺度归一化之后的欧氏距离，三步：先把每一维归一化 y_i = (x_i − c_i)/σ_i，其中 σ_i 是该簇在第 i 维的标准差；再把各维的 y_i 平方求和；最后开根号。这样每个维度都按该簇自己的胖瘦来缩放，不会被数值大的维度主导。</p><p class="sx">🎯 分母是簇内该维的标准差，不是方差，也不是全局标准差。</p></div></div></article><article class="slide" id="p59"><div class="slide-h"><span class="pno">P59</span><h3>马氏距离的性质与阈值</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p059.png" alt="L6 第59页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>若簇在 d 维上服从正态分布，归一化后 1 个标准差对应马氏距离 √d：约 68% 的点马氏距离小于 √d，95% 的点小于 2√d，所以阈值常取 2 个标准差。手算例：质心 (2,3)、各维标准差 (1,2)、点 (4,5)，则 y=(2,1)，d_M=√(2²+1²)=√5≈2.24；d=2 时 √d≈1.41、2√d≈2.83，故 1σ 阈值下拒绝、2σ 阈值下接收。注意这里的阈值是按簇自己的标准差折算出来的，所以它会随维数 d 变化。</p><p class="sx">🎯 √d 对应 68%、2√d 对应 95%，两个数都要记。</p></div></div></article><article class="slide" id="p60"><div class="slide-h"><span class="pno">P60</span><h3>图：欧氏 vs 马氏等距线</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p060.png" alt="L6 第60页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>三张图对比等距线的形状：均匀分布的点用欧氏距离，等距线是圆；正态分布的点用欧氏距离，等距线还是圆，但已经和数据形状不匹配；换成马氏距离，等距线变成顺着分布拉长的椭圆。结论是判断远近要按簇自身的形状和尺度来量，不能一律用欧氏。</p><p class="sx">🎯 图题：欧氏=圆等距线，马氏=椭圆等距线。</p></div></div></article><article class="slide" id="p61"><div class="slide-h"><span class="pno">P61</span><h3>Q2：两个 CS 要不要合并</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p061.png" alt="L6 第61页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>Q2 的答案：先算合并后子簇的方差，低于阈值就合并。关键是 N、SUM、SUMSQ 可以直接相加，所以合并后的方差瞬间就能算出来，完全不用碰原始点。课件还提到可以按维度区别对待、考虑密度等变体，但主干就是「合并后方差是否够小」。</p><p class="sx">🎯 合并后 N、SUM、SUMSQ 分别相加，再代方差公式。</p></div></div></article><article class="slide" id="p62"><div class="slide-h"><span class="pno">P62</span><h3>小节标题：扩展到任意形状</h3></div><div class="slide-b"><img src="slides/L6/p062.png" alt="L6 第62页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>小节标题：把 k-means 扩展到任意形状的簇。前面 k-means 和 BFR 都要求各维正态、坐标轴固定，所以斜着的椭圆就处理不了；下面介绍的 CURE 放弃这些假设，用一组代表点代替单个质心。BFR 靠 2d+1 统计量换内存，CURE 靠代表点换形状自由，这是两种完全不同的取舍。</p></div></div></article><article class="slide" id="p63"><div class="slide-h"><span class="pno">P63</span><h3>CURE 的假设与代价</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p063.png" alt="L6 第63页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>CURE（Clustering Using REpresentatives）只假设欧氏距离：不限簇形状、不要求各维正态、不要求坐标轴固定。它不用一个质心代表簇，而用一组代表点（representative points）；代价是簇数 k 必须事先给定，而且代表点的个数需要调。也就是说它把 k-means 的单个质心换成一组点，「各维正态、轴对齐」这两条假设全部取消。</p><p class="sx">🎯 CURE 与 BFR/k-means 的假设差异必考。</p></div></div></article><article class="slide" id="p64"><div class="slide-h"><span class="pno">P64</span><h3>图：salary–age 上的两个簇</h3></div><div class="slide-b"><img src="slides/L6/p064.png" alt="L6 第64页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>图：salary–age 平面上的两团点，分别用 e 和 h 标记，代表两个形状不规则的簇——一团横向拉长，另一团竖着且有弯折。这类不是椭圆的簇正是 BFR/k-means 处理不了的对象，也是 CURE 要解决的目标。注意两团的密度和尺度相差很多，这正是后面收缩要处理的情况。</p></div></div></article><article class="slide" id="p65"><div class="slide-h"><span class="pno">P65</span><h3>Pass 1：采样、代表点、收缩</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p065.png" alt="L6 第65页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>CURE 是两遍算法。第一遍：随机采样一批数据，在内存里做层次聚类，合并准则是「两簇之间存在最近的一对点」；然后为每个簇挑代表点，原则是尽量分散（例如取 4 个彼此最远的点）；再把这些代表点朝簇质心移动一个分数（例如 20%）；最后用「最近的代表点对」继续合并簇，直到剩 k 个。</p><p class="sx">🎯 代表点既要「分散」又要「收缩」，两步都是考点。</p></div></div></article><article class="slide" id="p66"><div class="slide-h"><span class="pno">P66</span><h3>图：采样后的两个簇</h3></div><div class="slide-b"><img src="slides/L6/p066.png" alt="L6 第66页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>图：采样之后 salary–age 平面上的两团点，先当作两个簇处理。注意 e 那团又长又散、h 那团小而密，两团还挨得比较近——这个设置就是专门用来演示收缩为什么有用的。下面两页会分别演示「挑代表点」和「把代表点朝质心移」。</p></div></div></article><article class="slide" id="p67"><div class="slide-h"><span class="pno">P67</span><h3>图：每簇挑 4 个远端代表点</h3></div><div class="slide-b"><img src="slides/L6/p067.png" alt="L6 第67页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>图：每个簇挑 4 个尽量分散的代表点，课件原话是 pick (say) 4 remote points for each cluster。挑的时候要选远离簇心、能覆盖簇真实形状的点；如果只取中心附近的点，形状信息就丢了，方法会退化成质心法。图里两团各被几个点标出来，等下一移动。</p></div></div></article><article class="slide" id="p68"><div class="slide-h"><span class="pno">P68</span><h3>图：代表点朝质心移动 20%</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p068.png" alt="L6 第68页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>图：把每个代表点沿指向质心的方向移动 20% 的距离，也就是 p′ = p + 0.2(c − p)。移动量正比于它到质心的距离，所以大而散的簇代表点被拉得更远，小而密的簇几乎不动；移动之后大而散的簇就不会把紧挨着它的小密簇吞掉。</p><p class="sx">🎯 收缩 20% 是课件举例值；动的是代表点，不是整个点集。</p></div></div></article><article class="slide" id="p69"><div class="slide-h"><span class="pno">P69</span><h3>Pass 2：按代表点重新分配</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p069.png" alt="L6 第69页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>第二遍：重新扫描全量数据，把每个点 p 分给「离它最近的代表点」所属的簇。注意「最近」是到代表点而不是到质心，这正是 CURE 能处理非椭圆形状的原因——代表点还留在簇的边界附近，能帮你把长条形的簇整段收进来。</p><p class="sx">🎯 第二遍用最近的代表点判归属，不是用质心。</p></div></div></article><article class="slide" id="p70"><div class="slide-h"><span class="pno">P70</span><h3>直觉：为什么收缩有用</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p070.png" alt="L6 第70页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>直觉解释：只要初始采样足够大，总有代表点落在簇的边界上，朝质心一移就把它们推进簇内部。而移动距离随簇的松散程度增大，于是大而散的簇被温柔地缩小，favors a small, dense cluster that is near a larger dispersed cluster——偏向保护紧挨大簇的小密簇。课件选这个例子是有意的：一大一小、一散一密挨在一起，正好放大收缩前后判定结果的差别。</p><p class="sx">🎯 收缩的目的：让大散簇不吞并紧邻的小密簇。</p></div></div></article><article class="slide" id="p71"><div class="slide-h"><span class="pno">P71</span><h3>全讲小结</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L6/p071.png" alt="L6 第71页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>全讲小结：聚类就是给定点集和距离，把点分成簇。四条算法主线——凝聚式层次聚类（质心与 clustroid、单链/全链/平均、停止条件）、k-means（目标函数、迭代、初始化与 k-means++、选 k）、BFR（大数据、2d+1 摘要、马氏距离）、CURE（任意形状、代表点+收缩）。答题时先判断距离度量与数据量级，再报算法名字和它的假设，就能把这四条线串起来。</p><p class="sx">🎯 复习顺序：先问距离度量、再问内存、最后问簇形状。</p></div></div></article><article class="slide" id="p72"><div class="slide-h"><span class="pno">P72</span><h3>尾页（L6 结束）</h3></div><div class="slide-b"><img src="slides/L6/p072.png" alt="L6 第72页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>本讲最后一页，只剩页码、没有新内容，标志 L6 结束。半期范围就在这里之后继续到 L7 降维（dimensionality reduction），下一讲会用到本讲的高维与稀疏的概念。</p></div></div></article></section></main>
+<div class="pnav"><a href="L5.html">← L5 ML I</a><a href="L7.html" style="text-align:right">L7 降维 →</a></div><footer>依据 9 个课件（L1–L9）整理 · 半期范围 L1–L7（第七章 降维为终点）· L8/L9 为拓展 · <span class="extra">课外补充</span> 为帮助理解而添加、非课件原文。<br>本复习站完全离线：拷贝整个「复习站」文件夹到任何电脑，双击 index.html 即可。</footer>
+<button id="totop" type="button" aria-label="回到顶部">↑</button>
+<script src="assets/app.js"></script>
+</body>
+</html>

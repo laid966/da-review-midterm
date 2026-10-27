@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#4c5fd5">
+<title>L8 数据可视化（Data Visualization） · Data Analytics 半期复习</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div id="prog"></div>
+<header class="hero-lite"><div class="kin"><a class="back" href="index.html">← 总目录</a><h1>L8 · 数据可视化（Data Visualization）</h1><span class="pill2">拓展 · 不在半期范围</span><span class="sp"></span><span class="pill2">课件 71 页</span></div></header>
+<nav class="tabs"><a href="index.html">🏠 首页</a><a href="L1.html">L1 导论</a><a href="L2.html">L2 SQL</a><a href="L3.html">L3 相似 I</a><a href="L4.html">L4 相似 II</a><a href="L5.html">L5 ML I</a><a href="L6.html">L6 ML II</a><a href="L7.html">L7 降维</a><a href="L8.html" class="active out">L8 可视化</a><a href="L9.html" class="out">L9 推荐</a><a href="index.html#cross">公式速查</a><a href="index.html#quiz">模拟卷</a><a href="index.html#plan">3 天计划</a><span class="sp"></span><button id="expand" data-open="0" type="button">展开全部答案</button><button id="theme" type="button" aria-label="切换深色模式">☾</button></nav>
+<main><section class="ch" id="l8">
+  <div class="ch-head">
+    <div class="ch-badge">L8</div>
+    <div>
+      <h2>数据可视化<span class="en">Data Visualization</span><span class="ch-tag cold">拓展·超出半期范围</span></h2>
+      <p class="ch-sub">半期范围到 L7（降维）为止，本讲属期末拓展（覆盖 p0–p70，共 71 页）。半期卷面基本不出；期末若考，几乎只考概念辨析和"给你一份数据怎么画"的简答，算法与计算题很少。复习优先级最低，但下面几张卡的术语是全课通用背景，读一遍约 20 分钟。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🎯 本节考什么</h3>
+    <ul class="kp">
+      <li><b>会算</b>：像素预算——屏幕 1600×1200 只有约 192 万像素，而数据是百万/十亿级，算出"每条记录分不到 1 个像素"就懂为什么必须聚合、采样或像素导向；再会算感知带宽的倍数（视觉 &gt;100 MB/s vs 听觉约 0.1 KB/s，差约 6 个数量级）。</li>
+      <li><b>会背</b>：可视化的 9 条目的（p21）；按数据类型的分类（1D/2D/3D/多维/时间 + 树/图，另有结构化/非结构化/地理/时空）；参考模型三段（raw → abstract → visual form）；InfoVis / SciVis / CG / VA 四者边界；大数据 3V 与三大挑战；五类大数据可视化技术。</li>
+      <li><b>会区分</b>：InfoVis vs SciVis vs CG vs Visual Analysis；可视化 vs 视觉分析 vs 数据挖掘；像素导向 vs 聚合/LOD vs 扭曲 vs 去杂；采样 vs 边捆绑 vs 查询式可视化；"看见"（perception）vs "理解"（cognition）。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>为什么"看"比"读"快：三条来自感知的证据</h3>
+    <div class="concept">
+      <h4>1）视觉是带宽最大的输入通道<span class="en">Bandwidth</span></h4>
+      <p>p3–p5 先问"人怎么获取信息"：听、尝/闻、触、看，然后把四种通道的带宽摆在一起——视觉走电子/光信号，带宽 <b>&gt; 100 MB/s</b>；听觉走声信号，只有约 <b>0.1 KB/s</b>；味觉/嗅觉是化学信号、触觉是物理信号，课件说它们的带宽"无法用信息论估计"。两者差约 6 个数量级。这不是修辞：同一份信息画出来 0.01 秒进脑，念出来要几分钟。所以可视化的第一性原理是<b>把信息搬进带宽最宽的那个通道</b>。</p>
+      <p class="dim">答题用法：问"为什么用图不用表"时，答"视觉通道带宽高 + 早期视觉并行处理"，比答"图更好看"得分高一个档次。</p>
+    </div>
+    <div class="concept">
+      <h4>2）视觉思维流水线：并行在前、串行在后<span class="en">Visual Thinking Pipeline</span></h4>
+      <p>p7 是讲机制的关键一页：光信号进入后，约 20 亿神经元先做<b>并行、自动</b>的低层视觉属性提取（color、shape 等），形成 proto-objects 与 patterns，进入视觉工作记忆并产生 GIST（整体印象）；而语言工作记忆（verbal working memory）走的是<b>串行、目标导向</b>的处理。图之所以高效，是因为它把"找规律"交给并行的早期视觉，而不是交给串行、容量极小的语言回路。</p>
+      <figure class="sfig"><img src="slides/L8/p008.png" alt="L8 第8页课件原图" loading="lazy" decoding="async"><figcaption>视觉思维流水线：早期视觉并行提特征、语言回路串行，是"图优于表"的机制图。</figcaption></figure>
+    </div>
+    <div class="concept">
+      <h4>3）前注意视觉通道：一眼"跳出来"的属性<span class="en">Pre-Attentive Visual Channels</span></h4>
+      <p>p17 标题即前注意视觉通道：有一类视觉属性不需要逐个注视、不占注意力就能被<b>并行、瞬间</b>编码，于是能在整幅图上"pop-out"。这就是热力图用颜色、散点用位置的理由——让读者一眼定位，而不是逐个读数字。p16 的格式塔法则（Law of Proximity：靠得近的元素会被自动归为一组）是同一机制的近亲，所以布局本身就在编码"分组"，随手排版等于随手撒谎。</p>
+      <p><span class="extra">课外补充：课件该页只有图，没列清单。常考的前注意通道包括颜色（色相 hue / 明度 lightness / 饱和度 saturation）、大小、朝向、形状、位置、运动、空间分组（proximity / similarity / continuity）。判据是识别时间短于约 200–250 ms 且不受元素个数影响；反过来，需要串行注视才能完成的通道（精确长度、面积比）叫"后注意"通道，不适合编码精细数值。</span></p>
+    </div>
+    <div class="formula">
+      <span class="fm">视觉带宽 / 听觉带宽 ≈ (100 × 10⁶ B/s) ÷ (0.1 × 10³ B/s) ≈ 10⁶</span>
+      <span class="cap">视觉通道吞吐量约为听觉的一百万倍——"一图胜千言"的量化版本（p4–p5）。</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>可视化的目的：9 条清单（p13–p21，选择题原题库）</h3>
+    <p>p13–p21 整整一段在回答 why do we create visualization，p21 把理由列成 9 条。考试若出"下列哪项不是可视化的目的"，干扰项通常藏在"让图更美观/更炫"这一类里。</p>
+    <table class="cmp">
+      <caption>9 条按用途归成 4 组；考试更常考分组，而不是逐条默写。</caption>
+      <thead><tr><th>组</th><th>目的（课件原文）</th><th>考法 / 例子</th></tr></thead>
+      <tbody>
+        <tr><td>分析</td><td>see data in context（放回上下文）、find patterns（发现模式）、summarization and interpretation（概括与解释）</td><td>p14–p15：数文本里"3"的个数极难，重排/高亮后一眼看出——"模式"是被视觉揭示的</td></tr>
+        <tr><td>沟通</td><td>telling a story、communicate information with others、attract attention、inspire people</td><td>p20 "a picture is worth a thousand words"；p70 TED 演讲</td></tr>
+        <tr><td>认知外挂</td><td>expand memory（扩展记忆）、graphical calculation（图形计算）</td><td>把心算/心记的负担卸给屏幕，减轻工作记忆压力</td></tr>
+        <tr><td>判据</td><td>p34：目的不是好看，而是 reveal the insight of the data</td><td>凡选项说"可视化就是为了美观"必错</td></tr>
+      </tbody>
+    </table>
+    <p class="note">易混：<b>可视化 ≠ 数据挖掘</b>。可视化的产出是"人能看懂的图形"，判断由人做；数据挖掘的产出是"算法算出的模式"，计算由机器做。p66 把两者明确对立（见下文视觉分析）。</p>
+  </div>
+
+  <div class="card">
+    <h3>按数据类型的分类（p24–p33）：先分清数据，才谈得上选图</h3>
+    <p>p24 的 taxonomy 给出 1D、2D、3D、Multi-D、Temporal，再加 Tree、Graph。前五个是"数据有几个自变量/维度"，后两个是"数据之间有没有关系结构"——简答题失分常常就失在把 Tree/Graph 当成维度。树是层次（父子），图是网络（任意连边），都不是"几维"的问题。</p>
+    <table class="cmp">
+      <thead><tr><th>类型</th><th>含义</th><th>课件例子（页）</th><th>常用编码</th></tr></thead>
+      <tbody>
+        <tr><td>1D 数值</td><td>一条数值序列</td><td>p25</td><td>折线、柱状、直方图</td></tr>
+        <tr><td>1D 序数</td><td>有固定顺序的类别</td><td>p26 NYT 电影票房条形图</td><td>有序条带 / 阶梯图</td></tr>
+        <tr><td>2D</td><td>平面上的对象或区域</td><td>p27 股票 treemap：<b>面积=市值，颜色=涨跌</b></td><td>散点、treemap、等高线</td></tr>
+        <tr><td>3D</td><td>三维空间中的点/场</td><td>p24 分类；p58 体绘制</td><td>三维散点、体渲染、等值面</td></tr>
+        <tr><td>多维 Multi-D</td><td>每个对象有多个属性</td><td>p28 汽车 7 维：MPG、排量、汽缸、马力、重量、加速度、年份</td><td>平行坐标、散点矩阵、星图、雷达图</td></tr>
+        <tr><td>时间 Temporal</td><td>随时间变化</td><td>p24</td><td>折线、动画、小多图</td></tr>
+        <tr><td>树 Tree</td><td>层次结构（父子）</td><td>p24、p29 结构化数据</td><td>树图、sunburst、缩进图</td></tr>
+        <tr><td>图 Graph</td><td>任意关系网络</td><td>p10 美国航线图、p44 好友图</td><td>节点-链接、邻接矩阵、力导向</td></tr>
+        <tr><td>非结构化</td><td>无固定字段：文本、图像</td><td>p30 文本文档可视化</td><td>词云、主题图、文献网络</td></tr>
+        <tr><td>地理 / 时空</td><td>带空间坐标，常带时间</td><td>p31 地图；p33 风场流线图</td><td>choropleth、流线、轨迹动画</td></tr>
+      </tbody>
+    </table>
+    <p><span class="extra">课外补充：课件没有讲"编码通道优劣"，但简答常问。按知觉准确性从高到低大致为：位置 &gt; 长度 &gt; 角度/斜率 &gt; 面积 &gt; 体积 &gt; 颜色明度 &gt; 颜色色相。要读者比较精确数值就用位置/长度，不要用面积和颜色深浅。</span></p>
+  </div>
+
+  <div class="card">
+    <h3>参考模型：任何可视化都是三段转换（p23 / p60 / p67）</h3>
+    <p>这张图在 L8 里出现三次（p23、p60、p67），每次都在加一层东西，所以它是最值得背的一页。核心链路：</p>
+    <ol class="steps">
+      <li><b>Raw Data →（data mining / table）→ Abstract Data</b>：把原始日志、交易、传感数据整理成关系表/抽象数据。这一步是<b>数据变换</b>，也是数据挖掘真正插进来的位置。</li>
+      <li><b>Abstract Data →（filtering、encoding and layout）→ Visual Form</b>：给每个字段分配视觉通道（编码 = visual design），再摆到屏幕上（布局 = layout algorithm）。同一份数据，编码/布局不同，结论可以完全不同。</li>
+      <li><b>Visual Form →（rendering）→ 像素</b>：把几何与颜色真正画出来，交给图形库/GPU。</li>
+    </ol>
+    <pre class="dia">Raw Data ──data mining──▶ Abstract Data
+Abstract Data ──filter + encode + layout──▶
+Visual Form ──rendering──▶ 屏幕像素
+p67 变体：外面再套 Analysis + Visualisation
++ Interaction 三层循环 → Visual Analysis</pre>
+    <p class="note">考点：<b>data mining 在 raw→abstract 之间</b>，不在最后；<b>encoding/layout 在 abstract→visual form 之间</b>。把编码放到渲染之后是最常见的错答。p60 还补了两行注解：Encoding = Visual Design Technique，Layout = Layout Algorithm——这正是 InfoVis 的两个核心研究点。</p>
+  </div>
+
+  <div class="card">
+    <h3>InfoVis / SciVis / CG / Visual Analysis：四个名词的边界（p35–p37、p66–p67）</h3>
+    <p>p35 用两根轴区分 InfoVis 与 Computer Graphics：一根是<b>真实感（realism）</b>，一根是<b>信息（information）</b>。p36 再用"物理数据 vs 人造/抽象数据"区分 SciVis 与 InfoVis。合起来是四块：</p>
+    <table class="cmp">
+      <thead><tr><th></th><th>研究对象</th><th>目标</th><th>核心问题</th></tr></thead>
+      <tbody>
+        <tr><td><b>InfoVis</b> 信息可视化</td><td>抽象数据：网络、树、文本、统计表</td><td>放大认知（amplify cognition），发现模式</td><td>怎么编码、怎么布局</td></tr>
+        <tr><td><b>SciVis</b> 科学可视化</td><td>物理数据：CT/MRI、流体、气象、分子</td><td>让不可见的物理场可见</td><td>体绘制、等值面、流线</td></tr>
+        <tr><td><b>CG</b> 计算机图形学</td><td>几何、材质、光照</td><td>照片级真实感（realism）</td><td>渲染方程、光照模型、纹理</td></tr>
+        <tr><td><b>VA</b> 视觉分析</td><td>图形 + 数据挖掘/ML 模型</td><td>人机协同推理</td><td>交互如何让人参与迭代</td></tr>
+      </tbody>
+    </table>
+    <p>判据一句话：<b>数据本身有没有物理空间位置？</b>有 → SciVis；没有（关系、文本、层次）→ InfoVis。所以"社交网络图"虽然画在画布上，仍属 InfoVis；"CT 体绘制"哪怕交互很花哨，也属 SciVis。CG 关注"像不像真的"，InfoVis 关注"看不看得出规律"。</p>
+    <p>p37 讲趋势：传统上 SciVis 与 InfoVis 分家，现代做法是把 <b>InfoVis + data mining + machine learning</b> 合成 <b>Visual Analysis</b>。p66 一句话定性：<b>Data Mining = computational power（算力），Visual Analysis = human intelligence（人的判断）</b>；p67 的模型把 <b>Analysis + Visualisation + Interaction</b> 三件套叠上去，才叫视觉分析。代表工作：Whisper（流式信息扩散，p63）、FacetAtlas 与 SolarMap/ContexTour（大规模文本语料、多关系聚类，p64）、TargetVue（Twitter 异常用户，p68）、g-Miner（多变量图上的交互式组挖掘，p69）。</p>
+    <p class="note">最容易被问倒的一句：<b>视觉分析不是"可视化 + 数据挖掘"的简单叠加</b>。关键在 interaction——用户通过缩放、筛选、下钻去改查询、改模型，形成"算—看—改"的闭环；没有交互的静态大图只是可视化。</p>
+  </div>
+
+  <div class="card">
+    <h3>大数据：3V 与三个硬约束（p40–p45）</h3>
+    <p>p40 先给量级冲击：一天 40 亿条消息、3.4 亿条 tweet，于是"信息过载（information overload）"——问题不是没有数据，而是<b>没法从海量数据里拿到有用信息</b>。p43 用 3V 概括大数据：<b>Volume（体量）、Velocity（速度）、Variety（多样性）</b>。<span class="extra">课外补充：很多教材还加 Veracity（真实性）、Value（价值），但课件只点名 3V，答题按 3V 写最稳。</span></p>
+    <p>p44 给出大数据可视化的核心矛盾，这句话值得背：<b>把百万甚至十亿条记录塞进几百万像素</b>——一块 1600×1200 的屏幕只有约 192 万像素。课件举的例子是 1480 万条 tweet 的信息扩散图和 5 亿用户的 Facebook 好友图。算一下就知道为什么必须上技术手段：</p>
+    <div class="formula">
+      <span class="fm">像素数 = 1600 × 1200 = 1,920,000 ≈ 1.92 × 10⁶</span>
+      <span class="fm">每条记录可得像素 = 1.92 × 10⁶ / 10⁹ ≈ 0.0019 像素</span>
+      <span class="cap">十亿条记录连"一条一像素"都做不到，所以大数据可视化必须先回答"牺牲什么"：牺牲细节（聚合）、牺牲完整性（采样）、牺牲形状（扭曲），或牺牲可读性（像素导向）。</span>
+    </div>
+    <figure class="sfig"><img src="slides/L8/p045.png" alt="L8 第45页课件原图" loading="lazy" decoding="async"><figcaption>1480 万条 tweet 与 5 亿用户好友图挤进 192 万像素（1600×1200）：大数据可视化的核心矛盾。</figcaption></figure>
+    <p>p45 把困难归结为三条，正好对应后面的五类技术：</p>
+    <ul class="dot">
+      <li><b>Visual clutter（视觉杂乱）</b>：重叠与交叉让图糊成一片 → 采样、重排、边捆绑、查询式可视化。</li>
+      <li><b>Performance（性能）</b>：大数据要实时渲染 + 丰富交互 → 聚合/LOD 逐级加载、GPU 并行。</li>
+      <li><b>Limited cognition（认知有限）</b>：信息量超过人的工作记忆 → 聚合、焦点+上下文、交互式过滤，把"一次要看的东西"降到人能处理的量级。</li>
+    </ul>
+    <p class="note">这三条是"为什么难"的答案，五类技术是"怎么办"的答案。简答若问"大数据可视化难在哪"，答这三条比罗列技术更能拿分。</p>
+  </div>
+
+  <div class="card">
+    <h3>五类大数据可视化技术（p46–p58）：每一类牺牲的东西不同</h3>
+    <table class="cmp">
+      <caption>记忆抓手："像素省细节、聚合省精度、扭曲省真实、去杂省完整、GPU 省时间"。</caption>
+      <thead><tr><th>技术</th><th>做法</th><th>典型代表（页）</th><th>代价 / 适用</th></tr></thead>
+      <tbody>
+        <tr><td>① 像素导向 Pixel-Oriented</td><td>一个数据项 = 一个像素，按兴趣度或属性相似度排序后铺满屏幕</td><td>Keim &amp; Kriegel 1994/1996：1 万条 × 6 维、按兴趣度/属性相似度排序（p47–p48）；区域切分（Yang et al. 2006，p49）</td><td>不丢原始记录，能看全局密度；但单点不可读，只适合概览</td></tr>
+        <tr><td>② 聚合 &amp; LOD</td><td>先聚合成节点建树，随缩放切换粒度：下钻 drill down 变细、上卷 roll up 变粗</td><td>直方图（Pearson 1895）、热力图、InfoCube（p51）；散点图、平行坐标、星图（p52）</td><td>丢个体、保趋势；粒度选错会掩盖异常</td></tr>
+        <tr><td>③ 扭曲 Distortion</td><td>放大焦点区、压缩周边，同时保留全局上下文</td><td>p53–p54（焦点+上下文类视图）</td><td>形变误导长度/面积判断；适合导航，不适合精确比较</td></tr>
+        <tr><td>④ 去杂 Clutter Reduction</td><td>抽样少画；重排减少交叉；边捆绑把平行边聚成束；查询式只画查出来的数据</td><td>sampling / reordering（p55）、edge bundling（Holten &amp; van Wijk 2009，p56，美国航线图 p10）、query engine + DB + REST API（p57）</td><td>抽样丢小众模式、捆绑丢单边精度；查询式要求用户会写查询</td></tr>
+        <tr><td>⑤ GPU 并行</td><td>把渲染/体绘制搬到 GPU 上并行</td><td>p58 大规模体可视化综述（EuroVis 2014）</td><td>解决性能，不解决"看不懂"</td></tr>
+      </tbody>
+    </table>
+    <div class="concept">
+      <h4>逐条说人话</h4>
+      <p><b>像素导向</b>最反直觉：屏幕就这么大，那就把每条记录压成一个像素，用颜色表示数值，用"怎么排"编码结构（按兴趣度排、按属性相似度排）。p47 的"order by degree of interests"就是把最该看的排到最显眼处。它<b>不做聚合</b>，1 万条一条不少；代价是任何单个像素都无法读数。</p>
+      <p><b>聚合/LOD</b> 是"先看森林再看树"：p50 明确聚合树可自底向上（bottom-up）或自顶向下（top-down）建；p51–p52 给了一堆聚合与降维视图。注意 p52 的散点图/平行坐标/星图本质是<b>多维降维</b>，与 L7 降维是同一思想的不同载体。</p>
+      <p><b>边捆绑</b>为什么有效：图里真正让人眼花的不是节点，而是边的交叉重叠；把走向相近的边合并成一束，既减少墨水量又突显微观结构（p56 用美国航线图演示，p10 是同一张）。<b>查询式可视化</b>（p57）把"画什么"交给查询引擎：database + REST API + query engine，用户先筛选再渲染，只画相关的那一小部分。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>简答模板：给你一份数据，怎么设计可视化（p60–p62、p12）</h3>
+    <p>p61–p62 讲工程现实：用现成工具（课件 p12 举了 Matplotlib）很容易，但开发新方法需要跨领域知识——计算机图形学、数据挖掘、人机交互、工业设计。若考"设计题"，按下面五步答，比堆技术名词有条理：</p>
+    <ol class="steps">
+      <li><b>认数据类型</b>：1D/2D/多维/时间/树/图/地理时空，先落到 p24 的某一格。</li>
+      <li><b>定任务</b>：是找模式（分析）、讲故事（沟通），还是查具体值（定位）？任务不同，图不同。</li>
+      <li><b>选编码 + 布局</b>：能用位置就不用面积，能用长度就不用颜色；高维做降维/平行坐标，关系数据先跑布局算法。</li>
+      <li><b>加交互应对大数据</b>：概览用聚合/LOD，细节靠 drill down 与过滤，杂乱靠采样/边捆绑，查询式只画关心的子集。</li>
+      <li><b>验收</b>：能不能一句话说出结论（reveal insight）？若只是"图挺好看"，回第 2 步。</li>
+    </ol>
+  </div>
+
+  <div class="trap">
+    <h3>⚠ 易错点 / 命题陷阱</h3>
+    <ul>
+      <li><b>把 CG 当成 InfoVis 的子集</b>：p35 是两根轴——CG 追真实感，InfoVis 追信息。光线追踪渲染出一张"照片"，可能一点信息量都没有。</li>
+      <li><b>用"是否科学"区分 SciVis 和 InfoVis</b>：判据是数据有无物理空间位置。社交网络图是科学研究对象，但仍属 InfoVis。</li>
+      <li><b>以为"可视化 + 挖掘 = 视觉分析"</b>：缺了 interaction，就只是"挖完再画出来"，人的判断没参与迭代（p66、p68）。</li>
+      <li><b>把像素导向说成"缩略图/降采样"</b>：恰恰相反，它不聚合、不丢记录，1 条 = 1 像素；代价是单点不可读。同理，LOD 的 drill down 是往细看，roll up 是往粗看，方向别弄反。</li>
+      <li><b>把 data mining 放到参考模型最后一步</b>：它在 raw→abstract 之间，最后一步是 rendering。<span class="extra">课外补：前注意通道也不是越多越好，同时用颜色+大小+形状+运动编码四个量会互相干扰，强调层级时通常只用一个通道，其余保持中性。</span></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>🧠 随堂自测</h3>
+    <details class="q"><summary>Q1 归类：把下面四项分别归到 InfoVis / SciVis / CG / Visual Analysis，并各说一句理由。（a）医院 CT 的体绘制；（b）Twitter 好友关系网络图；（c）电影特效里的光线追踪渲染；（d）分析师在界面里筛选、下钻并实时改模型的异常用户排查系统。</summary>
+      <div class="q-a"><p><span class="ans">答案：</span>（a）SciVis——物理数据（人体密度场），用体绘制/等值面让不可见的物理场可见；（b）InfoVis——抽象的关系数据，无物理空间位置，核心是编码与布局；（c）CG——目标是真实感几何/光照/材质，不追求信息洞察；（d）Visual Analysis——图形 + 挖掘模型 + 交互，人机协同（p66–p68）。判据：先问"数据有无物理位置"，再问"有没有交互与模型参与迭代"。</p></div>
+    </details>
+    <details class="q"><summary>Q2 计算：屏幕 2560×1440，手上有 10 亿条记录。平均每条记录能分到几个像素？若要求"每条至少 1 像素"，至少需要多少条记录以内？这对技术选型说明什么？</summary>
+      <div class="q-a"><p><span class="ans">答案：</span>像素数 = 2560 × 1440 = 3,686,400 ≈ 3.69 × 10⁶。10⁹ ÷ 3.69 × 10⁶ ≈ <b>271 条记录挤在 1 个像素里</b>。反过来，"一条一像素"最多只能放约 369 万条记录。结论：数据量超出像素预算两个数量级以上，必须先用聚合/LOD（得到趋势）或采样（得到分布），或用像素导向把 1 条压成 1 像素但接受不可读数；实时交互则再叠 GPU/查询式过滤。这正是 p44–p45 的核心矛盾。</p></div>
+    </details>
+    <details class="q"><summary>Q3 简答：500 万条航班记录画成"城市对-连线"图后糊成一团，说出两个病理名称和对应的两种技术，并解释各自牺牲了什么。</summary>
+      <div class="q-a"><p><span class="ans">答案：</span>病理是 <b>visual clutter（重叠与交叉）</b>，加上数据量远超像素预算。技术一：<b>边捆绑（edge bundling）</b>——把走向相近的边合成束，减少交叉、突显主干枢纽，代价是丢失单条航线的精确走向（p56 的美国航线图正是此例）。技术二：<b>聚合 + LOD</b>——把城市对聚合成区域级流量或按缩放切换粒度，代价是丢失个体记录；也可用<b>采样</b>先画子集，代价是丢小众模式。答题要点是"技术 + 代价"成对出现。</p></div>
+    </details>
+    <details class="q"><summary>Q4 填空：补出参考模型的三个变换及其所属步骤——Raw Data →（①）→ Abstract Data →（②）→ Visual Form →（③）→ 屏幕。</summary>
+      <div class="q-a"><p><span class="ans">答案：</span>① data mining / table（数据变换，数据挖掘在这里）；② filtering、encoding and layout（视觉编码 = visual design，布局 = layout algorithm）；③ rendering（渲染）。记忆：<b>数转 → 编布 → 渲</b>。p67 的视觉分析变体还要在这条链外面加 Analysis + Visualisation + Interaction 的循环。</p></div>
+    </details>
+  </div>
+
+  <div class="mnemonic"><b>记忆口诀</b>：视觉带宽百万倍，并行在前串行后；九条目的归四组，洞察不是好看图；数据先分七类半（1D/2D/3D/多维/时间 + 树/图），树图不是维度算；模型三段数转编渲，挖掘插在第一段；三大挑战糊慢懵（clutter / performance / cognition），五招像素聚扭杂（聚合/扭曲/去杂）；比较记得 Info 与 Real，判定先看有无空间。</div>
+</section>
+<section class="sec" id="slides"><div class="ch-head"><h2>📽 课件原页浏览 · 71 页</h2><p class="ch-sub">拓展章节（不在半期范围），提供课件原页与自动提取的页标题，供快速翻阅。</p></div><details class="ptoc"><summary>📑 页面目录（71 页，点击展开可跳页）</summary><ol><li><a href="#p1">P1 · Data Visualization</a></li><li><a href="#p2">P2 · Introduction</a></li><li><a href="#p3">P3 · Introduction</a></li><li><a href="#p4">P4 · Listen</a></li><li><a href="#p5">P5 · Do they effective ?</a></li><li><a href="#p6">P6 · Do they effective ?</a></li><li><a href="#p7">P7 · A picture worth 1000 Words</a></li><li><a href="#p8">P8 · Why efficient ?</a></li><li><a href="#p9">P9 · Example</a></li><li><a href="#p10">P10 · Example</a></li><li><a href="#p11">P11 · Example</a></li><li><a href="#p12">P12 · What is Information Visualization ?</a></li><li><a href="#p13">P13 · 15</a></li><li><a href="#p14">P14 · Introduction</a></li><li><a href="#p15">P15 · Why do we create visualization?</a></li><li><a href="#p16">P16 · Find Patterns</a></li><li><a href="#p17">P17 · Find Patterns</a></li><li><a href="#p18">P18 · Find Patterns: Pre-Attentive Visual Ch</a></li><li><a href="#p19">P19 · Why do we create Visualization?</a></li><li><a href="#p20">P20 · Seeing data in context</a></li><li><a href="#p21">P21 · Why do we create visualization ?</a></li><li><a href="#p22">P22 · Some other reasons</a></li><li><a href="#p23">P23 · Introduction</a></li><li><a href="#p24">P24 · Visualization &amp; Visual Analysis Refere</a></li><li><a href="#p25">P25 · Taxonomy by data types</a></li><li><a href="#p26">P26 · Examples: Visualizing 1D Numerical Dat</a></li><li><a href="#p27">P27 · Example : Visualizing 1D Ordinal Data</a></li><li><a href="#p28">P28 · Examples: 2D Data</a></li><li><a href="#p29">P29 · Example:Multi-Dimensional Data</a></li><li><a href="#p30">P30 · Examples: Visualizing Structured Data</a></li><li><a href="#p31">P31 · Examples: Visualizing Unstructured Dat</a></li><li><a href="#p32">P32 · Examples: Geospatial</a></li><li><a href="#p33">P33 · Examples: Visualizing Spatial Temporal</a></li><li><a href="#p34">P34 · Examples: Visualizing Spatial Temporal</a></li><li><a href="#p35">P35 · Visualization is not just a beautiful</a></li><li><a href="#p36">P36 · InfoVis vs Computer Graphics</a></li><li><a href="#p37">P37 · InfoVis v.s. Scientific Visualization</a></li><li><a href="#p38">P38 · Three Sub-areas</a></li><li><a href="#p39">P39 · Introduction</a></li><li><a href="#p40">P40 · Are you ready to</a></li><li><a href="#p41">P41 · Data, Data, and Data</a></li><li><a href="#p42">P42 · Information Overload</a></li><li><a href="#p43">P43 · Challenge</a></li><li><a href="#p44">P44 · 3Vs of Big Data</a></li><li><a href="#p45">P45 · Big Data Visualization</a></li><li><a href="#p46">P46 · Challenges</a></li><li><a href="#p47">P47 · Techniques (1) : Pixel Oriented Visual</a></li><li><a href="#p48">P48 · Technique(1) : Pixel Oriented Visualiz</a></li><li><a href="#p49">P49 · Techniques (1): Pixel Oriented Visuali</a></li><li><a href="#p50">P50 · Techniques (1) : Pixel Oriented Visual</a></li><li><a href="#p51">P51 · Techniques (2): Aggregation &amp; Level of</a></li><li><a href="#p52">P52 · Technique (2) : Aggregation &amp; LOD</a></li><li><a href="#p53">P53 · Techniques (2) : Aggregation</a></li><li><a href="#p54">P54 · Technique (3) : Distortion</a></li><li><a href="#p55">P55 · Techniques (3) : Distortion</a></li><li><a href="#p56">P56 · Technique (4) : Clutter Reduction</a></li><li><a href="#p57">P57 · Technique (4): Clutter Reduction</a></li><li><a href="#p58">P58 · Technique (4): Query based Visualizati</a></li><li><a href="#p59">P59 · Technique (5): Parallel Computing via</a></li><li><a href="#p60">P60 · Introduction</a></li><li><a href="#p61">P61 · Visualization &amp; Visual Analysis Refere</a></li><li><a href="#p62">P62 · Using existing tools are easy</a></li><li><a href="#p63">P63 · Developing new ones require knowledge</a></li><li><a href="#p64">P64 · PART III : How can we visualize big da</a></li><li><a href="#p65">P65 · PART III : How can we visualize big da</a></li><li><a href="#p66">P66 · Introduction</a></li><li><a href="#p67">P67 · Visual Analysis v.s. Data Mining</a></li><li><a href="#p68">P68 · Visualization &amp; Visual Analysis Refere</a></li><li><a href="#p69">P69 · PART IV : Visual Analysis of Big Data</a></li><li><a href="#p70">P70 · PART IV : Visual Analysis of Big Data</a></li><li><a href="#p71">P71 · The beauty of data visualization</a></li></ol></details><article class="slide" id="p1"><div class="slide-h"><span class="pno">P1</span><h3>Data Visualization</h3></div><img src="slides/L8/p001.png" alt="L8 第1页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p2"><div class="slide-h"><span class="pno">P2</span><h3>Introduction</h3></div><img src="slides/L8/p002.png" alt="L8 第2页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p3"><div class="slide-h"><span class="pno">P3</span><h3>Introduction</h3></div><img src="slides/L8/p003.png" alt="L8 第3页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p4"><div class="slide-h"><span class="pno">P4</span><h3>Listen</h3></div><img src="slides/L8/p004.png" alt="L8 第4页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p5"><div class="slide-h"><span class="pno">P5</span><h3>Do they effective ?</h3></div><img src="slides/L8/p005.png" alt="L8 第5页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p6"><div class="slide-h"><span class="pno">P6</span><h3>Do they effective ?</h3></div><img src="slides/L8/p006.png" alt="L8 第6页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p7"><div class="slide-h"><span class="pno">P7</span><h3>A picture worth 1000 Words</h3></div><img src="slides/L8/p007.png" alt="L8 第7页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p8"><div class="slide-h"><span class="pno">P8</span><h3>Why efficient ?</h3></div><img src="slides/L8/p008.png" alt="L8 第8页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p9"><div class="slide-h"><span class="pno">P9</span><h3>Example</h3></div><img src="slides/L8/p009.png" alt="L8 第9页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p10"><div class="slide-h"><span class="pno">P10</span><h3>Example</h3></div><img src="slides/L8/p010.png" alt="L8 第10页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p11"><div class="slide-h"><span class="pno">P11</span><h3>Example</h3></div><img src="slides/L8/p011.png" alt="L8 第11页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p12"><div class="slide-h"><span class="pno">P12</span><h3>What is Information Visualization ?</h3></div><img src="slides/L8/p012.png" alt="L8 第12页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p13"><div class="slide-h"><span class="pno">P13</span><h3>15</h3></div><img src="slides/L8/p013.png" alt="L8 第13页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p14"><div class="slide-h"><span class="pno">P14</span><h3>Introduction</h3></div><img src="slides/L8/p014.png" alt="L8 第14页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p15"><div class="slide-h"><span class="pno">P15</span><h3>Why do we create visualization?</h3></div><img src="slides/L8/p015.png" alt="L8 第15页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p16"><div class="slide-h"><span class="pno">P16</span><h3>Find Patterns</h3></div><img src="slides/L8/p016.png" alt="L8 第16页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p17"><div class="slide-h"><span class="pno">P17</span><h3>Find Patterns</h3></div><img src="slides/L8/p017.png" alt="L8 第17页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p18"><div class="slide-h"><span class="pno">P18</span><h3>Find Patterns: Pre-Attentive Visual Ch</h3></div><img src="slides/L8/p018.png" alt="L8 第18页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p19"><div class="slide-h"><span class="pno">P19</span><h3>Why do we create Visualization?</h3></div><img src="slides/L8/p019.png" alt="L8 第19页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p20"><div class="slide-h"><span class="pno">P20</span><h3>Seeing data in context</h3></div><img src="slides/L8/p020.png" alt="L8 第20页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p21"><div class="slide-h"><span class="pno">P21</span><h3>Why do we create visualization ?</h3></div><img src="slides/L8/p021.png" alt="L8 第21页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p22"><div class="slide-h"><span class="pno">P22</span><h3>Some other reasons</h3></div><img src="slides/L8/p022.png" alt="L8 第22页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p23"><div class="slide-h"><span class="pno">P23</span><h3>Introduction</h3></div><img src="slides/L8/p023.png" alt="L8 第23页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p24"><div class="slide-h"><span class="pno">P24</span><h3>Visualization &amp; Visual Analysis Refere</h3></div><img src="slides/L8/p024.png" alt="L8 第24页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p25"><div class="slide-h"><span class="pno">P25</span><h3>Taxonomy by data types</h3></div><img src="slides/L8/p025.png" alt="L8 第25页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p26"><div class="slide-h"><span class="pno">P26</span><h3>Examples: Visualizing 1D Numerical Dat</h3></div><img src="slides/L8/p026.png" alt="L8 第26页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p27"><div class="slide-h"><span class="pno">P27</span><h3>Example : Visualizing 1D Ordinal Data</h3></div><img src="slides/L8/p027.png" alt="L8 第27页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p28"><div class="slide-h"><span class="pno">P28</span><h3>Examples: 2D Data</h3></div><img src="slides/L8/p028.png" alt="L8 第28页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p29"><div class="slide-h"><span class="pno">P29</span><h3>Example:Multi-Dimensional Data</h3></div><img src="slides/L8/p029.png" alt="L8 第29页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p30"><div class="slide-h"><span class="pno">P30</span><h3>Examples: Visualizing Structured Data</h3></div><img src="slides/L8/p030.png" alt="L8 第30页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p31"><div class="slide-h"><span class="pno">P31</span><h3>Examples: Visualizing Unstructured Dat</h3></div><img src="slides/L8/p031.png" alt="L8 第31页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p32"><div class="slide-h"><span class="pno">P32</span><h3>Examples: Geospatial</h3></div><img src="slides/L8/p032.png" alt="L8 第32页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p33"><div class="slide-h"><span class="pno">P33</span><h3>Examples: Visualizing Spatial Temporal</h3></div><img src="slides/L8/p033.png" alt="L8 第33页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p34"><div class="slide-h"><span class="pno">P34</span><h3>Examples: Visualizing Spatial Temporal</h3></div><img src="slides/L8/p034.png" alt="L8 第34页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p35"><div class="slide-h"><span class="pno">P35</span><h3>Visualization is not just a beautiful</h3></div><img src="slides/L8/p035.png" alt="L8 第35页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p36"><div class="slide-h"><span class="pno">P36</span><h3>InfoVis vs Computer Graphics</h3></div><img src="slides/L8/p036.png" alt="L8 第36页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p37"><div class="slide-h"><span class="pno">P37</span><h3>InfoVis v.s. Scientific Visualization</h3></div><img src="slides/L8/p037.png" alt="L8 第37页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p38"><div class="slide-h"><span class="pno">P38</span><h3>Three Sub-areas</h3></div><img src="slides/L8/p038.png" alt="L8 第38页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p39"><div class="slide-h"><span class="pno">P39</span><h3>Introduction</h3></div><img src="slides/L8/p039.png" alt="L8 第39页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p40"><div class="slide-h"><span class="pno">P40</span><h3>Are you ready to</h3></div><img src="slides/L8/p040.png" alt="L8 第40页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p41"><div class="slide-h"><span class="pno">P41</span><h3>Data, Data, and Data</h3></div><img src="slides/L8/p041.png" alt="L8 第41页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p42"><div class="slide-h"><span class="pno">P42</span><h3>Information Overload</h3></div><img src="slides/L8/p042.png" alt="L8 第42页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p43"><div class="slide-h"><span class="pno">P43</span><h3>Challenge</h3></div><img src="slides/L8/p043.png" alt="L8 第43页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p44"><div class="slide-h"><span class="pno">P44</span><h3>3Vs of Big Data</h3></div><img src="slides/L8/p044.png" alt="L8 第44页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p45"><div class="slide-h"><span class="pno">P45</span><h3>Big Data Visualization</h3></div><img src="slides/L8/p045.png" alt="L8 第45页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p46"><div class="slide-h"><span class="pno">P46</span><h3>Challenges</h3></div><img src="slides/L8/p046.png" alt="L8 第46页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p47"><div class="slide-h"><span class="pno">P47</span><h3>Techniques (1) : Pixel Oriented Visual</h3></div><img src="slides/L8/p047.png" alt="L8 第47页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p48"><div class="slide-h"><span class="pno">P48</span><h3>Technique(1) : Pixel Oriented Visualiz</h3></div><img src="slides/L8/p048.png" alt="L8 第48页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p49"><div class="slide-h"><span class="pno">P49</span><h3>Techniques (1): Pixel Oriented Visuali</h3></div><img src="slides/L8/p049.png" alt="L8 第49页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p50"><div class="slide-h"><span class="pno">P50</span><h3>Techniques (1) : Pixel Oriented Visual</h3></div><img src="slides/L8/p050.png" alt="L8 第50页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p51"><div class="slide-h"><span class="pno">P51</span><h3>Techniques (2): Aggregation &amp; Level of</h3></div><img src="slides/L8/p051.png" alt="L8 第51页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p52"><div class="slide-h"><span class="pno">P52</span><h3>Technique (2) : Aggregation &amp; LOD</h3></div><img src="slides/L8/p052.png" alt="L8 第52页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p53"><div class="slide-h"><span class="pno">P53</span><h3>Techniques (2) : Aggregation</h3></div><img src="slides/L8/p053.png" alt="L8 第53页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p54"><div class="slide-h"><span class="pno">P54</span><h3>Technique (3) : Distortion</h3></div><img src="slides/L8/p054.png" alt="L8 第54页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p55"><div class="slide-h"><span class="pno">P55</span><h3>Techniques (3) : Distortion</h3></div><img src="slides/L8/p055.png" alt="L8 第55页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p56"><div class="slide-h"><span class="pno">P56</span><h3>Technique (4) : Clutter Reduction</h3></div><img src="slides/L8/p056.png" alt="L8 第56页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p57"><div class="slide-h"><span class="pno">P57</span><h3>Technique (4): Clutter Reduction</h3></div><img src="slides/L8/p057.png" alt="L8 第57页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p58"><div class="slide-h"><span class="pno">P58</span><h3>Technique (4): Query based Visualizati</h3></div><img src="slides/L8/p058.png" alt="L8 第58页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p59"><div class="slide-h"><span class="pno">P59</span><h3>Technique (5): Parallel Computing via</h3></div><img src="slides/L8/p059.png" alt="L8 第59页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p60"><div class="slide-h"><span class="pno">P60</span><h3>Introduction</h3></div><img src="slides/L8/p060.png" alt="L8 第60页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p61"><div class="slide-h"><span class="pno">P61</span><h3>Visualization &amp; Visual Analysis Refere</h3></div><img src="slides/L8/p061.png" alt="L8 第61页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p62"><div class="slide-h"><span class="pno">P62</span><h3>Using existing tools are easy</h3></div><img src="slides/L8/p062.png" alt="L8 第62页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p63"><div class="slide-h"><span class="pno">P63</span><h3>Developing new ones require knowledge</h3></div><img src="slides/L8/p063.png" alt="L8 第63页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p64"><div class="slide-h"><span class="pno">P64</span><h3>PART III : How can we visualize big da</h3></div><img src="slides/L8/p064.png" alt="L8 第64页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p65"><div class="slide-h"><span class="pno">P65</span><h3>PART III : How can we visualize big da</h3></div><img src="slides/L8/p065.png" alt="L8 第65页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p66"><div class="slide-h"><span class="pno">P66</span><h3>Introduction</h3></div><img src="slides/L8/p066.png" alt="L8 第66页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p67"><div class="slide-h"><span class="pno">P67</span><h3>Visual Analysis v.s. Data Mining</h3></div><img src="slides/L8/p067.png" alt="L8 第67页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p68"><div class="slide-h"><span class="pno">P68</span><h3>Visualization &amp; Visual Analysis Refere</h3></div><img src="slides/L8/p068.png" alt="L8 第68页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p69"><div class="slide-h"><span class="pno">P69</span><h3>PART IV : Visual Analysis of Big Data</h3></div><img src="slides/L8/p069.png" alt="L8 第69页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p70"><div class="slide-h"><span class="pno">P70</span><h3>PART IV : Visual Analysis of Big Data</h3></div><img src="slides/L8/p070.png" alt="L8 第70页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article><article class="slide" id="p71"><div class="slide-h"><span class="pno">P71</span><h3>The beauty of data visualization</h3></div><img src="slides/L8/p071.png" alt="L8 第71页" loading="lazy" decoding="async" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#fff"></article></section></main>
+<div class="pnav"><a href="L7.html">← L7 降维</a><a href="L9.html" style="text-align:right">L9 推荐 →</a></div><footer>依据 9 个课件（L1–L9）整理 · 半期范围 L1–L7（第七章 降维为终点）· L8/L9 为拓展 · <span class="extra">课外补充</span> 为帮助理解而添加、非课件原文。<br>本复习站完全离线：拷贝整个「复习站」文件夹到任何电脑，双击 index.html 即可。</footer>
+<button id="totop" type="button" aria-label="回到顶部">↑</button>
+<script src="assets/app.js"></script>
+</body>
+</html>

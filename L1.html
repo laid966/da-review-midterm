@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#4c5fd5">
+<title>L1 导论 Introduction · Data Analytics 半期复习</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div id="prog"></div>
+<header class="hero-lite"><div class="kin"><a class="back" href="index.html">← 总目录</a><h1>L1 · 导论 Introduction</h1><span class="pill2">半期范围</span><span class="sp"></span><span class="pill2">课件 66 页</span></div></header>
+<nav class="tabs"><a href="index.html">🏠 首页</a><a href="L1.html" class="active">L1 导论</a><a href="L2.html">L2 SQL</a><a href="L3.html">L3 相似 I</a><a href="L4.html">L4 相似 II</a><a href="L5.html">L5 ML I</a><a href="L6.html">L6 ML II</a><a href="L7.html">L7 降维</a><a href="L8.html" class="out">L8 可视化</a><a href="L9.html" class="out">L9 推荐</a><a href="index.html#cross">公式速查</a><a href="index.html#quiz">模拟卷</a><a href="index.html#plan">3 天计划</a><span class="sp"></span><button id="expand" data-open="0" type="button">展开全部答案</button><button id="theme" type="button" aria-label="切换深色模式">☾</button></nav>
+<main><section class="ch" id="l1">
+  <div class="ch-head">
+    <div class="ch-badge">L1</div>
+    <div>
+      <h2>导论：数据、工具与陷阱<span class="en">Introduction to Data Analytics</span><span class="ch-tag mid">概念题</span></h2>
+      <p class="ch-sub">覆盖 p12–p65（从 "Introduction to Data Analytics" 到 AI/Turing test）。半期卷里本讲以选择/判断/简答出现，几乎不考计算；但"两步法、相关≠因果、欠拟合/过拟合"是 L3–L7 反复引用的地基，后面每讲都会回头用。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🎯 本节考什么</h3>
+    <ul class="kp">
+      <li><b>会算</b>：数据量级换算（MB→GB→TB→PB→EB，每档 ×1000）与"多少个莎士比亚"类比值题。</li>
+      <li><b>会背</b>：两步法 Collect → Analyze；五个技术层次的名称+一句话定义；相关≠因果的三种解释；underfitting / overfitting 的一句话定义；五档数据量级锚点。</li>
+      <li><b>会区分</b>：basic query vs data mining vs machine learning vs visualization 的输出差别；correlation vs causation；RDBMS vs NoSQL vs 云平台的分工；数据隐私三种风险来源（隐蔽采集 / 合法但越界 / 匿名反推）。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>核心概念 1：从数据到决策的两步法</h3>
+    <div class="concept">
+      <h4>两步法（The Two Steps of Working with Data）</h4>
+      <p>课件把"和数据打交道"压成极简两步：(1) <b>Collect data</b> —— 通过计算机、传感器、人、事件采集；(2) <b>Do something with it</b> —— 做决策、验证假设、获得洞察、预测未来。然后给出定义：<b>Data Science 就是从 (1) 走到 (2)</b>。这句是全讲的纲，也是简答题"什么是数据科学"最省字的标准答法。</p>
+      <p>为什么要背这个框架：后面每一讲都能挂上去 —— L2 是"把数据存好、查出来"，L3/L4 是"在大数据里找相似对象"，L5/L6 是"用数据建模预测"，L7 是"把高维数据压扁"，L9 是"把行为数据变成推荐"。答题时先说是第几步、再做哪类任务，结构分就稳了。</p>
+      <p class="dim">例：Ocean Health 项目 = 44,000 个传感器、20 亿条测量（物理/化学/生物）→ 典型第 (1) 步 collect and curate；PharmGKB 收集"人类基因如何影响药物反应"的知识并发布 → 第 (2) 步 do something with it。</p>
+    </div>
+    <div class="concept">
+      <h4>数据准备才是脏活（Data Collection and Preparation）</h4>
+      <p>课件把它称作 working with data 的 "dirty secret"，列了五件事：从难取的源里抽数据、填补缺失值、剔除可疑数据、统一格式/编码/单位、去重与匹配。必须记住的数字是：<b>数据准备通常占一个数据项目 80% 以上的工作量</b>。这句每年都被改成判断题（"建模与分析才是耗时大头"→ 错）。</p>
+      <p class="dim">例：同一列里同时出现 "北京 / Beijing / BJ"、"2024-01-01 / 01/01/2024"，不先统一，后面的 join（L2）会把本应匹配的行全部漏掉，聚合也会把同一实体算成三类。</p>
+    </div>
+    <div class="formula">
+      <span class="fm">Data Science = Collect data → Do something with it</span>
+      <span class="cap">课件原话：Data Science 就是"从第 (1) 步走到第 (2) 步"。隐含前提：数据必须先被清理到可用，否则 80% 的时间都花在这上面。</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>核心概念 2：工具与技术的五个层次</h3>
+    <p>课件（p24–p36）把数据处理技术分成五层。注意这五层是<b>叠加</b>而不是替代，一个真实项目往往五层全用。考试若问"下面任务属于哪一层"，判据不是工具名，而是<b>输出是什么</b>：确定答案 → 基础操作；模式/规则 → 挖掘；模型与对未见数据的预测 → ML；图形 → 可视化；把脏数据变干净 → 采集与准备。</p>
+    <table class="cmp">
+      <caption>五个层次：定义、输出与课件例子</caption>
+      <thead><tr><th>层次</th><th>一句话定义</th><th>输出</th><th>课件例子</th></tr></thead>
+      <tbody>
+        <tr><td>Basic Data Manipulation and Analysis</td><td>做定义良好的计算或问定义良好的问题（queries）</td><td>确定的事实/统计值</td><td>过去 20 年各国 1 月平均低温；20–30 岁女性买过的 100 元以上商品数；过去一年价格波动最大的十只股票</td></tr>
+        <tr><td>Data Mining</td><td>在数据里找模式（patterns）</td><td>频繁项集、关联规则、分组</td><td>X、Y、Z 常一起被买；喜欢电影 X 的人也喜欢 Y；同一所大学的学生常互为好友</td></tr>
+        <tr><td>Machine Learning</td><td>用数据建模型并做预测</td><td>模型 + 对缺失/未来数据的预测</td><td>20 岁以上女性更可能点某广告；成绩好的学生 SAT 也会好；城市气温≈邻近城市均值（除非在海边/山里）</td></tr>
+        <tr><td>Data Visualization</td><td>数据的图形化呈现</td><td>图（bar/pie/scatter/map 等）</td><td>一图胜千言；Napoleon's Army 行军图；误导性图表</td></tr>
+        <tr><td>Data Collection and Preparation</td><td>把原始数据变成可用数据</td><td>干净、一致、去重的数据集</td><td>抽数据、补缺失、去可疑、统一单位编码、去重匹配（占 80% 工作量）</td></tr>
+      </tbody>
+    </table>
+    <div class="concept">
+      <h4>Data Mining vs Machine Learning（最容易被扣分的一组）</h4>
+      <p>课件的 "roughly" 那句就是标准答案：<b>Basic data analysis 和 data mining 给出的是"现有数据内部"的答案</b>（查询结果、频繁项集、关联规则）；<b>machine learning 用现有数据去预测 missing 或 future data</b>。所以"60% 男性、70% 女性回应了广告"是对已有数据的描述（mining/analysis），而"20 岁以上女性更可能点广告"是对未来个体的预测（ML）。</p>
+      <p>ML 的三大任务课件只点名三个词：<b>Regression</b>（回归，预测数值）、<b>Classification</b>（分类，预测类别）、<b>Clustering</b>（聚类，无标签分组）。数据挖掘则点名 frequent item-sets、association rules，以及针对网络/文本/多媒体的专门技术。</p>
+      <p class="dim">例（判据训练）："找出过去一年波动最大的十只股票"能写成 SQL，是 basic query；"买了尿布的人常买啤酒"是 mining；"预测某用户下周会不会买啤酒"是 ML；"把 10 年销量画成折线"是 visualization。</p>
+    </div>
+    <div class="concept">
+      <h4>可视化：别只看"花式图"</h4>
+      <p>课件的态度很清楚：<b>不要低估基本图形的力量</b>（bar chart、pie chart、scatterplot、map），并且承认早期经典图（如 Napoleon's Army 行军图，p32 归为 early visualization）与花式图（p33 fancy visualization）的价值；只是提醒日常分析里基本图往往就够。同时专设一页讲 <b>misleading data visualization</b>（误导性图表）：坐标轴不从 0 开始、用面积/体积代替长度、3D 透视变形，都能把 2 倍差距画成 10 倍。判断题常问"图看起来如此，所以结论成立"——错，先看图有没有说谎。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>核心概念 3：相关 ≠ 因果（三种解释 + 混杂变量）</h3>
+    <div class="concept">
+      <h4>两个定义与两条判据</h4>
+      <p>课件给的定义：<b>Correlation</b> —— 两个值一起变化（height 与 shoe size、grades 与 SAT）；<b>Causation</b> —— 一个值直接影响另一个（education level → starting salary、temperature → cold drink sales）。结论一句：<b>"Correlation does not imply causation"</b>。</p>
+      <p>课件还给两条极重要的判据：<b>相关通常"容易"检验</b>（有观测数据就能算相关系数）；<b>因果通常无法检验</b>（要排除所有替代解释，理想上需随机对照实验）。看到"显著相关"就直接声称因果，是这类题的唯一错误答案。</p>
+    </div>
+    <div class="concept">
+      <h4>相关出现时的三种解释（必背）</h4>
+      <ol class="steps">
+        <li><b>A 导致 B</b>（真因果）：education level → starting salary；temperature → cold drink sales。</li>
+        <li><b>B 导致 A</b>（反向因果）：<span class="extra">课外补充：课件只显式讲了混杂变量；反向因果是同一个"A 与 B 相关"结论的另一种解释，考试常作为选项出现（例：不是"好公司让人健康"，而是"健康的人更容易被好公司录用"）。</span></li>
+        <li><b>隐藏的 C 同时导致 A 和 B</b>（confounding variable，混杂变量）：A 与 B 相关，是因为存在未观测的 C 使 C → A 且 C → B。课件三个例子必须记住：homeless population 与 crime rate 的混杂是 <b>unemployment</b>；forgetfulness 与 poor eyesight 的混杂是 <b>age</b>；height 与 shoe size 的混杂是 age/gender（孩子长个时脚也在长）。</li>
+        <li><b>纯巧合</b>（spurious correlation）：课件给了 tylervigen.com 那一串"惊人相关"（某部电影上映与某类事故数同步涨）。<span class="extra">课外补充：数据挖掘时反复试探大量变量对，总会有几对"显著"，这叫多重比较问题——探索性发现必须在独立数据上复核。</span></li>
+      </ol>
+      <p class="dim">例（答题模板）："冰淇淋销量与溺水人数正相关 → 不能推出冰淇淋导致溺水；最可能的解释是第三个变量气温（或季节）同时抬高两者；若要检验因果，需控制气温后看偏相关，或做干预实验。"</p>
+    </div>
+    <pre class="dia">      C  (混杂变量，常未观测)
+     ↙           ↘
+    A  ←— 相关 —→  B
+   （A、B 之间可能根本没有箭头）</pre>
+    <p class="note">答题技巧：凡题干出现"相关/同时上升/呈正比"，标准动作是先问三句——有没有第三个变量？是不是时间趋势？是不是反向因果？这三问能覆盖 90% 的卷面。</p>
+  </div>
+
+  <div class="card">
+    <h3>核心概念 4：欠拟合 vs 过拟合（Regression 示意）</h3>
+    <p>课件先讲 Regression 本身：<b>给一堆点拟合一条直线或曲线（= 模型），再用它预测新点的值</b>。紧接着给了两种失败方式，这就是本讲唯一"看图说话"的考点。</p>
+    <div class="concept">
+      <h4>Underfitting（欠拟合）：模型太简单</h4>
+      <p>课件原话 "Model used for predictions is too simplistic"。三个例子：① 60% 男性 / 70% 女性回应了广告 → 结论"以后所有广告都投女性"（忽略年龄、渠道、产品差异）；② "有四条腿和平面台面的家具 = 餐桌"（把沙发、书桌都算进来）；③ 城市气温≈邻近城市平均，除非它在海边或山里（把地形造成的大偏差当噪声）。共同点：<b>模型没能力表达数据里真实存在的结构</b>。</p>
+    </div>
+    <div class="concept">
+      <h4>Overfitting（过拟合）：模型太具体</h4>
+      <p>课件原话 "Model used for predictions is too specific"。两个例子：① 广告最佳目标是"25–27 岁、短黑发、一个孩子、一只宠物狗的已婚女性"（把训练样本的偶然细节当规律）；② "四条 100 cm 带装饰的腿 + 抛光圆角木质平顶 = 餐桌"（新产品一个都不满足，模型完全没法用）。共同点：<b>模型记住了训练数据的噪声，换新数据就崩</b>。</p>
+    </div>
+    <figure class="sfig"><img src="slides/L1/p053.png" alt="L1 第53页课件原图" loading="lazy" decoding="async"><figcaption>三张图对照：过拟合（左，曲线被每个训练点牵着剧烈摆动）、欠拟合（中，直线太平）、恰当（右）。</figcaption></figure>
+    <table class="cmp">
+      <caption>两种失败的对照（L1 只考定性，L5 会升级为 bias–variance）</caption>
+      <thead><tr><th>维度</th><th>Underfitting 欠拟合</th><th>Overfitting 过拟合</th></tr></thead>
+      <tbody>
+        <tr><td>模型复杂度</td><td>过低（直线/常数规则）</td><td>过高（高次曲线/规则过细）</td></tr>
+        <tr><td>训练集误差</td><td>高（连样本都没拟合住）</td><td>极低（几乎 0）</td></tr>
+        <tr><td>新数据误差</td><td>高</td><td>高（方差大，换数据就崩）</td></tr>
+        <tr><td>一句话判据</td><td>训练差 + 测试差</td><td>训练极好 + 测试差</td></tr>
+        <tr><td>补救方向</td><td>加特征、换更复杂的模型</td><td>更多数据、正则化、剪枝、降维、简化模型</td></tr>
+        <tr><td>回归示意（p51/p52）</td><td>一条直线硬穿散点</td><td>一条疯狂摆动的曲线</td></tr>
+      </tbody>
+    </table>
+    <p class="note">为什么这页必须背：L5 的 SVM 松弛变量、决策树剪枝、L6 的 k-means 选 k、L7 的 rank 选择（保留几个奇异值），本质都是同一个问题的不同名字——<b>复杂度不够则欠拟合，复杂度过头则过拟合</b>。简答题用"训练误差 / 测试误差"两个数字区分最稳。</p>
+  </div>
+
+  <div class="card">
+    <h3>核心概念 5：数据到底有多大（本讲唯一能"算"的点）</h3>
+    <p>课件用"多少个莎士比亚"当标尺（全集 = 5 MB），给了一条 5 档阶梯。这页几乎必出选择题（问最大/最小/相差几个数量级），也可能出一步除法。</p>
+    <table class="cmp">
+      <caption>课件的五档锚点（p58）</caption>
+      <thead><tr><th>对象</th><th>体量</th><th>折合莎士比亚</th></tr></thead>
+      <tbody>
+        <tr><td>莎士比亚全集</td><td>5 megabytes</td><td>1</td></tr>
+        <tr><td>一个普通人产生的数据</td><td>50 gigabytes</td><td>10,000</td></tr>
+        <tr><td>美国国会图书馆</td><td>10 terabytes</td><td>2,000,000</td></tr>
+        <tr><td>Facebook 每天上传</td><td>1 petabyte</td><td>200,000,000</td></tr>
+        <tr><td>全人类每天产生</td><td>2.5 exabytes</td><td>课件写 500 trillion</td></tr>
+      </tbody>
+    </table>
+    <div class="formula">
+      <span class="fm">1 MB → 1 GB → 1 TB → 1 PB → 1 EB，每档 ×1000</span>
+      <span class="cap">课件的换算用十进制（5 MB × 10,000 = 50 GB，5 MB × 2,000,000 = 10 TB），不是 1024。答题按 ×1000 算，别用 1024 把 10,000 算成 9,765。</span>
+    </div>
+    <p><b>会算的三类题</b>：① 单位阶梯题——两个量差几档就是差几个 1000 倍（50 GB 与 10 TB 差 200 倍）；② 百分比题——一个人 50 GB 占国会图书馆 10 TB 的 50 ÷ 10,000 = 0.5%；③ 折合题——1 PB 是 5 MB 的 2 亿倍。</p>
+    <p class="note">课件内部有个小矛盾：2.5 EB ÷ 5 MB 实际是 5×10¹¹（5,000 亿），课件却写 500 trillion（5×10¹⁴）。考试按"量级：每天 EB 级"记，做比值题只用前四行（它们自洽），不要在这行做除法。</p>
+  </div>
+
+  <div class="card">
+    <h3>核心概念 6：语言、系统与平台</h3>
+    <p>这一页是"选型题"的题库：给一个场景问该用什么。课件（p54–p57）按规模/结构/可靠性给了一张选型谱系。</p>
+    <div class="concept">
+      <h4>六个选项各自的位置</h4>
+      <ul class="dot">
+        <li><b>Spreadsheets</b>：只要数据不太大就"意外地多才多艺"，适合快速探索与小数据。</li>
+        <li><b>带数据支持的编程语言</b>：R —— 统计特性强；Python —— 通用语言，配 Pandas / SciPy / scikit-learn 就有 R 的能力。</li>
+        <li><b>RDBMS（关系数据库管理系统，SQL 系统）</b>：可靠性、效率、强查询处理的长期方案；<b>除了真正极端的规模或高度非结构化的数据，其它都适用</b>。这正是 L2 的全部内容所在。</li>
+        <li><b>NoSQL 系统</b>：分布式/可扩展处理；部分专门面向非结构化数据（文档、图）。</li>
+        <li><b>可扩展系统上的专门语言</b>：MapReduce / Hadoop、Spark（把数据流泛化）；另有专门的数据准备系统、可视化系统。</li>
+        <li><b>云</b>：AWS / Google Cloud / Microsoft Azure 一次给齐存储、处理（SQL / Hadoop / Spark）、机器学习库、与可视化系统的集成。</li>
+      </ul>
+    </div>
+    <div class="concept">
+      <h4>"Big data is better data" 要会说两面</h4>
+      <p>课件（p61）直接引了 Kenneth Cukier 的 TED 标题 "Big data is better data"：数据变多后可以不再依赖抽样，能看到长尾、异常与细分群体。但紧接着 p59 给了刹车，这几句必须一起背：</p>
+      <ul class="dot">
+        <li><b>大多数工具与技术适用于任何规模的数据</b>（不是"只有大数据才需要技术"）。</li>
+        <li><b>Big insights 也可以来自 small / medium data</b>。</li>
+        <li>有时确实需要云上二十台 Spark 服务器，但<b>更常见的情况是一台笔记本 + SQL/Python/简单表格就够了</b>。</li>
+      </ul>
+      <p class="dim">例：p63 的 "Engine / Fuel" 类比 —— deep learning 是引擎，big data 是燃料；这解释了为什么算力和数据同时爆发时 AI 才起飞。答题可加一句"但燃料多不等于结论对：偏差、噪声、混杂不会因为数据变大而消失"（呼应上一节）。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>核心概念 7：数据隐私的三种风险来源（p53）</h3>
+    <p>课件按"数据是怎么来的"把隐私风险分成三类。这页只有三个例子，但几乎每次考试都会变成"给场景判断属于哪一类"的配对题，所以三个例子必须能一一对上。</p>
+    <ul class="dot">
+      <li><b>隐蔽采集（collected covertly）</b>：个人数据在不知情的情况下被收集。课件例子是 Edward Snowden 揭露的 "metadata" 论战——被辩解的正是"只收集了元数据"：即便只有谁在何时打给谁、打了多久，也足以推断出社交关系、作息甚至政治倾向。</li>
+      <li><b>合法采集但用途可疑（collected legally but used questionably）</b>：采集本身没问题，问题在怎么用。课件强调个人的"信息轨迹（information trails）"极其庞大——单条记录无害，聚合成画像就能推断隐私。例子是 Target 从购买记录推断顾客可能怀孕并寄送母婴广告——合法买到的数据，被用在了当事人并不知情的推断上。</li>
+      <li><b>从"匿名"公开数据反推（deduced from anonymous public data）</b>：以为去标识化就安全，实际可与其它公开信息交叉重识别。例子是马萨诸塞州州长的健康记录被从"匿名"公开数据中识别出来。</li>
+    </ul>
+    <p>答题模板：先判断属于哪一类 → 再说失败模式（采集不透明 / 用途越界 / 匿名失效）→ 最后给补救。<span class="extra">课外补充：课件只列了风险、没有给对策，简答若问"怎么办"，可答知情同意与数据最小化（对应第一类）、用途限制与审计（第二类）、k-匿名/差分隐私与聚合发布（第三类）。</span></p>
+    <p class="dim">例（配对训练）："医院公开标称已去标识的就诊记录，研究者用邮编 + 出生日期定位到个人" → 第三类；"App 在用户未同意的后台持续读取通讯录" → 第一类；"电商把退货地址卖给第三方营销公司" → 第二类。</p>
+  </div>
+
+  <div class="trap">
+    <h3>⚠ 易错点 / 命题陷阱</h3>
+    <ul>
+      <li><b>把 data mining 当成 SQL 查询</b>：能写成"定义良好的 query"的任务（波动最大的十只股票、某国 20 年 1 月均温）属于 basic manipulation；mining 的输出必须是模式/规则（频繁项集、关联规则）。</li>
+      <li><b>相关当因果</b>：题干出现"同时上升/呈正相关"时，先找混杂变量（unemployment、age）、时间趋势、反向因果或纯巧合。反过来也不能因为"因果难证"就否认所有相关。</li>
+      <li><b>把 80% 记成"建模占大头"</b>：课件明确 data preparation 消耗 80% 以上的精力，这是判断题的固定送分点。</li>
+      <li><b>欠拟合/过拟合只答"模型不好"</b>：必须给出 too simplistic / too specific，并用"训练误差高 / 训练极好但测试差"区分；举例要落在"新数据"上。</li>
+      <li><b>量级换算用 1024</b>：课件的莎士比亚倍数是十进制（10,000 / 2,000,000 / 200,000,000），按 ×1000 算。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>🧠 随堂自测</h3>
+    <details class="q"><summary>Q1 计算：一个人的数据是 50 GB，美国国会图书馆是 10 TB。前者是后者的百分之几？1 PB 又相当于多少个莎士比亚全集（5 MB）？</summary>
+      <div class="q-a">
+        <p><span class="ans">答案：</span>0.5%；2 亿个。</p>
+        <p>步骤一：统一单位。10 TB = 10 × 1000 GB = 10,000 GB；50 ÷ 10,000 = 0.005，即 0.5%。</p>
+        <p>步骤二：1 PB = 1000 TB = 1,000,000 GB；1,000,000 GB ÷ 0.005 GB = 200,000,000。也可直接用课件倍数：5 MB × 2×10⁸ = 1 PB。</p>
+      </div>
+    </details>
+    <details class="q"><summary>Q2 判断+解释：某市"冰淇淋销量"与"溺水人数"逐年同步上升。请给出至少三种解释，并说明若要检验因果该怎么设计。</summary>
+      <div class="q-a">
+        <p><span class="ans">答案：</span>三种解释 —— ① 冰淇淋导致溺水（无生理机制，几乎可排除）；② 溺水导致冰淇淋（反向因果，不合理）；③ 隐藏变量：气温/季节同时抬高两者（最可能，confounding）；④ 两者都随时间趋势上涨造成的纯巧合（spurious）。</p>
+        <p>检验因果：控制气温后看偏相关，或用随机对照/自然实验（如某年夏季异常高温）；观测数据只能提供因果的弱证据。</p>
+      </div>
+    </details>
+    <details class="q"><summary>Q3 简答：模型在训练集上准确率 99%，上线后只有 60%。这是欠拟合还是过拟合？给出两个补救方向，并说明用哪两个数字来诊断。</summary>
+      <div class="q-a">
+        <p><span class="ans">答案：</span>过拟合（overfitting，模型 too specific）。训练误差极低、换新数据就崩，是过拟合的典型指纹；若训练集本身就很差（例如只有 60%），才是欠拟合（too simplistic）。</p>
+        <p>补救：更多/更有代表性的数据；正则化、剪枝、降维或降低模型复杂度；用交叉验证选超参。</p>
+        <p>诊断数字：训练误差 vs 验证/测试误差，两者的 gap 就是过拟合程度的指标。</p>
+      </div>
+    </details>
+  </div>
+
+  <div class="mnemonic"><b>记忆口诀</b>：两步走（先采后算），五层塔（操作·挖掘·建模·画图·洗数据）；三问防因果（第三个变量？反向？巧合？）；拟合两说法（too simplistic 欠、too specific 过）；量级记五行（莎士比亚 5MB、个人 50GB、国会 10TB、FB 每天 1PB、人类每天 2.5EB）。</div>
+</section>
+<section class="sec" id="slides"><div class="ch-head"><h2>📽 逐页精讲 · 课件原文 66 页</h2><p class="ch-sub">每格 = 课件原页截图 + 中文讲解；标 <b>考点</b> 的页容易出题或容易错。宽屏时图在左、讲解在右；点顶部「页面目录」可跳到任意页。</p></div><details class="ptoc"><summary>📑 页面目录（66 页，点击展开可跳页）</summary><ol><li><a href="#p1">P1 · 课程封面与授课教师</a></li><li><a href="#p2">P2 · 讨论渠道与课程资料</a></li><li><a href="#p3">P3 · 上课时间与地点</a></li><li><a href="#p4">P4 · 考核构成总览</a></li><li><a href="#p5">P5 · 考核方案细则</a></li><li><a href="#p6">P6 · 项目选题：城市数据分析</a></li><li><a href="#p7">P7 · 项目数据要求</a></li><li><a href="#p8">P8 · 项目分析方法要求</a></li><li><a href="#p9">P9 · 教材</a></li><li><a href="#p10">P10 · 14周教学日程表</a></li><li><a href="#p11">P11 · 授课教师信息</a></li><li><a href="#p12">P12 · 助教信息</a></li><li><a href="#p13">P13 · 正课开始：数据分析导论</a></li><li><a href="#p14">P14 · 数据无处不在</a></li><li><a href="#p15">P15 · 数据工作的两步</a></li><li><a href="#p16">P16 · 本讲内容总览</a></li><li><a href="#p17">P17 · 数据的好处：引入</a></li><li><a href="#p18">P18 · 应用例1：交通</a></li><li><a href="#p19">P19 · 应用例2：推荐系统</a></li><li><a href="#p20">P20 · 应用例3：网络广告</a></li><li><a href="#p21">P21 · 应用例4：体育</a></li><li><a href="#p22">P22 · 应用例5：海洋健康</a></li><li><a href="#p23">P23 · 应用例6：遗传与药物</a></li><li><a href="#p24">P24 · 更多应用方向</a></li><li><a href="#p25">P25 · 数据工具与技术总览</a></li><li><a href="#p26">P26 · 基本分析：查询例子</a></li><li><a href="#p27">P27 · 基本分析的工具</a></li><li><a href="#p28">P28 · 数据挖掘：模式例子</a></li><li><a href="#p29">P29 · 数据挖掘的技术</a></li><li><a href="#p30">P30 · 机器学习：预测例子</a></li><li><a href="#p31">P31 · ML关键区分与三类任务</a></li><li><a href="#p32">P32 · 数据可视化</a></li><li><a href="#p33">P33 · 早期可视化：拿破仑军队</a></li><li><a href="#p34">P34 · 炫目的现代可视化</a></li><li><a href="#p35">P35 · 别小看基础图表</a></li><li><a href="#p36">P36 · 误导性可视化</a></li><li><a href="#p37">P37 · 数据收集与准备</a></li><li><a href="#p38">P38 · 数据工作的陷阱</a></li><li><a href="#p39">P39 · 相关与因果：定义</a></li><li><a href="#p40">P40 · 相关不蕴含因果</a></li><li><a href="#p41">P41 · 混杂变量解释</a></li><li><a href="#p42">P42 · 相关易检验，因果难</a></li><li><a href="#p43">P43 · 相关因果插图页</a></li><li><a href="#p44">P44 · 惊人相关 #1</a></li><li><a href="#p45">P45 · 惊人相关 #2</a></li><li><a href="#p46">P46 · 惊人相关 #3</a></li><li><a href="#p47">P47 · 虚假相关网站</a></li><li><a href="#p48">P48 · 模型与拟合问题</a></li><li><a href="#p49">P49 · 欠拟合：模型太简单</a></li><li><a href="#p50">P50 · 过拟合：模型太specific</a></li><li><a href="#p51">P51 · 回归：拟合线或曲线</a></li><li><a href="#p52">P52 · 欠拟合图示</a></li><li><a href="#p53">P53 · 过拟合图示</a></li><li><a href="#p54">P54 · 数据隐私</a></li><li><a href="#p55">P55 · 语言与平台（一）</a></li><li><a href="#p56">P56 · 数据库：SQL与NoSQL</a></li><li><a href="#p57">P57 · 大规模处理与专门系统</a></li><li><a href="#p58">P58 · 云端数据处理</a></li><li><a href="#p59">P59 · 数据量到底有多大</a></li><li><a href="#p60">P60 · 冷静看待大数据</a></li><li><a href="#p61">P61 · TED视频：大数据探索</a></li><li><a href="#p62">P62 · TED视频：大数据更好</a></li><li><a href="#p63">P63 · 大数据的核心问题</a></li><li><a href="#p64">P64 · 大数据与深度学习比喻</a></li><li><a href="#p65">P65 · 图灵测试与强弱AI</a></li><li><a href="#p66">P66 · TED视频：AI改变世界</a></li></ol></details><article class="slide" id="p1"><div class="slide-h"><span class="pno">P1</span><h3>课程封面与授课教师</h3></div><div class="slide-b"><img src="slides/L1/p001.png" alt="L1 第1页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页是课程封面：课程代码 CIE6006/MCE5918，课程名 Data Analytics（数据分析），授课教师 Qingyu Li（邮箱 liqingyu@cuhk.edu.cn），来自香港中文大学（深圳）理工学院。封面页，直接看后面的课程信息即可。</p></div></div></article><article class="slide" id="p2"><div class="slide-h"><span class="pno">P2</span><h3>讨论渠道与课程资料</h3></div><div class="slide-b"><img src="slides/L1/p002.png" alt="L1 第2页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>课程信息页：日常讨论用微信群，课程笔记发布在 Blackboard 平台（bb.cuhk.edu.cn）。课件和通知以 Blackboard 上的为准，复习备考前记得上去核对最新版本。</p></div></div></article><article class="slide" id="p3"><div class="slide-h"><span class="pno">P3</span><h3>上课时间与地点</h3></div><div class="slide-b"><img src="slides/L1/p003.png" alt="L1 第3页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>上课安排：每周二和周四下午 3:30–4:50，地点都在行政楼（Administration Bldg）E205 教室。一周两次课，每次约 80 分钟。</p></div></div></article><article class="slide" id="p4"><div class="slide-h"><span class="pno">P4</span><h3>考核构成总览</h3></div><div class="slide-b"><img src="slides/L1/p004.png" alt="L1 第4页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页给出成绩构成：作业（Homework）占 10%，只有 1 次；课堂小测（in-class quiz）共占 10%，2 次各 5%；期中考试（Mid-term Exam）占 30%；项目（Project）占 50%，其中展示 25%、学术报告 25%。项目最多 5 人一组，可以单人做，但老师明确期望 5 人组做出比小组更出色的报告和结果。</p></div></div></article><article class="slide" id="p5"><div class="slide-h"><span class="pno">P5</span><h3>考核方案细则</h3></div><div class="slide-b"><img src="slides/L1/p005.png" alt="L1 第5页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页细化上一页的考核方案：作业是编程练习、问题求解和短分析；小测与期中都包含选择题和问题求解题；项目展示限时 10 分钟讲述加 3 分钟问答（Q&amp;A），内容要涵盖主题、数据集、结果和讨论；学术报告除补充材料外正文 4 页、双栏排版，模板会统一提供。</p></div></div></article><article class="slide" id="p6"><div class="slide-h"><span class="pno">P6</span><h3>项目选题：城市数据分析</h3></div><div class="slide-b"><img src="slides/L1/p006.png" alt="L1 第6页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>项目指南第一页，讲选题范围：聚焦单个城市或多个城市，强烈鼓励跨城市对比。必须解决真实的城市问题，页面列举了方向：环境与可持续（空气质量、热岛效应）、功能分区与土地利用规划、城市活力与空间品质（活动、感知）、交通与出行（拥堵、出行模式）、公共服务与设施（可达性、公平性）、治理与市民反馈（社交媒体、投诉数据）等。</p></div></div></article><article class="slide" id="p7"><div class="slide-h"><span class="pno">P7</span><h3>项目数据要求</h3></div><div class="slide-b"><img src="slides/L1/p007.png" alt="L1 第7页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>项目指南第二页，数据三条硬性要求：①至少使用两种不同数据源，例子如遥感影像+微博数据、兴趣点（POI）数据+人口普查、出租车 GPS+气象、街景图像+土地利用图；②独立收集数据，并清楚记录来源文档（API、官方统计、网页抓取、开放数据集）；③数据量要足以支撑稳健的统计分析，例如做回归要超过 1000 条记录，或对整个城市有完整空间覆盖。</p></div></div></article><article class="slide" id="p8"><div class="slide-h"><span class="pno">P8</span><h3>项目分析方法要求</h3></div><div class="slide-b"><img src="slides/L1/p008.png" alt="L1 第8页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>项目指南第三页：项目必须包含至少一个推断或预测模型，可选四类。推断统计：回归、假设检验，要报告 p 值和 VIF 等诊断量；经典机器学习：聚类（K-means、DBSCAN）、分类、树模型（Random Forest、XGBoost）并做特征重要性分析；深度学习：CNN 或 Transformer，仅当数据结构确有需要时才用；大语言模型（LLM）/多模态大模型（MLLM）：用于多模态理解，须解释提示词（prompt）设计和输出如何量化。</p></div></div></article><article class="slide" id="p9"><div class="slide-h"><span class="pno">P9</span><h3>教材</h3></div><div class="slide-b"><img src="slides/L1/p009.png" alt="L1 第9页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>指定教材是《Mining of Massive Datasets》（海量数据集挖掘，常简称 MMDS），作者 Leskovec、Rajaraman、Ullman，剑桥大学出版社 2020 版。这是数据挖掘领域的经典教材，课程后面的频繁项集、聚类、推荐系统等主题都能在这本书里找到对应章节。</p></div></div></article><article class="slide" id="p10"><div class="slide-h"><span class="pno">P10</span><h3>14周教学日程表</h3></div><div class="slide-b"><img src="slides/L1/p010.png" alt="L1 第10页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页是学期进度表（左列周次、中列主题、右列备注）：第1周导论与 SQL；第2周相似性搜索；第3–4周机器学习；第5周降维与数据可视化；第6周推荐系统；第7周期中考试；第8–9周图分析；第10周数据流与网络广告（布置作业 HW）；第11周大语言模型；第12–14周项目展示，第14周作业与学术报告同时截止。</p></div></div></article><article class="slide" id="p11"><div class="slide-h"><span class="pno">P11</span><h3>授课教师信息</h3></div><div class="slide-b"><img src="slides/L1/p011.png" alt="L1 第11页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>教师信息页：Dr. Qingyu Li，办公室在志仁楼（Zhi Ren Bldg.）609，答疑时间（office hours）为周四上午 10 点到 12 点、需预约。研究方向是交叉学科：人工智能、遥感、计算机视觉、地理空间分析等。页面上还附了个人主页链接。</p></div></div></article><article class="slide" id="p12"><div class="slide-h"><span class="pno">P12</span><h3>助教信息</h3></div><div class="slide-b"><img src="slides/L1/p012.png" alt="L1 第12页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页列出四位助教（Tutor）及答疑安排：Junsheng Yao，志仁楼621，周一 14:00–15:30；Weiwen Yuan，志信楼201，周一 9:30–12:30；Suzhong Fu，教学楼D 410b，周一 10:00–11:30；Xuanyu Chen，诚道楼417A，周四 9:30–11:00。均需预约，各有邮箱，遇到问题可按时间就近联系。</p></div></div></article><article class="slide" id="p13"><div class="slide-h"><span class="pno">P13</span><h3>正课开始：数据分析导论</h3></div><div class="slide-b"><img src="slides/L1/p013.png" alt="L1 第13页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>从这里开始进入正课内容：Introduction to Data Analytics（数据分析导论）。页面注明讲义主要基于斯坦福大学 Jennifer Widom 教授的课件，后面的框架和例子大多出自她的经典课程。</p></div></div></article><article class="slide" id="p14"><div class="slide-h"><span class="pno">P14</span><h3>数据无处不在</h3></div><div class="slide-b"><img src="slides/L1/p014.png" alt="L1 第14页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>导论开篇立论：数据驱动的科学发现、商业实践、医疗、教育、政治、社会干预正在爆发式增长，而且这只是开始。页面给了两条理由：跨领域收集数据的能力会持续加速，数据分析技术会持续进步。底部点题名言：「Data is the fuel of the 21st century」（数据是21世纪的燃料）。</p></div></div></article><article class="slide" id="p15"><div class="slide-h"><span class="pno">P15</span><h3>数据工作的两步</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L1/p015.png" alt="L1 第15页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页给出贯穿整节课的框架：与数据打交道就两步——(1) 收集数据（collect），通过计算机、传感器、人、事件等；(2) 用它做点事（do something with it）：做决策、验证假设、获得洞察、预测未来。所谓「数据科学」（Data Science）就是把 (1) 变成 (2) 的过程，后面每个应用例子都会套这个框架。</p><p class="sx">🎯 两步框架是整节课的骨架，简答可能让你用它解释某个应用。</p></div></div></article><article class="slide" id="p16"><div class="slide-h"><span class="pno">P16</span><h3>本讲内容总览</h3></div><div class="slide-b"><img src="slides/L1/p016.png" alt="L1 第16页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页是整讲的路线图，四大块：①数据工作的好处（promises）——应用与服务；②数据工具与技术——数据库管理系统、数据挖掘与机器学习；③数据工作的陷阱（pitfalls）——相关与因果、欠拟合与过拟合、隐私等；④数据系统与平台。后面所有内容都按这个顺序展开，迷路时回看这页。</p></div></div></article><article class="slide" id="p17"><div class="slide-h"><span class="pno">P17</span><h3>数据的好处：引入</h3></div><div class="slide-b"><img src="slides/L1/p017.png" alt="L1 第17页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>进入第一大块——数据带来的好处（promises of working with data）。图上仍是两步框架，强调从 (1) 收集数据走到 (2) 使用数据，能产生有益（beneficial）的结果。接下来连续几页是具体应用实例。</p></div></div></article><article class="slide" id="p18"><div class="slide-h"><span class="pno">P18</span><h3>应用例1：交通</h3></div><div class="slide-b"><img src="slides/L1/p018.png" alt="L1 第18页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>第一个应用实例：交通（Traffic）。套两步框架：(1) 收集交通数据，比如车流、车辆轨迹；(2) 用它做交通分析与管理。这页正文以图为主，对着原图看清它展示的数据来源和用途，就能把例子放进框架里。</p></div></div></article><article class="slide" id="p19"><div class="slide-h"><span class="pno">P19</span><h3>应用例2：推荐系统</h3></div><div class="slide-b"><img src="slides/L1/p019.png" alt="L1 第19页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>第二个实例：推荐系统（Recommender Systems）。(1) 收集你的评分、点击等行为数据；(2) 用它向你推荐可能喜欢的内容。页面特别补充：推荐的不只是电影，还包括音乐、新闻、朋友、恋爱对象等等——凡是「根据历史行为猜你喜欢什么」的场景都算。</p></div></div></article><article class="slide" id="p20"><div class="slide-h"><span class="pno">P20</span><h3>应用例3：网络广告</h3></div><div class="slide-b"><img src="slides/L1/p020.png" alt="L1 第20页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>第三个实例：网络广告（Web Advertising）。(1) 收集用户的浏览、搜索等行为数据；(2) 用它在网页上投放与你更相关的广告，提高点击和转化。原图是广告投放示意，对着图理解「收集行为数据→定向投放」这条链路即可。这个主题第10周还会专门讲。</p></div></div></article><article class="slide" id="p21"><div class="slide-h"><span class="pno">P21</span><h3>应用例4：体育</h3></div><div class="slide-b"><img src="slides/L1/p021.png" alt="L1 第21页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>第四个实例：体育（Sports）。(1) 收集运动员表现和比赛过程的数据；(2) 用它做表现分析、训练和战术决策。这页也以原图为主，结合图看清展示的是哪类体育数据、用来回答什么问题。</p></div></div></article><article class="slide" id="p22"><div class="slide-h"><span class="pno">P22</span><h3>应用例5：海洋健康</h3></div><div class="slide-b"><img src="slides/L1/p022.png" alt="L1 第22页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>第五个实例：海洋健康（Ocean Health）监测。页面数字很震撼：44,000 个传感器、超过 20 亿次测量，涵盖物理、化学、生物等指标。(1) 收集并整理（collect and curate）数据；(2) 用它评估海洋健康状况。注意这里第一步比前面多了 curate（整理、清洗），呼应后面数据准备的话题。</p></div></div></article><article class="slide" id="p23"><div class="slide-h"><span class="pno">P23</span><h3>应用例6：遗传与药物</h3></div><div class="slide-b"><img src="slides/L1/p023.png" alt="L1 第23页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>第六个实例：遗传-药物关系（Genetics-Medicine Relationships）。PharmGKB 是一个知识库，负责收集、整理并传播「人类遗传如何影响药物反应」的知识。(1) 收集并整理基因与药物反应数据；(2) 用它指导用药——同一种药对不同基因型的人效果可能不同。</p></div></div></article><article class="slide" id="p24"><div class="slide-h"><span class="pno">P24</span><h3>更多应用方向</h3></div><div class="slide-b"><img src="slides/L1/p024.png" alt="L1 第24页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>应用部分的收尾：类似的方向还有很多，页面列出天气预报、医疗诊断、金融市场、资源管理、计算社会科学、智能建筑与城市等。结论是「这个列表可以一直列下去，而且现在还是很早期」——呼应开头「数据是21世纪的燃料」。</p></div></div></article><article class="slide" id="p25"><div class="slide-h"><span class="pno">P25</span><h3>数据工具与技术总览</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L1/p025.png" alt="L1 第25页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>进入第二大块。这页总列五类数据工具与技术：①基本数据操作与分析——执行定义明确的计算、提出定义明确的问题（查询，queries）；②数据挖掘（data mining）——在数据里找模式；③机器学习（machine learning）——用数据建模型做预测；④数据可视化——数据的图形化呈现；⑤数据收集与准备。后面几页逐一展开，每类都是「例子页+工具页」两页。</p><p class="sx">🎯 五类的定义要能区分，尤其数据挖掘与机器学习的差别。</p></div></div></article><article class="slide" id="p26"><div class="slide-h"><span class="pno">P26</span><h3>基本分析：查询例子</h3></div><div class="slide-b"><img src="slides/L1/p026.png" alt="L1 第26页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页用四个例子说明什么叫「定义明确的问题」：过去20年每个国家一月份的平均最低气温；20–30岁女性顾客购买的超过100美元的商品件数；某种药缓解某种症状的频率；过去一年价格波动最大的十只股票。共同点是：问题事先说得清清楚楚，答案直接从已有数据里算出来，不需要「发现」新东西。</p></div></div></article><article class="slide" id="p27"><div class="slide-h"><span class="pno">P27</span><h3>基本分析的工具</h3></div><div class="slide-b"><img src="slides/L1/p027.png" alt="L1 第27页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页左半是上一页四个例子的重复（抽取文本两栏交错，内容一致，不必纠结乱序），右半给出做基本数据分析的四类工具：电子表格（spreadsheets）；关系型（SQL）数据库系统；「NoSQL」/可扩展系统；带数据支持的编程语言（如 Python、R）。思路：同一类任务，按数据规模和场景选工具。</p></div></div></article><article class="slide" id="p28"><div class="slide-h"><span class="pno">P28</span><h3>数据挖掘：模式例子</h3></div><div class="slide-b"><img src="slides/L1/p028.png" alt="L1 第28页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页讲数据挖掘（data mining）：在数据中寻找模式（patterns）。五个例子：商品 X、Y、Z 经常被一起购买；喜欢电影 X 的人也会喜欢电影 Y；对药物 X 和 Y 反应好的病人对药物 Z 反应也好；上同一所大学的学生常常是网友；较富裕的人群正从城市搬往郊区。与上一页的区别：没有预设的查询，而是让数据自己「说出」规律。</p></div></div></article><article class="slide" id="p29"><div class="slide-h"><span class="pno">P29</span><h3>数据挖掘的技术</h3></div><div class="slide-b"><img src="slides/L1/p029.png" alt="L1 第29页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页左半重复上一页例子（抽取有栏目交错），右半给出数据挖掘的三类技术：频繁项集（frequent item-sets）；关联规则（association rules）；针对网络、文本、多媒体数据的专门技术。频繁项集和关联规则正是「X、Y、Z 常被一起买」这类例子的形式化，第2周相似性搜索和后面章节会展开。</p></div></div></article><article class="slide" id="p30"><div class="slide-h"><span class="pno">P30</span><h3>机器学习：预测例子</h3></div><div class="slide-b"><img src="slides/L1/p030.png" alt="L1 第30页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页讲机器学习：用数据建立模型（model）并做出预测。三个例子：20岁以上的女性顾客更可能对某广告有响应；成绩好的学生被预测 SAT 也会考好；一个城市的气温可以用附近城市的平均值来估计——除非其中有的城市在海边或山里（说明好的模型还要能处理例外条件）。</p></div></div></article><article class="slide" id="p31"><div class="slide-h"><span class="pno">P31</span><h3>ML关键区分与三类任务</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L1/p031.png" alt="L1 第31页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页左半重复上页例子，右半给出全讲最关键的一句区分：基本数据分析和数据挖掘是从已有数据中得出答案；机器学习是用已有数据对缺失的或未来的数据做预测。一句话记：前两者回答「数据里有什么」，ML 回答「数据之外会怎样」。右侧列出三类 ML 任务：回归（regression）、分类（classification）、聚类（clustering）。</p><p class="sx">🎯 易考：区分数据挖掘（从已有数据找答案）与机器学习（预测缺失/未来数据）。</p></div></div></article><article class="slide" id="p32"><div class="slide-h"><span class="pno">P32</span><h3>数据可视化</h3></div><div class="slide-b"><img src="slides/L1/p032.png" alt="L1 第32页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页引入第四类工具：数据可视化（data visualization），用谚语「一图胜千言」（A picture is worth a thousand words）点题。原图展示的是海量（万亿级，trillion）数据点画成的图形，想说明：面对天量数据，一张好图传达的信息远胜一堆数字表格。</p></div></div></article><article class="slide" id="p33"><div class="slide-h"><span class="pno">P33</span><h3>早期可视化：拿破仑军队</h3></div><div class="slide-b"><img src="slides/L1/p033.png" alt="L1 第33页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页展示数据可视化早期的经典案例：拿破仑的军队（Napoleon's Army）。原图是 Minard 的著名统计图：用一条随行程不断变细的带状线表示1812年征俄战役中军队人数的锐减，同时叠加了行军路线、气温和日期，被誉为一张图融合多维信息的典范。对着原图看清「线宽=人数」这个编码。</p></div></div></article><article class="slide" id="p34"><div class="slide-h"><span class="pno">P34</span><h3>炫目的现代可视化</h3></div><div class="slide-b"><img src="slides/L1/p034.png" alt="L1 第34页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页展示现代「炫目」（fancy）的数据可视化案例，正文以原图为主、抽取文本无文字。与上一页的历史名图对照，可以体会可视化从手绘统计图发展到动态、交互、大规模的图形呈现，但核心目的不变：让图形替你传达数据里的信息。</p></div></div></article><article class="slide" id="p35"><div class="slide-h"><span class="pno">P35</span><h3>别小看基础图表</h3></div><div class="slide-b"><img src="slides/L1/p035.png" alt="L1 第35页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页提醒：别低估基本可视化（basic visualizations）的力量。列出四种最基础的图形：柱状图（bar charts）、饼图（pie charts）、散点图（scatterplots）、地图（maps）。很多重要结论用最朴素的图就能讲清楚，不必一味追求花哨——这和第6页项目里「城市数据+地图」的思路也呼应。</p></div></div></article><article class="slide" id="p36"><div class="slide-h"><span class="pno">P36</span><h3>误导性可视化</h3></div><div class="slide-b"><img src="slides/L1/p036.png" alt="L1 第36页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页讲误导性（misleading）的数据可视化，原图为主。要点：图形也会骗人——截断纵轴、缩放比例不当、只挑有利数据展示，都能让很小的差异看起来惊天动地。读任何统计图，先检查坐标轴从几开始、比例是否一致，再看结论。</p></div></div></article><article class="slide" id="p37"><div class="slide-h"><span class="pno">P37</span><h3>数据收集与准备</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L1/p037.png" alt="L1 第37页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>第五类工具：数据收集与准备，页面称之为数据工作的「肮脏」秘密（dirty secret）。具体任务：从困难来源提取数据；填补缺失值；剔除可疑数据；统一格式、编码和单位；去重与匹配。底部是本页最重要的数字：数据准备常常消耗一个数据驱动项目 <b>80% 以上</b>的工作量。</p><p class="sx">🎯 记数字：数据准备常占项目80%以上工作量，选择题爱考。</p></div></div></article><article class="slide" id="p38"><div class="slide-h"><span class="pno">P38</span><h3>数据工作的陷阱</h3></div><div class="slide-b"><img src="slides/L1/p038.png" alt="L1 第38页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>进入第三大块——陷阱（pitfalls）。图上还是两步框架，但强调：数据收上来了，第 (2) 步「用它做事」得出的结论未必正确（页面上 correct 被打上疑问）。接下来依次讲三个坑：相关与因果、欠拟合与过拟合、数据隐私。</p></div></div></article><article class="slide" id="p39"><div class="slide-h"><span class="pno">P39</span><h3>相关与因果：定义</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L1/p039.png" alt="L1 第39页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页给出本节两个核心概念。相关（correlation）：两个值同步变化、互相跟随，例子是身高与鞋码、成绩与 SAT 分数。因果（causation）：一个值直接影响另一个，例子是教育水平→起薪、气温→冷饮销量。数据分析、数据挖掘和机器学习都能揭示数据值之间的关系，但揭示出来的未必是因果。</p><p class="sx">🎯 会给例子让你判断是 correlation 还是 causation。</p></div></div></article><article class="slide" id="p40"><div class="slide-h"><span class="pno">P40</span><h3>相关不蕴含因果</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L1/p040.png" alt="L1 第40页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页重复相关与因果的定义和例子，然后落到本节最核心的一句话：「Correlation does not imply causation」（相关不蕴含因果）。意思是：即使两个变量高度相关，也不能就此断定一个导致另一个——可能方向反了，可能另有原因，也可能纯属巧合。</p><p class="sx">🎯 必记名言：Correlation does not imply causation，含义要能解释。</p></div></div></article><article class="slide" id="p41"><div class="slide-h"><span class="pno">P41</span><h3>混杂变量解释</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L1/p041.png" alt="L1 第41页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页解释相关为何推不出因果：相关可能源自一个隐藏的混杂变量（confounding variable）——A 和 B 相关，是因为存在隐藏的 C 使得 C→A 且 C→B。课件例子：无家可归人口与犯罪率相关，混杂变量是失业率（失业同时推高两者）；健忘与视力差相关，混杂变量是年龄。身高与鞋码、成绩与 SAT 也属此类，背后有共同因素。</p><p class="sx">🎯 易考：给出A、B相关，让你指出可能的confounding variable C。</p></div></div></article><article class="slide" id="p42"><div class="slide-h"><span class="pno">P42</span><h3>相关易检验，因果难</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L1/p042.png" alt="L1 第42页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页在混杂变量框架（A、B 相关因为隐藏 C 同时导致两者）之上，补一个重要对比：相关通常是「容易」检验的——拿数据算一算两个值是否同步变化即可；因果通常是不可能直接检验的——你无法对现实做完全的对照实验。所以数据分析里的因果断言必须格外谨慎。</p><p class="sx">🎯 考点：相关通常易检验、因果通常无法直接检验。</p></div></div></article><article class="slide" id="p43"><div class="slide-h"><span class="pno">P43</span><h3>相关因果插图页</h3></div><div class="slide-b"><img src="slides/L1/p043.png" alt="L1 第43页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页抽取文本无文字，内容以原图为主，延续前几页「相关与因果」的主题。对着原图看它想说明什么，并紧扣核心结论：图上展示的两个变量即使变化曲线高度一致，也只是相关，不能据此断定谁导致谁。</p></div></div></article><article class="slide" id="p44"><div class="slide-h"><span class="pno">P44</span><h3>惊人相关 #1</h3></div><div class="slide-b"><img src="slides/L1/p044.png" alt="L1 第44页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页是「令人惊讶的相关」（Surprising Correlation）第1例，原图为主、抽取文本无文字。这类图通常展示两个变化曲线高度重合、但显然不存在因果联系的变量，用来直观演示：强相关也可能毫无意义，看到高相关先想混杂变量和巧合。</p></div></div></article><article class="slide" id="p45"><div class="slide-h"><span class="pno">P45</span><h3>惊人相关 #2</h3></div><div class="slide-b"><img src="slides/L1/p045.png" alt="L1 第45页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>「惊人相关」第2例，同样以原图为主。阅读方法和上一页一样：先看图上两条曲线重合得多好，再问自己——两者之间有任何因果机制吗？有没有共同的第三方变量？答案通常都是否定的，这正是本页想让你感受的荒谬感。</p></div></div></article><article class="slide" id="p46"><div class="slide-h"><span class="pno">P46</span><h3>惊人相关 #3</h3></div><div class="slide-b"><img src="slides/L1/p046.png" alt="L1 第46页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>「惊人相关」第3例，原图为主。连续三页例子都在强化同一个信息：数据里能找到大量高度相关却毫无因果关系的变量对，相关系数再高也不等于因果，下结论前必须先问机制。</p></div></div></article><article class="slide" id="p47"><div class="slide-h"><span class="pno">P47</span><h3>虚假相关网站</h3></div><div class="slide-b"><img src="slides/L1/p047.png" alt="L1 第47页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页推荐课后浏览的网站「Spurious Correlations」（虚假相关）：tylervigen.com，上面收集了大量真实统计数据中高度相关但荒谬无比的变量对。用途是加深对「相关不蕴含因果」的体感：数据越多，撞出来的假相关也越多。</p></div></div></article><article class="slide" id="p48"><div class="slide-h"><span class="pno">P48</span><h3>模型与拟合问题</h3></div><div class="slide-b"><img src="slides/L1/p048.png" alt="L1 第48页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页回到前面的机器学习例子，引出第二大陷阱。机器学习用数据建立「模型」（model），再用模型做预测——页面重复了三个老例子：20岁以上女性顾客对广告响应更高、成绩好学生预测 SAT 考得好、城市气温用邻近城市平均估计（除非有沿海或山区城市）。问题是：模型建得太简单或太繁琐会怎样？下两页各是一个极端。</p></div></div></article><article class="slide" id="p49"><div class="slide-h"><span class="pno">P49</span><h3>欠拟合：模型太简单</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L1/p049.png" alt="L1 第49页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>欠拟合（underfitting）：用于预测的模型过于简单（too simplistic）。三个例子：因为男性60%、女性70%对广告有响应，就断定以后所有广告都只投给女性——差别远没这么大，模型丢掉了重要信息；把「有四条腿和一个平面」的家具都定义为餐桌——凳子、书桌也中招；用邻近城市平均估气温却忽略沿海山区的例外。共性：模型没抓住数据里真实存在的区分和规律。</p><p class="sx">🎯 欠拟合=模型太简单抓不住规律；会给例子让你判断类型。</p></div></div></article><article class="slide" id="p50"><div class="slide-h"><span class="pno">P50</span><h3>过拟合：模型太specific</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L1/p050.png" alt="L1 第50页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>过拟合（overfitting）：模型过于具体（too specific）。两个例子与上页正好相对：广告最佳目标被定义成「25到27岁、黑色短发、有一个孩子、养一条宠物狗的已婚女性」——条件苛刻到几乎没人符合；餐桌被定义成「有四条100厘米带装饰的腿、平坦抛光的木质圆角桌面」。共性：模型把训练数据里的细枝末节和噪声都背了下来，换个数据就失灵，泛化能力差。</p><p class="sx">🎯 过拟合=把训练数据细节噪声都记住，泛化差；与欠拟合对比考。</p></div></div></article><article class="slide" id="p51"><div class="slide-h"><span class="pno">P51</span><h3>回归：拟合线或曲线</h3></div><div class="slide-b"><img src="slides/L1/p051.png" alt="L1 第51页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页用回归（regression）把欠拟合、过拟合画出来：回归就是给一组数据点拟合一条线或曲线，这条线/曲线就是模型，然后用它预测新点的取值。原图是一组散点加一条拟合线，接下来两页分别展示拟合得太差和太过的情形。</p></div></div></article><article class="slide" id="p52"><div class="slide-h"><span class="pno">P52</span><h3>欠拟合图示</h3></div><div class="slide-b"><img src="slides/L1/p052.png" alt="L1 第52页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页原图是散点图上的欠拟合：拟合出的模型太简单——比如数据明明有弯曲趋势，却只用一条直线去套，线没有跟上点的走向。结果是训练数据上误差就很大，对新点预测自然也差。对照原图看「线太直、点成弧」即可。</p></div></div></article><article class="slide" id="p53"><div class="slide-h"><span class="pno">P53</span><h3>过拟合图示</h3></div><div class="slide-b"><img src="slides/L1/p053.png" alt="L1 第53页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页原图是散点图上的过拟合：曲线扭曲着穿过几乎每一个训练点，连噪声点也强行照顾到。在训练数据上看起来完美，但对没见过的点，曲线在点与点之间大幅摆动，预测很不靠谱——模型「背下了」训练集而不是学到规律。</p></div></div></article><article class="slide" id="p54"><div class="slide-h"><span class="pno">P54</span><h3>数据隐私</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L1/p054.png" alt="L1 第54页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>第三大陷阱：数据隐私（privacy）。三类情形各有真实案例：①个人数据被暗中收集——Edward Snowden 的「元数据」（metadata）争论；②个人数据合法收集但用途存疑——每个人留下的「信息足迹」极其庞大，经典案例是 Target 超市通过购买记录推断出一位顾客怀孕并寄送孕期商品目录；③从「匿名」公开数据反推出个人身份——马萨诸塞州州长的健康记录被从公开数据中重新识别出来。</p><p class="sx">🎯 三个隐私案例（Snowden、Target、州长健康记录）对应三类情形。</p></div></div></article><article class="slide" id="p55"><div class="slide-h"><span class="pno">P55</span><h3>语言与平台（一）</h3></div><div class="slide-b"><img src="slides/L1/p055.png" alt="L1 第55页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>进入第四大块：语言、系统与平台。这页讲两类：电子表格（spreadsheets）——只要数据不太大，它对数据分析任务出乎意料地多功能、强大；带数据支持的编程语言——R 语言以统计功能强大著称，Python 是通用语言、配有类 R 的数据扩展库：Pandas（数据处理）、SciPy（科学计算）、scikit-learn（机器学习）。</p></div></div></article><article class="slide" id="p56"><div class="slide-h"><span class="pno">P56</span><h3>数据库：SQL与NoSQL</h3></div><div class="slide-b"><img src="slides/L1/p056.png" alt="L1 第56页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>继续讲平台，这页是两类数据管理系统。关系型数据库管理系统（RDBMS，也叫 SQL 系统）：历史悠久的成熟方案，提供可靠性、效率和强大的查询处理，除了超大规模数据和高度非结构化数据之外都适用。「NoSQL」系统：主打分布式、可扩展的处理，其中一些专门面向非结构化数据（文档、图）。选择逻辑：数据规整、量不极端就用 SQL，否则考虑 NoSQL。</p></div></div></article><article class="slide" id="p57"><div class="slide-h"><span class="pno">P57</span><h3>大规模处理与专门系统</h3></div><div class="slide-b"><img src="slides/L1/p057.png" alt="L1 第57页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页继续平台清单：可扩展系统上的专用语言——MapReduce/Hadoop（分布式批处理框架）和 Spark（通用化的数据流 generalized data flow）；此外还有专门做数据准备的系统和专门做数据可视化的系统。Hadoop 和 Spark 在第10周「数据流与网络广告」一讲会正式展开。</p></div></div></article><article class="slide" id="p58"><div class="slide-h"><span class="pno">P58</span><h3>云端数据处理</h3></div><div class="slide-b"><img src="slides/L1/p058.png" alt="L1 第58页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页讲云平台：Amazon Web Services（AWS）、Google Cloud、Microsoft Azure 三大云。云上可以获得：数据存储；数据处理（SQL、Hadoop、Spark）；机器学习库；以及与可视化系统的集成。直觉理解：不必自购服务器和搭建全套软件，按需租用云上的算力与工具链即可完成整个数据项目。</p></div></div></article><article class="slide" id="p59"><div class="slide-h"><span class="pno">P59</span><h3>数据量到底有多大</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L1/p059.png" alt="L1 第59页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页用「莎士比亚全集≈5兆字节（MB）」当尺子来感受数据规模：普通人一生数据约50吉字节GB（1万部莎翁全集）；美国国会图书馆约10太字节TB（200万部）；Facebook 每天上传约1拍字节PB（2亿部）；全人类每天产生约2.5艾字节EB（500万亿部）。注意单位阶梯 MB→GB→TB→PB→EB，每上一级约乘一千倍。</p><p class="sx">🎯 单位阶梯MB→GB→TB→PB→EB每级约千倍，可能考排序。</p></div></div></article><article class="slide" id="p60"><div class="slide-h"><span class="pno">P60</span><h3>冷静看待大数据</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L1/p060.png" alt="L1 第60页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页对「大数据」（Big Data）给出冷静判断：确实有些领域产生海量数据、有些分析必须靠大数据才有效；但大多数工具和技术适用于各种规模的数据，而且<b>大洞察也可以来自中小数据</b>。课件的对比很形象：有时需要云上的二十台 Spark 服务器，但更多时候一台装了 SQL、Python 或简单电子表格的笔记本电脑就够用了。</p><p class="sx">🎯 观点题：大洞察不一定需要大数据，多数工具适用各种规模。</p></div></div></article><article class="slide" id="p61"><div class="slide-h"><span class="pno">P61</span><h3>TED视频：大数据探索</h3></div><div class="slide-b"><img src="slides/L1/p061.png" alt="L1 第61页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页是 TED 演讲视频链接（Tim Smith 关于大数据前沿探索的演讲），课堂播放。看视频时带着上一页的问题：什么时候真的需要大数据，什么时候中小数据就够？</p></div></div></article><article class="slide" id="p62"><div class="slide-h"><span class="pno">P62</span><h3>TED视频：大数据更好</h3></div><div class="slide-b"><img src="slides/L1/p062.png" alt="L1 第62页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页是第二个 TED 视频链接：Kenneth Cukier 的「Big data is better data」（大数据是更好的数据）。他的核心观点正呼应标题：数据多了不只是规模大，而是能看到更多维度、更多相关关系，从而得出更好的判断。</p></div></div></article><article class="slide" id="p63"><div class="slide-h"><span class="pno">P63</span><h3>大数据的核心问题</h3></div><div class="slide-b"><img src="slides/L1/p063.png" alt="L1 第63页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页抛出大数据部分的总问题：面对浩瀚如海洋的信息，我们如何处理并从中提炼出有意义的洞察（insights）？它起承上启下的作用——把前面「数据量有多大」的震撼，落到「怎么存、怎么算、怎么分析」这些实际问题上，这正是后续存储、并行计算、机器学习等技术要回答的。</p></div></div></article><article class="slide" id="p64"><div class="slide-h"><span class="pno">P64</span><h3>大数据与深度学习比喻</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L1/p064.png" alt="L1 第64页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页用一个比喻总结大数据与机器学习的关系，原图上画着引擎（engine）和燃料（fuel）：大数据是燃料，深度学习（deep learning）是引擎。燃料越多，引擎才能发挥越大威力；反过来，没有引擎，燃料也毫无用处。这也解释了为什么深度学习恰好在大数据时代崛起——两者互相成就。</p><p class="sx">🎯 比喻可能考：大数据是燃料（fuel），深度学习是引擎（engine）。</p></div></div></article><article class="slide" id="p65"><div class="slide-h"><span class="pno">P65</span><h3>图灵测试与强弱AI</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L1/p065.png" alt="L1 第65页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页讲三个概念（抽取文本有错位，已按原意整理）。图灵测试（Turing test）回答「机器能思考吗」：人类裁判通过文字同时与一台机器和一个人对话，若裁判无法可靠分辨哪个是机器，机器即通过。强AI（Strong AI）：具有类人通用智能的机器——有自我意识、能适应、能推理。弱AI（Weak AI）：今天的全部AI，包括 GPT-4、DeepSeek 这类最先进模型，仍属于弱AI。</p><p class="sx">🎯 区分强弱AI：GPT-4、DeepSeek仍属weak AI；图灵测试判定方式。</p></div></div></article><article class="slide" id="p66"><div class="slide-h"><span class="pno">P66</span><h3>TED视频：AI改变世界</h3></div><div class="slide-b"><img src="slides/L1/p066.png" alt="L1 第66页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页是收尾的 TED-Ed 视频链接：「AI 将如何改变世界」。结合上一页强AI与弱AI的区分观看，思考当前弱AI已经能把哪些事做好、离真正的强AI还有多远。</p></div></div></article></section></main>
+<div class="pnav"><a href="index.html">← 总目录</a><a href="L2.html" style="text-align:right">L2 SQL →</a></div><footer>依据 9 个课件（L1–L9）整理 · 半期范围 L1–L7（第七章 降维为终点）· L8/L9 为拓展 · <span class="extra">课外补充</span> 为帮助理解而添加、非课件原文。<br>本复习站完全离线：拷贝整个「复习站」文件夹到任何电脑，双击 index.html 即可。</footer>
+<button id="totop" type="button" aria-label="回到顶部">↑</button>
+<script src="assets/app.js"></script>
+</body>
+</html>

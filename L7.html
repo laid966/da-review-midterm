@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#4c5fd5">
+<title>L7 降维（Dimensionality Reduction） · Data Analytics 半期复习</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div id="prog"></div>
+<header class="hero-lite"><div class="kin"><a class="back" href="index.html">← 总目录</a><h1>L7 · 降维（Dimensionality Reduction）</h1><span class="pill2">半期范围 · 终点章</span><span class="sp"></span><span class="pill2">课件 62 页</span></div></header>
+<nav class="tabs"><a href="index.html">🏠 首页</a><a href="L1.html">L1 导论</a><a href="L2.html">L2 SQL</a><a href="L3.html">L3 相似 I</a><a href="L4.html">L4 相似 II</a><a href="L5.html">L5 ML I</a><a href="L6.html">L6 ML II</a><a href="L7.html" class="active">L7 降维</a><a href="L8.html" class="out">L8 可视化</a><a href="L9.html" class="out">L9 推荐</a><a href="index.html#cross">公式速查</a><a href="index.html#quiz">模拟卷</a><a href="index.html#plan">3 天计划</a><span class="sp"></span><button id="expand" data-open="0" type="button">展开全部答案</button><button id="theme" type="button" aria-label="切换深色模式">☾</button></nav>
+<main><section class="ch" id="l7">
+  <div class="ch-head">
+    <div class="ch-badge">L7</div>
+    <div>
+      <h2>降维与 SVD<span class="en">Dimensionality Reduction · SVD &amp; CUR</span><span class="ch-tag hot">半期终点</span></h2>
+      <p class="ch-sub">半期最后一讲，压轴必考：A = U Σ Vᵀ 三个矩阵的含义、能量选 r、最优低秩近似、q·V 查询映射、幂迭代、CUR 采样概率。覆盖课件 p1–p62。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🎯 本节考什么</h3>
+    <ul class="kp">
+      <li><b>会算</b>：给定 σ 列表算能量占比、按 90% 准则选 r；幂迭代一步 x₁ = Mx₀/‖Mx₀‖ 与 λ = xᵀMx；deflation M* = M − λxxᵀ；由 AᵀA 的特征分解写出 SVD；CUR 的行列采样概率（范数平方）。</li>
+      <li><b>会背</b>：U / Σ / Vᵀ 的尺寸与含义；正交性 UᵀU = I、VᵀV = I；奇异值非负且降序；秩 1 分解求和式；Eckart–Young 定理；Frobenius 范数定义；CUR 三矩阵与 W⁺ 伪逆。</li>
+      <li><b>会区分</b>：SVD vs CUR（最优 vs 可解释/稀疏）；AᵀA 给 V 还是给 U；奇异值 vs 特征值；rank-k 近似 vs 精确分解。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>核心概念一：降维要做什么</h3>
+    <div class="concept">
+      <h4>数据矩阵与潜在因子</h4>
+      <p>数据通常可以写成一个 <b>m × n</b> 矩阵 A（m 个对象、n 个特征，例如 m 个用户 × n 部电影）。这个矩阵往往可以被"共享一个很小的维度 r"的三个矩阵的乘积<b>近似</b>：A ≈ U Σ Vᵀ，其中 r ≪ min(m, n)。</p>
+      <p>为什么能这样：数据背后有<b>隐藏的、潜在的因子（latent factors / latent dimensions）</b>，它们"在很近的程度上"解释了矩阵里的数值为什么是这样。用户-电影矩阵里，潜在因子就是"科幻偏好""爱情偏好"这类品位维度。</p>
+      <p class="dim">课件 p3 的例子最能说明问题：矩阵有 10⁶ 行、10³ 列，不允许更新、允许随机访问任何格子、可以有小误差。另有一个 7×5 的矩阵，所有行都只是 [1 1 1 0 0] 或 [0 0 0 1 1] 的缩放 ⇒ 它"实际上是 2 维的"，两个维度就够了。</p>
+    </div>
+    <div class="concept">
+      <h4>rank（秩）与"找数据的轴"</h4>
+      <p>rank(A) = A 的线性无关行的个数（也就等于线性无关列的个数，两者恒相等）。3 维空间里 A、B、C 三点，本来就是 3 个坐标；但可以换一组基（例如 [1 2 1] 与 [-2 -3 1]），用 2 个新坐标表示它们——维度就降了。</p>
+      <p>降维的目标因此可以这么说：<b>发现数据的坐标轴</b>。这些轴的选择方式（课件 p5）：第一维取<b>点分布方差最大</b>的方向；第二维取与第一维<b>正交</b>且方差次大的方向；一直取下去，直到剩下的维度方差很小、可以丢掉。</p>
+      <p class="dim">这就是 PCA 的几何表述。注意"正交"这一条：新轴必须互相正交，否则不是一组基。<span class="extra">课外补充：沿方差最大的方向投影，被丢掉的方差最小，这是"降维误差最小"的等价说法，也是 SVD 最优性的几何来源。</span></p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>核心概念二：SVD 分解 A = U Σ Vᵀ</h3>
+    <div class="concept">
+      <h4>三个矩阵分别是什么（必背表）</h4>
+      <p>任意实矩阵都能分解成 A = U Σ Vᵀ，三个矩阵的形式受到强约束，因此分解是<b>唯一</b>的（允许符号翻转）。</p>
+      <table class="cmp">
+        <caption>以"m 个用户 × n 部电影"为例</caption>
+        <thead><tr><th>矩阵</th><th>尺寸</th><th>数学含义</th><th>用户-电影语境下的含义</th></tr></thead>
+        <tbody>
+          <tr><td>U</td><td>m × r</td><td>左奇异向量（列）</td><td><b>user-to-concept</b>：每个用户在各概念上的坐标</td></tr>
+          <tr><td>Σ</td><td>r × r 对角</td><td>奇异值，非负、降序</td><td>每个概念的<b>强度</b>（strength）</td></tr>
+          <tr><td>Vᵀ</td><td>r × n</td><td>右奇异向量（V 的转置，行）</td><td><b>concept-to-movie</b>：每个概念在各电影上的权重</td></tr>
+        </tbody>
+      </table>
+      <p>三条硬约束：① U、V 的列<b>正交且单位长</b>（column orthonormal），即 UᵀU = I、VᵀV = I；② Σ 是对角矩阵；③ 对角元（奇异值）<b>非负且按降序排列</b> σ₁ ≥ σ₂ ≥ … ≥ 0。这里的 r 就是 rank(A)。</p>
+      <p class="dim">注意 UᵀU = I 并不等于 UUᵀ = I：只有当 r = m（U 是方阵）时才两者都成立。这是"正交矩阵"与"列正交"的区别，判断题常考。</p>
+      <pre class="dia">       n        r        r         n
+   +------+ +-----+ +----+ +--------+
+ m |  A   |x|  U  |x| S  |x|   VT   |
+   +------+ +-----+ +----+ +--------+
+      m x n   m x r   r x r    r x n
+   A ~ U x S x VT ,  S = Sigma
+   r = #concepts ,  r << min(m,n)</pre>
+    </div>
+    <div class="concept">
+      <h4>秩 1 分解的求和形式（最好用的视角）</h4>
+      <p>把乘法展开，A 就是 r 个"秩 1 矩阵"按奇异值加权的和：</p>
+      <div class="formula">
+        <span class="fm">A = σ₁u₁v₁ᵀ + σ₂u₂v₂ᵀ + … + σᵣuᵣvᵣᵀ</span>
+        <span class="cap">σᵢ 是标量，uᵢ 是 U 的第 i 列（长度 m），vᵢ 是 V 的第 i 列（长度 n）。</span>
+      </div>
+      <p>于是"降维"有了一个极其直白的操作：<b>把最小的奇异值置为 0</b>，对应的那一项 σᵢuᵢvᵢᵀ 整块被抹掉，矩阵就变瘦了。课件 p11 的原话：如果把 σ₂ 设为 0，那么"绿色的那几列就被擦掉了"。</p>
+      <figure class="sfig"><img src="slides/L7/p010.png" alt="L7 第10页课件原图" loading="lazy" decoding="async"><figcaption>把 A 写成 r 个秩 1 项 σᵢuᵢvᵢᵀ 的和；置某个 σᵢ=0 就抹掉对应的一整项。</figcaption></figure>
+    </div>
+    <div class="concept">
+      <h4>课件那个 7×5 电影矩阵（数值要认得）</h4>
+      <p>7 个用户 × 5 部电影（Matrix / Alien / Serenity / Casablanca / Amelie）。前 4 个用户偏爱 SciFi（在 Matrix、Alien、Serenity 上打分），后 3 个偏爱 Romance（在 Casablanca、Amelie 上打分）。SVD 得到三个奇异值：</p>
+      <div class="formula">
+        <span class="fm">σ = (12.4, 9.5, 1.3)</span>
+        <span class="cap">第一概念 = SciFi，第二概念 = Romance，第三概念强度只有 1.3，基本是噪声。</span>
+      </div>
+      <p>U 的每一行是一个用户在两个概念上的坐标：前 4 个用户的 SciFi 分量大（0.13 / 0.41 / 0.55 / 0.68 量级），后 3 个用户的 Romance 分量大且<b>为负</b>（−0.59 / −0.73 / −0.29）。<b>负号不表示"不喜欢"，而是同一概念轴的方向约定</b>——U 与 V 同时翻符号，乘积 A 不变。V 的每一行是一部电影在两个概念上的权重，例如 v₁ ≈ (0.56, 0.59, 0.56, 0.09, 0.09)，正是"三部 SciFi 电影在 SciFi 轴上权重大"。</p>
+      <p class="dim">考试常问"U 的第一列代表什么"——答：每个用户在 SciFi 概念上的坐标；"Σ 第一个元素代表什么"——答：SciFi 概念的强度。别答成"第一主成分的方差"（虽然数值上是它的平方根，见下）。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>核心概念三：用 SVD 降维与最优低秩近似</h3>
+    <div class="concept">
+      <h4>r 怎么选：能量准则</h4>
+      <p>定义一组奇异值的 <b>energy = 各自平方之和</b>。选 r 使得<b>保留的奇异值至少占总能量的 90%</b>。用课件的例子算一遍（这是最可能的计算题）：</p>
+      <div class="formula">
+        <span class="fm">总能量 = 12.4² + 9.5² + 1.3² = 153.76 + 90.25 + 1.69 = 245.7</span>
+        <span class="cap">只要丢掉 1.3（平方仅 1.69），剩下 244.0，占 244.0/245.7 ≈ 99.3% &gt; 90% ⇒ r = 2 就够。</span>
+      </div>
+      <p class="dim">如果只保留 r = 1：153.76/245.7 ≈ 62.6%，不够 90%，所以要 r = 2。注意能量用<b>平方</b>，不要拿 12.4/23.2 去算比例。</p>
+    </div>
+    <div class="concept">
+      <h4>rank-k 近似是怎么做出来的</h4>
+      <p>做法只有一句话：<b>把 Σ 里最小的一些奇异值置 0</b>（等价于只留前 k 个 σᵢ，矩阵瘦身成 U_k Σ_k V_kᵀ）。得到 B 叫 rank-k 近似。k 越大越准：rank-1 近似已经很粗糙，rank-2 就能把这个 7×5 矩阵还原得相当好。</p>
+      <p>误差用 <b>Frobenius 范数</b>量化：</p>
+      <div class="formula">
+        <span class="fm">‖M‖_F = √( Σ_{ij} M_ij² )，误差 = ‖A − B‖_F = √( Σ_{ij} (A_ij − B_ij)² )</span>
+        <span class="cap">就是把所有元素平方相加再开根——"整体差多少"的度量。</span>
+      </div>
+      <p>课件 p28 把 rank-2 重构出来的 B 与原矩阵对比：SciFi 区的元素几乎一致（如 1 → 0.92、3 → 2.91），Romance 区也基本还原（4 → 4.11、5 → 4.78），只有本来为 0 的位置出现了很小的非零值（0.01、0.03、−0.01）。<b>这些"0 变成小正数"就是重构误差的来源</b>——SVD 填上了它认为"应该有一点"的值。</p>
+    </div>
+    <div class="concept">
+      <h4>Eckart–Young 定理：为什么 SVD 是"最好"的</h4>
+      <p>定理（课件 p30 的表述）：设 A = U Σ Vᵀ，令 B = U S Vᵀ，其中 S 是对角矩阵、前 k 个对角元 sᵢ = σᵢ（i = 1…k）、其余为 0，<b>则 B 是 A 的最优 rank-k 近似</b>。"最优"的严格含义是：B 是 min_B ‖A − B‖_F（约束 rank(B) = k）的解。</p>
+      <p class="dim">换句话说：SVD 给出的轴就是"最小化重构误差之和"的轴，这与前面"取方差最大的方向"是同一件事的两面。答题时两个说法都要会：<b>方差最大 == Frobenius 重构误差最小</b>。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>核心概念四：把查询映射进概念空间（q·V）</h3>
+    <div class="concept">
+      <h4>做法</h4>
+      <p>问题：找出喜欢《Matrix》的用户。做法：把查询向量 <b>投影到概念空间</b>——与每个概念向量 vᵢ 做内积。写成矩阵形式（q 是 1×n 的行向量）：</p>
+      <div class="formula">
+        <span class="fm">q_concept = q V，只保留前 k 列时 q_concept = q V_k</span>
+        <span class="cap">q 是"用户对 n 部电影的评分"行向量；V 是 n×r 的 movie-to-concept 矩阵。</span>
+      </div>
+      <p class="dim">量纲检查（最容易错的地方）：q 是 1×n，V 是 n×r，乘出来 1×r ✓。写成 V q 维度就不合法；写成 q Vᵀ 会得到 1×n，"没降维"。</p>
+    </div>
+    <div class="concept">
+      <h4>课件的数值例（要会复现）</h4>
+      <p>查询 q = (5, 0, 0, 0, 0)，即只在《Matrix》上打了 5 分（其余电影没评分）。用 V 的前两列（v₁ ≈ (0.56, 0.59, 0.56, 0.09, 0.09)，v₂ ≈ (0.12, −0.02, 0.12, −0.69, −0.69)）：</p>
+      <div class="formula">
+        <span class="fm">q · v₁ = 5 × 0.56 = 2.80，q · v₂ = 5 × 0.12 = 0.60 ⇒ q_concept ≈ (2.8, 0.6)</span>
+        <span class="cap">结论：这个用户"很 SciFi、略 Romance"。</span>
+      </div>
+      <p>另一个用户 d = (0, 4, 5, 0, 0)，即在《Alien》打 4 分、《Serenity》打 5 分：</p>
+      <div class="formula">
+        <span class="fm">d · v₁ = 4×0.59 + 5×0.56 = 5.16，d · v₂ = 4×(−0.02) + 5×0.12 = 0.52</span>
+        <span class="cap">课件标注为约 (5.2, 0.4)，属四舍五入/印刷误差，算法如上式。</span>
+      </div>
+      <p><b>这是整讲最漂亮的一个结论</b>：q 与 d 在原空间里<b>没有任何一部电影是共同评过分的</b>（q 只评 Matrix，d 只评 Alien、Serenity），但映射到概念空间后两者方向接近、相似度 &gt; 0。降维在这里的作用不是"压缩存储"，而是<b>发现"科幻爱好者"这个共同身份</b>——这就是它在推荐系统里的用法。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>核心概念五：SVD 到底怎么算出来</h3>
+    <div class="concept">
+      <h4>路线 A：先求对称矩阵的主特征对（幂迭代 power iteration）</h4>
+      <p>对称矩阵：m_ij = m_ji。求它的<b>主特征值</b>（最大那个）与对应特征向量的迭代法：</p>
+      <ol class="steps">
+        <li>随便猜一个初始向量 x₀。</li>
+        <li>构造 x_{k+1} = M x_k / ‖M x_k‖（每步都归一化，防止数值爆炸）。</li>
+        <li>重复到"相邻两次 x 几乎不变"为止，收敛到的就是主特征向量 x。</li>
+        <li>再用 λ = xᵀ M x 求特征值（因为 Mx = λx，两边左乘 xᵀ 且 xᵀx = 1）。</li>
+      </ol>
+      <p class="dim">课件 p37 的数值例：M = [[1,2],[2,3]]，x₀ = (1,1)。Mx₀ = (3,5)，‖Mx₀‖ = √34 ≈ 5.83 ⇒ x₁ ≈ (0.51, 0.86)。下一步 Mx₁ ≈ (2.23, 3.60)，‖·‖ = √17.93 ≈ 4.24 ⇒ x₂ ≈ (0.53, 0.85)。收敛值 ≈ (0.526, 0.851)，λ ≈ 4.25（精确值 2+√5 ≈ 4.236）。</p>
+      <p class="dim"><span class="extra">课外补充：定理要求 M 对称、且主特征值的绝对值严格最大，否则迭代会来回振荡不收敛。课件只写"对称"，判收敛条件属于隐含前提。</span></p>
+    </div>
+    <div class="concept">
+      <h4>路线 A 续：deflation 求第二、第三特征对</h4>
+      <p>求出 (λ, x) 后，把 M 中"能被这一对生成的部分"减掉，再对剩下的矩阵重复同样过程：</p>
+      <div class="formula">
+        <span class="fm">M* := M − λ x xᵀ</span>
+        <span class="cap">x 是单位列向量，xxᵀ 是秩 1 矩阵；减完后 M* 的主特征对就是原矩阵的第二特征对。</span>
+      </div>
+      <p class="dim">课件数值例：λ = 4.25，x ≈ (0.53, 0.85)。先算 xxᵀ（(0.53,0.85) 的外积），乘 4.25，从 M 减掉，得 M* ≈ [[−0.19, 0.09],[0.09, −0.07]]。<b>课件印成 +0.07 是丢了一个负号</b>：M 的迹是 1+3 = 4，而第二特征值必须是 4 − 4.25 = −0.25，−0.19 + (−0.07) ≈ −0.26 才对得上；若取 +0.07 迹就是 −0.12，矛盾。考试按 −0.07 写。</p>
+    </div>
+    <div class="concept">
+      <h4>路线 B：用 AᵀA 与 AAᵀ 的特征分解直接得到 V、Σ、U（最常考）</h4>
+      <p>推导只需三行，考简答就写这三行：</p>
+      <ol class="steps">
+        <li>Aᵀ = (UΣVᵀ)ᵀ = V Σᵀ Uᵀ = V Σ Uᵀ（转置法则；Σ 是对角阵所以 Σᵀ = Σ）。</li>
+        <li>AᵀA = V Σ Uᵀ · U Σ Vᵀ = V Σ² Vᵀ（因为 UᵀU = I，U 列正交）。</li>
+        <li>两边右乘 V：AᵀA V = V Σ² ⇒ ⇒ 所以 <b>V 的第 i 列就是 AᵀA 的第 i 个特征向量，对应特征值等于 σᵢ²</b>；奇异值 = 特征值开根号。</li>
+      </ol>
+      <p>对称地，AAᵀ 的特征分解给出 <b>U</b>（特征值同样是 σᵢ²）。所以完整算法：求 AᵀA 的特征对 → 得到 V 和 Σ → 再用 uᵢ = A vᵢ / σᵢ 得到 U（或直接对 AAᵀ 分解）。</p>
+      <div class="formula">
+        <span class="fm">AᵀA = V Σ² Vᵀ ⇒ V、Σ；AAᵀ = U Σ² Uᵀ ⇒ U；σᵢ = √(λᵢ)</span>
+        <span class="cap">方向千万别记反：AᵀA（n×n）给的是 V（n 维），不是 U。</span>
+      </div>
+      <p>计算代价：完整 SVD 是 O(nm²) 或 O(n²m)（取较小者）；如果只要奇异值、或只要前 k 个奇异向量、或矩阵稀疏，可以更省。实际都调用 LINPACK / Matlab 之类的库。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>核心概念六：CUR 分解（SVD 的稀疏可解释替代）</h3>
+    <div class="concept">
+      <h4>动机：SVD 的两大毛病</h4>
+      <p>SVD 虽然是最优低秩近似，但有两个毛病：<b>不可解释</b>——每个奇异向量都是<b>所有</b>输入行/列的线性组合，你没法指着 u₁ 说"这是哪部电影"；<b>不稀疏</b>——即使 A 很稀疏，U 和 V 也是稠密的。CUR 的解法：只用 A 的<b>真实行和真实列</b>。</p>
+      <div class="formula">
+        <span class="fm">A ≈ C · U · R，目标：min ‖A − C U R‖_F</span>
+        <span class="cap">C = 从 A 采样的若干列（m × c），R = 采样的若干行（r × n）。</span>
+      </div>
+    </div>
+    <div class="concept">
+      <h4>U 从哪来：交集 W 的伪逆</h4>
+      <ol class="steps">
+        <li>令 W = 被选中的列 C 与被选中的行 R 的<b>交集</b>（尺寸 c × r）。</li>
+        <li>对 W 做 SVD：W = X Z Yᵀ。</li>
+        <li>伪逆 W⁺ = Y Z⁺ Xᵀ，其中 Z⁺ 是把 Z 的非零奇异值取<b>倒数</b>（1/Z_ii）。</li>
+        <li>取 U = W⁺，于是 A ≈ C W⁺ R。</li>
+      </ol>
+      <p>为什么交集：交集里的元素是 A 中<b>幅值较大</b>的格子（被"重要行列"同时覆盖），用它来标定缩放关系最稳。</p>
+      <p>为什么伪逆能当成逆来用：若 W 非奇异，W⁻¹ = (X Z Yᵀ)⁻¹ = Y Z⁻¹ Xᵀ；而 X、Y 正交 ⇒ X⁻¹ = Xᵀ、Y⁻¹ = Yᵀ；Z 对角 ⇒ Z⁻¹ 就是逐个取倒数。<b>所以当 W 可逆时，伪逆就是真正的逆</b>；W 不可逆（有零奇异值）时，把零奇异值置 0 而不是取倒数，这就是伪逆的定义。</p>
+      <pre class="dia">   A    =     C    x    U   x     R
+  m x n      m x c      c x r    r x n
+                |          |
+                +--- W ---+  W = C and R
+                     U = W+</pre>
+      <figure class="sfig"><img src="slides/L7/p053.png" alt="L7 第53页课件原图" loading="lazy" decoding="async"><figcaption>CUR 的结构：C 取真实列、R 取真实行，W 是二者交集，U 取 W 的伪逆。</figcaption></figure>
+    </div>
+    <div class="concept">
+      <h4>采样概率：按"范数平方"抽（必考计算）</h4>
+      <p>要降低期望误差，行/列不能均匀抽，必须<b>非均匀</b>抽。一行或一列的 importance = 它 <b>Frobenius 范数的平方</b>，也就是<b>它所有元素平方之和</b>。抽取概率必须正比于 importance。</p>
+      <div class="formula">
+        <span class="fm">P(第 i 行被选中) ∝ ‖A(i,:)‖²_F = Σ_j A_ij²</span>
+        <span class="cap">注意是平方和，不是范数本身，也不是最大值。</span>
+      </div>
+      <p class="dim">课件的例子：行 [3,4,5] 的 importance = 9+16+25 = 50；行 [3,0,1] 的 importance = 9+0+1 = 10。所以前者被抽中的频率是后者的 <b>50/10 = 5 倍</b>。这是 CUR 最简单的一道计算题。</p>
+      <p>理论保证：取 c = r = O(k log k / ε²) 列/行（k 是想要的秩），则 <b>‖A − C U R‖_F ≤ (2 + ε)‖A − A_k‖_F 以 98% 的概率成立</b>——即 CUR 的误差最多是 SVD 最优误差的 2+ε 倍。实践中取 <b>4k</b> 行/列就够了。</p>
+      <p class="dim">注意：这是<b>随机算法</b>，<b>同一行/列可以被重复抽中</b>。这是 CUR 的缺点之一（重复行/列）。</p>
+    </div>
+    <div class="concept">
+      <h4>优缺点与存储对比</h4>
+      <table class="cmp">
+        <thead><tr><th></th><th>SVD（A = U Σ Vᵀ）</th><th>CUR（A = C U R）</th></tr></thead>
+        <tbody>
+          <tr><td>最优性</td><td>Frobenius 范数下的最优 rank-k 近似</td><td>只有 2+ε 倍的近似保证（98% 概率）</td></tr>
+          <tr><td>可解释性</td><td>差：奇异向量是所有行列的线性组合</td><td>好：基向量就是真实的列和行</td></tr>
+          <tr><td>稀疏性</td><td>U、V 稠密（A 稀疏也没用）</td><td>C、R 保持稀疏</td></tr>
+          <tr><td>主要缺点</td><td>不可解释、稠密、慢</td><td>行列可能重复采样；结果随机</td></tr>
+          <tr><td>存储量</td><td>U(m×k) 稠密 + Σ(k×k) + Vᵀ(k×n) 稠密</td><td>C(m×c) 稀疏 + U(c×r) 小稠密 + R(r×n) 稀疏</td></tr>
+        </tbody>
+      </table>
+      <p class="dim">直觉（课件 p58）：SVD 的维度是正交的，遇到"两团斜着放的云"会把轴放在两团中间；CUR 更可能抽到远离原点的真实行列，于是直接命中两团云（但会冗余）。DBLP 数据集（42.8 万作者 × 3659 会议，极度稀疏）的对比实验显示：CUR 的精度略低于 SVD，但空间占用和 CPU 时间都明显更优。</p>
+    </div>
+  </div>
+
+  <div class="trap">
+    <h3>⚠ 易错点 / 命题陷阱</h3>
+    <ul>
+      <li><b>UᵀU = I 但 UUᵀ ≠ I</b>（除非 r = m）：U 是"列正交"矩阵，不是"正交矩阵"，V 同理。<b>负的 U/V 分量也不表示"负评分"</b>——U 与 V 同列同时变号时 A 不变，符号是任意的。</li>
+      <li><b>降维时置零的是奇异值 σᵢ</b>，不是 uᵢ 或 vᵢ；Σ 是 r×r 对角、r = rank(A)，不是 m×n，奇异值非负。<b>能量必须用平方</b>：12.4 + 9.5 + 1.3 = 23.2 毫无意义，要用 245.7。</li>
+      <li><b>AᵀA 给 V、AAᵀ 给 U</b>，且特征值是 σᵢ²（要开根号才是奇异值）；"最优"只对 <b>Frobenius 范数</b>成立，别推广成"任何误差度量都最优"。幂迭代求的是<b>最大</b>特征值，求次大必须 deflation。</li>
+      <li><b>q·V 是行向量右乘 V 且只取前 k 列 V_k</b>（写成 Vq 维度不成立；写成 qVᵀ 等于没降维）。同理用户的 d·V。</li>
+      <li><b>CUR 采样概率 ∝ ‖行‖²（平方和）</b>，不是 ∝ ‖行‖ 或最大值；它是随机算法，<b>同一行列可被重复抽中</b>。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>🧠 随堂自测</h3>
+
+    <details class="q"><summary>Q1 计算：某矩阵奇异值 σ = (12.4, 9.5, 1.3)。分别求 r = 1、r = 2 时的保留能量占比，并按"≥ 90%"准则给出 r。</summary>
+      <div class="q-a">
+        <p><span class="ans">答案：</span>总能量 = 12.4² + 9.5² + 1.3² = 153.76 + 90.25 + 1.69 = 245.7。</p>
+        <p>r = 1：153.76 / 245.7 ≈ 62.6%，不足 90%。</p>
+        <p>r = 2：(153.76 + 90.25) / 245.7 = 244.01 / 245.7 ≈ 99.3% ≥ 90% ⇒ <b>r = 2</b>。</p>
+        <p>顺带：丢弃 1.3 只损失总能量的 1.69/245.7 ≈ 0.7%，所以这个矩阵实质上只有 2 个概念。</p>
+      </div>
+    </details>
+
+    <details class="q"><summary>Q2 计算：M = [[1,2],[2,3]]，取 x₀ = (1,1)/√2 ≈ (0.707, 0.707)。做一步幂迭代求 x₁ 与 ‖Mx₀‖，并用 λ = xᵀMx 估计收敛后的特征值。</summary>
+      <div class="q-a">
+        <p><span class="ans">答案：</span>Mx₀ = (1×0.707 + 2×0.707, 2×0.707 + 3×0.707) = (2.12, 3.54)；若直接用未归一化的 x₀ = (1,1) 则 Mx₀ = (3,5)。</p>
+        <p>‖Mx₀‖ = √34 ≈ 5.83 ⇒ x₁ = (3,5)/5.83 ≈ (0.51, 0.86)，与课件一致。</p>
+        <p>继续迭代会收敛到 x ≈ (0.526, 0.851)，此时 λ = xᵀMx ≈ 4.25（精确值 2 + √5 ≈ 4.236）。注意 x 必须是单位向量，否则 λ = xᵀMx 不成立。</p>
+      </div>
+    </details>
+
+    <details class="q"><summary>Q3 计算：A = [[1,1],[1,1]]。求 AᵀA 的特征分解，并由此写出 A 的 SVD（三个矩阵都给）。</summary>
+      <div class="q-a">
+        <p><span class="ans">答案：</span>AᵀA = [[2,2],[2,2]]，特征值为 4 和 0（迹 = 4，行列式 = 0）。</p>
+        <p>λ = 4 的特征向量 v₁ = (1,1)/√2；λ = 0 的 v₂ = (1,−1)/√2。所以 V = [[1/√2, 1/√2],[1/√2, −1/√2]]。</p>
+        <p>奇异值 σᵢ = √λᵢ ⇒ σ = (2, 0)，Σ 写 2×2 的 diag(2, 0)（rank(A) = 1，真正的 Σ 是 1×1 的 [2]）。</p>
+        <p>U：u₁ = A v₁ / σ₁ = (2/√2, 2/√2)/2 = (1/√2, 1/√2)；u₂ 取与 u₁ 正交的单位向量 (1,−1)/√2。</p>
+        <p>验证：σ₁u₁v₁ᵀ = 2 · [[1/2, 1/2],[1/2, 1/2]] = [[1,1],[1,1]] = A ✓（因为这是秩 1 矩阵，第二项系数为 0）。</p>
+      </div>
+    </details>
+
+    <details class="q"><summary>Q4 计算：数据矩阵的三行分别是 [3,4,5]、[3,0,1]、[0,0,1]。按 CUR 的方式随机选行，三行被选中的概率各是多少？第一行是第一行的几倍？</summary>
+      <div class="q-a">
+        <p><span class="ans">答案：</span>importance = 元素平方和：50、10、1；总和 61。</p>
+        <p>概率分别 50/61 ≈ 0.820、10/61 ≈ 0.164、1/61 ≈ 0.016。</p>
+        <p>第一行被抽中的频率是第二行的 50/10 = <b>5 倍</b>，是第三行的 50 倍。这正是"重行被反复抽到"的来源，也是 CUR 会出现重复行的原因。</p>
+      </div>
+    </details>
+  </div>
+
+  <div class="mnemonic"><b>记忆口诀</b>：U 管人（user→concept）、Σ 管强度、V 管物（concept→movie）；降维就是"把最小的 σ 抹成零"，能量算平方、门槛九成；查询右乘 q·V，算 SVD 走 AᵀA 得 V、AAᵀ 得 U，幂迭代加 deflation；CUR 抽真实行列、概率按范数平方，换来可解释与稀疏。</div>
+</section>
+<section class="sec" id="slides"><div class="ch-head"><h2>📽 逐页精讲 · 课件原文 62 页</h2><p class="ch-sub">每格 = 课件原页截图 + 中文讲解；标 <b>考点</b> 的页容易出题或容易错。宽屏时图在左、讲解在右；点顶部「页面目录」可跳到任意页。</p></div><details class="ptoc"><summary>📑 页面目录（62 页，点击展开可跳页）</summary><ol><li><a href="#p1">P1 · 降维：本讲标题页</a></li><li><a href="#p2">P2 · 全讲总纲：A≈UΣVᵀ</a></li><li><a href="#p3">P3 · 动机：巨大矩阵压缩</a></li><li><a href="#p4">P4 · 潜在因子解释数据</a></li><li><a href="#p5">P5 · 找轴的准则：最大方差</a></li><li><a href="#p6">P6 · 秩与新基底</a></li><li><a href="#p7">P7 · 降维目标：发现数据的轴</a></li><li><a href="#p8">P8 · 投影示意（图页）</a></li><li><a href="#p9">P9 · SVD：唯一的三矩阵分解</a></li><li><a href="#p10">P10 · SVD 四个矩阵各是什么</a></li><li><a href="#p11">P11 · A 是秩 1 层之和</a></li><li><a href="#p12">P12 · SVD 定理：三条约束</a></li><li><a href="#p13">P13 · 例子：7 用户 × 5 电影</a></li><li><a href="#p14">P14 · 例子：SVD 的具体数字</a></li><li><a href="#p15">P15 · U：用户到概念矩阵</a></li><li><a href="#p16">P16 · Σ：SciFi 概念强度 12.4</a></li><li><a href="#p17">P17 · V：电影到概念矩阵</a></li><li><a href="#p18">P18 · 三个矩阵的分工总结</a></li><li><a href="#p19">P19 · 分解结构示意（图页）</a></li><li><a href="#p20">P20 · 用户是电影空间里的点</a></li><li><a href="#p21">P21 · v1 与投影坐标</a></li><li><a href="#p22">P22 · v1 上方差最大</a></li><li><a href="#p23">P23 · 投影坐标 = UΣ</a></li><li><a href="#p24">P24 · 细节小节：降维怎么做</a></li><li><a href="#p25">P25 · 答案：把小奇异值置零</a></li><li><a href="#p26">P26 · 置零的另一画法</a></li><li><a href="#p27">P27 · 秩 2 近似与秩 1 近似</a></li><li><a href="#p28">P28 · 秩 2 近似的瘦矩阵</a></li><li><a href="#p29">P29 · 重构矩阵与 Frobenius 误差</a></li><li><a href="#p30">P30 · SVD 给出最优投影轴</a></li><li><a href="#p31">P31 · 定理：最优秩 k 近似</a></li><li><a href="#p32">P32 · 怎么选 r：90% 能量</a></li><li><a href="#p33">P33 · 能量与选 r 示意（图页）</a></li><li><a href="#p34">P34 · 幂迭代求主特征对</a></li><li><a href="#p35">P35 · 幂迭代手算例</a></li><li><a href="#p36">P36 · 用 xᵀMx 求特征值</a></li><li><a href="#p37">P37 · 缩并求第二特征对</a></li><li><a href="#p38">P38 · AᵀA 与特征分解</a></li><li><a href="#p39">P39 · V、Σ 来自 AᵀA 特征对</a></li><li><a href="#p40">P40 · SVD 的复杂度</a></li><li><a href="#p41">P41 · 过渡：从会算到会用</a></li><li><a href="#p42">P42 · 查询：谁喜欢 Matrix</a></li><li><a href="#p43">P43 · 构造查询向量 q</a></li><li><a href="#p44">P44 · 内积投影到 v1、v2</a></li><li><a href="#p45">P45 · 紧凑写法：q_concept = qV</a></li><li><a href="#p46">P46 · 用户也能映射进概念空间</a></li><li><a href="#p47">P47 · 零重叠也能算相似</a></li><li><a href="#p48">P48 · SVD 的优缺点</a></li><li><a href="#p49">P49 · SVD 视频（链接页）</a></li><li><a href="#p50">P50 · 过渡：稀疏矩阵与稠密因子</a></li><li><a href="#p51">P51 · CUR 的动机</a></li><li><a href="#p52">P52 · CUR：目标与形状</a></li><li><a href="#p53">P53 · U 来自交集 W 的伪逆</a></li><li><a href="#p54">P54 · 伪逆的算法</a></li><li><a href="#p55">P55 · 按重要度非均匀采样</a></li><li><a href="#p56">P56 · 列采样算法</a></li><li><a href="#p57">P57 · CUR 的直观解释</a></li><li><a href="#p58">P58 · CUR 的误差保证</a></li><li><a href="#p59">P59 · CUR 的优缺点</a></li><li><a href="#p60">P60 · SVD 与 CUR 的存储对比</a></li><li><a href="#p61">P61 · 实例：DBLP 作者-会议矩阵</a></li><li><a href="#p62">P62 · SVD vs CUR 实验对比</a></li></ol></details><article class="slide" id="p1"><div class="slide-h"><span class="pno">P1</span><h3>降维：本讲标题页</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p001.png" alt="L7 第1页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>标题页：降维（dimensionality reduction），课件来自 Stanford 的 Machine Learning Basics。这是半期范围最后一章，要解决的问题是特征太多、矩阵太大怎么办。</p><p class="sx">🎯 半期压轴章：SVD 与秩-k 近似很可能出计算题。</p></div></div></article><article class="slide" id="p2"><div class="slide-h"><span class="pno">P2</span><h3>全讲总纲：A≈UΣVᵀ</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p002.png" alt="L7 第2页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>开篇给出全讲总图：数据是 m 行 n 列的矩阵（m 个样本、n 个特征），它往往可以被三个矩阵的乘积逼近，而这三个矩阵共享一个很小的公共维度 r。图里 A 是 m×n，U 是 m×r，Σ 是 r×r，Vᵀ 是 r×n，整句就是 A ≈ U Σ Vᵀ。为什么能这样：数据的真实自由度远小于表面维度，r 就是那个自由度的数量。</p><p class="sx">🎯 必考形状：U m×r、Σ r×r、Vᵀ r×n，且 r ≤ min(m,n)。</p></div></div></article><article class="slide" id="p3"><div class="slide-h"><span class="pno">P3</span><h3>动机：巨大矩阵压缩</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p003.png" alt="L7 第3页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>讲为什么要降维：设想 10⁶ 行、10³ 列的数据（10⁹ 个格子），若不更新它、只要求随机访问任意格子且能容忍小误差，那就值得压缩。右边是 5×5 小例子：前三行分别是 [1 1 1 0 0] 的 1、3、4、5 倍，后三行是 [0 0 0 1 1] 的 2、3、1 倍，所以整个矩阵其实只有 2 个方向。课件原话：这个矩阵真的是 2 维的，所有行都能由两个基向量缩放重构，于是每行只需存两个系数。</p><p class="sx">🎯 判断能否降维：行向量是否都是少数基向量的倍数。</p></div></div></article><article class="slide" id="p4"><div class="slide-h"><span class="pno">P4</span><h3>潜在因子解释数据</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p004.png" alt="L7 第4页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>接上页回答「为什么」：存在隐藏的潜在因子（latent factor，也叫 latent dimension），它近似地解释了数据矩阵里为什么会出现这些数值。换成电影例子：用户的评分不是随机的，而是由「喜欢科幻」「喜欢爱情」这两个看不见的维度驱动，所以 5 部电影的评分列其实只由 2 个因子决定。降维的目标就是把这两个因子找出来，而不是保留所有原始列。</p><p class="sx">🎯 术语：latent factor = 潜在因子 = 隐因子，与 L9 推荐系统同源。</p></div></div></article><article class="slide" id="p5"><div class="slide-h"><span class="pno">P5</span><h3>找轴的准则：最大方差</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p005.png" alt="L7 第5页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>潜在因子就是新的坐标轴，怎么选？课件给三条准则：第一维取数据散布最大（方差 variance 最大）的方向；第二维取与第一维正交（orthogonal）且方差次大的方向；如此继续，直到剩余方差很小为止。两个关键词必须同时记住：最大方差（信息多、投影后点分得开）与两两正交（各维不重复表达同一件事）。这正是 PCA 的定义，也决定了 SVD 右奇异向量的方向。</p><p class="sx">🎯 会考为什么：方差大=投影后区分度高；正交=信息不冗余。</p></div></div></article><article class="slide" id="p6"><div class="slide-h"><span class="pno">P6</span><h3>秩与新基底</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p006.png" alt="L7 第6页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>先定义秩（rank）：矩阵 A 的秩 = 线性无关的行数（也等于线性无关的列数）。再用三维点云说明换基底：原来用标准基 [1 0 0]、[0 1 0]、[0 0 1] 表示每个点需要 3 个坐标；换成两个新基向量 [1 2 1] 和 [−2 −3 1] 后，点 A、B、C 分别写成 [1 0]、[0 1]、[1 −1]，只需 2 个坐标——维数真的降了。课件把点按行排成矩阵，就是「一行一个点」。</p><p class="sx">🎯 秩 = 能张成数据的最少维数；换基只换坐标，数据本身没变。</p></div></div></article><article class="slide" id="p7"><div class="slide-h"><span class="pno">P7</span><h3>降维目标：发现数据的轴</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p007.png" alt="L7 第7页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>一句话点题：降维的目标是发现数据的轴（discover the axes of data）。图里二维散点大致沿一条红线分布，于是不再用 (x, y) 两个坐标，而是只用一个坐标——点在红线（即新轴）上的位置。代价是点并不精确落在线上，投影会产生一点误差。这就是降维的本质交易：用更少的坐标换存储、计算和可视化，代价是可控的重构误差。</p><p class="sx">🎯 核心权衡：维度下降、重构误差上升；降维是有损压缩。</p></div></div></article><article class="slide" id="p8"><div class="slide-h"><span class="pno">P8</span><h3>投影示意（图页）</h3></div><div class="slide-b"><img src="slides/L7/p008.png" alt="L7 第8页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页抽取后只剩图、没有文字，位置在「发现轴」与「SVD 定义」之间，画的是把高维点投影到一条轴上的几何过程。读图只需认三件事：原来的点是数据，点在轴上的垂足是它的投影（projection），点到轴的垂直距离就是被丢掉的误差（residual）。看懂这张图，后面「最大化投影方差 = 最小化重构误差」就顺理成章。</p></div></div></article><article class="slide" id="p9"><div class="slide-h"><span class="pno">P9</span><h3>SVD：唯一的三矩阵分解</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p009.png" alt="L7 第9页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>正式引入 SVD：任何矩阵都能分解成三个矩阵的乘积，而且每个矩阵都受很强的形式约束，所以分解是唯一的（unique decomposition）。在这套分解里可以任选中间概念个数 r（latent factor 的个数），选法就是让重构误差（reconstruction error）最小。图里标了四个形状：A 是 m×n，U 是 m×r，Σ 是 r×r，Vᵀ 是 r×n——注意 r 由你自己定，不是矩阵本身的属性。</p><p class="sx">🎯 唯一性来自约束；r 是人为选的超参数，r 越大误差越小。</p></div></div></article><article class="slide" id="p10"><div class="slide-h"><span class="pno">P10</span><h3>SVD 四个矩阵各是什么</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p010.png" alt="L7 第10页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>逐块解释：A 是输入数据矩阵，m×n（课件举 m 篇文档、n 个词）；U 是左奇异向量（left singular vector），m×r，行是样本、列是概念，所以叫文档到概念；Σ 是奇异值（singular value）组成的 r×r 对角阵，对角元表示每个概念的强度；V 是右奇异向量，n×r，即 n 个词到 r 个概念。图中 Σ 的 r 就是矩阵 A 的秩。</p><p class="sx">🎯 必背：A m×n、U m×r、Σ r×r、Vᵀ r×n；奇异值个数 = rank。</p></div></div></article><article class="slide" id="p11"><div class="slide-h"><span class="pno">P11</span><h3>A 是秩 1 层之和</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p011.png" alt="L7 第11页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>把 SVD 改写成求和形式：A ≈ σ₁u₁v₁ᵀ + σ₂u₂v₂ᵀ + …，每一项都是一个秩 1 的「层」（layer）。其中 σᵢ 是标量，uᵢ 和 vᵢ 是向量。课件强调：如果把 σ₂ 设为 0，那一层对 A 的贡献就整个消失（图上被标绿的部分被抹掉）。这就是降维的操作模型——留下大奇异值对应的层、删掉小的层，而不是去挑原始的行或列。</p><p class="sx">🎯 会考：σᵢ 是标量、uᵢ/vᵢ 是向量；删掉 σᵢ 就是删掉第 i 个概念层。</p></div></div></article><article class="slide" id="p12"><div class="slide-h"><span class="pno">P12</span><h3>SVD 定理：三条约束</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p012.png" alt="L7 第12页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>SVD 的正式定理：任意实矩阵 A 都能写成 A = U Σ Vᵀ，且 U、Σ、V 唯一。唯一性来自三条约束：① U 和 V 的列是正交单位向量（column orthonormal），即 UᵀU = I、VᵀV = I；② Σ 是对角阵；③ 奇异值非负且按降序排列 σ₁ ≥ σ₂ ≥ … ≥ 0。降序这一条最关键：它让「保留前 r 个就是保留最重要的 r 个」成立。看到这三条要能反推：U、V 的列既正交又单位长，Σ 只在对角线上有非负数。</p><p class="sx">🎯 判断题坑：U、V 的列要同时正交且单位长；σ 必须降序非负。</p></div></div></article><article class="slide" id="p13"><div class="slide-h"><span class="pno">P13</span><h3>例子：7 用户 × 5 电影</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p013.png" alt="L7 第13页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>全讲贯穿的例子登场：7 个用户 × 5 部电影的评分矩阵。列的顺序是 Matrix、Alien、Serenity、Casablanca、Amelie——前 3 部是科幻（SciFi），后 2 部是爱情（Romance）。前 4 个用户只评科幻片，后 3 个只评爱情片，所以矩阵里大片是 0。右边写着 A = U Σ Vᵀ，中间的 concepts 又叫 latent dimension / latent factor，就是要把这个「科幻 vs 爱情」的隐藏结构找出来。</p><p class="sx">🎯 记住两组用户：前 4 科幻、后 3 爱情；5 列顺序别记反。</p></div></div></article><article class="slide" id="p14"><div class="slide-h"><span class="pno">P14</span><h3>例子：SVD 的具体数字</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p014.png" alt="L7 第14页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>给出这个例子的 SVD 真实结果：U 是 7×3，第一列从 0.13、0.41 递增到 0.68，正好对应前 4 个用户越来越喜欢科幻；Σ 对角是 12.4、9.5、1.3；Vᵀ 是 3×5，第 1 行是 0.56 0.59 0.56 0.09 0.09。可以自己验证：第 4 个用户给三本科幻片都打 5 分，他在第一概念上的坐标就是最大的 0.68。这些数字不必背，但要会读它们的含义。</p><p class="sx">🎯 会读：U 行=用户、列=概念；Σ 对角=概念强度；Vᵀ 行=概念、列=电影。</p></div></div></article><article class="slide" id="p15"><div class="slide-h"><span class="pno">P15</span><h3>U：用户到概念矩阵</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p015.png" alt="L7 第15页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页把注意力放到 U 上：U 是 user-to-concept（用户到概念）因子矩阵，列分别是 SciFi-concept、Romance-concept 和第三概念。每一行是一个用户，行里三个数就是这个用户在三个概念轴上的坐标。于是「一个评了 5 部电影的用户」被压缩成 3 个数，行为相近的用户在这 3 维里也相近——这就是后面能拿概念空间做相似用户查询的原因。</p><p class="sx">🎯 术语：U = user-to-concept，行数 m 不变，列数变为 r。</p></div></div></article><article class="slide" id="p16"><div class="slide-h"><span class="pno">P16</span><h3>Σ：SciFi 概念强度 12.4</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p016.png" alt="L7 第16页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页讲 Σ：对角元是每个概念的强度（strength）。课件标出 SciFi 概念的强度是 12.4，第二个概念 9.5，第三个只有 1.3。强度越大说明这个概念对重构 A 贡献越大、也越值钱；所以后面选 r 时优先丢最小的那个 1.3，而不是随便删一列。换个说法：σ 就是每个概念在数据里的音量，音量小的概念可以关掉，耳朵几乎听不出差别。</p><p class="sx">🎯 会考：σ 大=概念重要；截断时先丢最小的奇异值。</p></div></div></article><article class="slide" id="p17"><div class="slide-h"><span class="pno">P17</span><h3>V：电影到概念矩阵</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p017.png" alt="L7 第17页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>最后看 V：movie-to-concept（电影到概念）矩阵，转置后是 3×5，每列是一部电影在 3 个概念上的坐标。看第 1 行就知道概念的语义：Alien、Serenity、Matrix 上是 0.56、0.59、0.56，而 Casablanca、Amelie 只有 0.09——所以第 1 个概念就是「是不是科幻片」。这也教你读因子的方法：看哪些列同号且绝对值大，就知道这个轴在区分什么。</p><p class="sx">🎯 会考：如何从 V 读出概念含义——比较各列系数的大小与符号。</p></div></div></article><article class="slide" id="p18"><div class="slide-h"><span class="pno">P18</span><h3>三个矩阵的分工总结</h3></div><div class="slide-b"><img src="slides/L7/p018.png" alt="L7 第18页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>三行总结：U 是用户到概念矩阵，V 是电影到概念矩阵，Σ 的对角元是每个概念的强度。到这一页，SVD 的「三个矩阵各是什么」必须能脱口而出：A ≈ U Σ Vᵀ，U 管样本、V 管特征、Σ 管每个概念有多重要。下一页开始转入「概念空间能拿来干什么」。</p></div></div></article><article class="slide" id="p19"><div class="slide-h"><span class="pno">P19</span><h3>分解结构示意（图页）</h3></div><div class="slide-b"><img src="slides/L7/p019.png" alt="L7 第19页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>图页（抽取后无文字），位置在「三个矩阵总结」和「把用户看成电影空间中的点」之间，把原始评分矩阵与分解后的 U、Σ、Vᵀ 并排画出来，强调三者相乘能还原 A。看这张图时默念两句话：A 的每一行（用户）在 U 里变成 r 维坐标；A 的每一列（电影）在 V 里变成 r 维坐标。形状对上了，内容就懂了。</p></div></div></article><article class="slide" id="p20"><div class="slide-h"><span class="pno">P20</span><h3>用户是电影空间里的点</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p020.png" alt="L7 第20页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>换视角：把用户看成平面上的点，两个坐标是「电影 1 的评分」和「电影 2 的评分」。这些点其实沿某个方向铺开，所以不必用 (x, y) 两个坐标，只用 1 个坐标就够——点在第一个右奇异向量 v₁ 上的投影位置。v₁ 叫 first right singular vector，它就是数据分布最长的那个方向。</p><p class="sx">🎯 v₁ = V 的第一列 = Vᵀ 的第一行；它是电影空间方向，不是用户空间。</p></div></div></article><article class="slide" id="p21"><div class="slide-h"><span class="pno">P21</span><h3>v1 与投影坐标</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p021.png" alt="L7 第21页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>同一张图加上 v₁ 箭头：箭头方向就是数据最分散的方向。右边把 A、U、Σ、Vᵀ 的数字再列一遍，提示你 v₁ 就是 Vᵀ 的第一行 0.56 0.59 0.56 0.09 0.09——五个分量是 v₁ 在五部电影上的坐标。把每个用户点投到 v₁ 上得到的长度，就是它在 SciFi 概念上的坐标。读图时注意：用户点在轴上的位置就是它的概念坐标，轴外的分量才是被丢弃的误差。</p><p class="sx">🎯 易错：v₁ 属于电影（列）空间、长度 n；用它与用户向量做内积才是投影。</p></div></div></article><article class="slide" id="p22"><div class="slide-h"><span class="pno">P22</span><h3>v1 上方差最大</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p022.png" alt="L7 第22页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>这页回答「为什么 v₁ 是好方向」：把点投影到 v₁ 之后，投影点在轴上的分散程度（variance，spread）最大；而在与 v₁ 垂直的方向上剩下的方差最小，被丢掉的信息最少。所以降维选轴的标准就是：选投影后方差最大的轴。这条与「最小化重构误差」是同一件事的两种说法，考试常让你解释这个等价性。</p><p class="sx">🎯 会考：最大化投影方差与最小化重构误差等价。</p></div></div></article><article class="slide" id="p23"><div class="slide-h"><span class="pno">P23</span><h3>投影坐标 = UΣ</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p023.png" alt="L7 第23页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>关键一步：用户在各概念轴上的坐标等于 UΣ。原因是 A ≈ U Σ Vᵀ，且 Vᵀ 的行互相正交，把数据投影到概念轴上就得到 UΣ。数字上很好验证：用户 1 的 SciFi 坐标 1.61 = 0.13 × 12.4，用户 4 是 8.43 = 0.68 × 12.4；Romance 列则是 0.02 × 9.5 = 0.19 等等。图上把 7 个用户画在 v₁ 轴上的投影位置，间距就是投影后的方差。</p><p class="sx">🎯 会算：UΣ 的第 i 行 = 第 i 个样本的 r 维坐标；第一列乘 12.4。</p></div></div></article><article class="slide" id="p24"><div class="slide-h"><span class="pno">P24</span><h3>细节小节：降维怎么做</h3></div><div class="slide-b"><img src="slides/L7/p024.png" alt="L7 第24页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>进入「More details」小节，第一个问题：降维到底怎么完成？这页只抛问题并重画矩阵，不给答案，逼你先想。你可以把它当成考前小测：Σ 上是 12.4、9.5、1.3，如果只想保留两个概念，应该动哪个数？动完之后 U 和 Vᵀ 要不要跟着改？答案在下一页。</p></div></div></article><article class="slide" id="p25"><div class="slide-h"><span class="pno">P25</span><h3>答案：把小奇异值置零</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p025.png" alt="L7 第25页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>答案：把最小的奇异值设为 0。Σ 从 diag(12.4, 9.5, 1.3) 变成 diag(12.4, 9.5, 0)，第三层 σ₃u₃v₃ᵀ 被整体删掉，r 从 3 降到 2。注意这不是删矩阵的行或列，而是让一个概念层的权重归零——原始 A 没变，变的是我们对它的近似。操作的先后顺序是：先算 SVD，再决定 r，最后截断。</p><p class="sx">🎯 会考：降维 = 截断奇异值，不是选原始特征列。</p></div></div></article><article class="slide" id="p26"><div class="slide-h"><span class="pno">P26</span><h3>置零的另一画法</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p026.png" alt="L7 第26页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>同一操作换一种画法再演示：把 1.3 置 0 后 A ≈ U Σ′ Vᵀ 仍成立，只是误差变大。学生常误以为置零等于「删掉第三个概念那一行或列」，其实 Σ 的形状固定，置零后那一维还在但贡献为 0；要真正省存储，就得同时把 U、V 也截成 k 列、k 行（下一页）。</p><p class="sx">🎯 易错：置零不等于压缩；截掉 U、V 的尾部才省空间。</p></div></div></article><article class="slide" id="p27"><div class="slide-h"><span class="pno">P27</span><h3>秩 2 近似与秩 1 近似</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p027.png" alt="L7 第27页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>给出术语：保留前 2 个奇异值得到的是秩 2 近似（rank-2 approximation），只保留第 1 个就是秩 1 近似。课件一句话总结规律：秩越大，近似越准确（the larger the rank the more accurate the approximation）。这就是选 r 的取舍两端：r 大则误差小但压缩少；r 小则压缩狠但失真。考试常直接问：秩 2 近似下原来的 7×5 矩阵要存多少个数？</p><p class="sx">🎯 会背：rank-r 近似 = 只留前 r 个奇异值及其 u、v。</p></div></div></article><article class="slide" id="p28"><div class="slide-h"><span class="pno">P28</span><h3>秩 2 近似的瘦矩阵</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p028.png" alt="L7 第28页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>把秩 2 近似写成真正省空间的形式：U 只取前 2 列（7×2）、Σ 只取左上 2×2 的 12.4 和 9.5、Vᵀ 只取前 2 行（2×5）。这样存的是 7×2 + 2 + 2×5 = 26 个数，比原来的 7×5 = 35 个少。这个瘦版就是降维后的数据表示，也是考试让你写 UₖΣₖVₖᵀ 时的标准形态。自己核对一次：7×2 = 14，2×5 = 10，再加 2 个奇异值，正好 26。</p><p class="sx">🎯 会算存储量：m·r + r + r·n 个数。</p></div></div></article><article class="slide" id="p29"><div class="slide-h"><span class="pno">P29</span><h3>重构矩阵与 Frobenius 误差</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p029.png" alt="L7 第29页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>把瘦版乘回去得到重构矩阵 B，与原始 A 对比：科幻片那三列重构为 0.92、2.91、3.90、4.82，与你填的 1、3、4、5 很接近；爱情片两列是 4.11、4.78、2.01，原始是 4、5、2。误差用 Frobenius 范数衡量：‖M‖_F = √(Σᵢⱼ Mᵢⱼ²)，所以误差 ‖A − B‖_F = √(Σᵢⱼ (Aᵢⱼ − Bᵢⱼ)²)，要求它小。注意误差都是小量：0.92 对 1 只差 0.08，说明截断到秩 2 已经抓住了主要结构，被丢掉的那个概念只贡献很小的修正。</p><p class="sx">🎯 会算：Frobenius 范数 = 所有元素平方求和再开根号。</p></div></div></article><article class="slide" id="p30"><div class="slide-h"><span class="pno">P30</span><h3>SVD 给出最优投影轴</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p030.png" alt="L7 第30页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>本页给出最优性：SVD 选出的轴是 best——判据是最小化重构误差之和。右边比较 A 与 B（同样的 U、Σ、Vᵀ，但截断），说明 B 就是 A 的最好近似。注意 best 是被定义出来的，不是主观评价：定义就是最小化 Σᵢⱼ (Aᵢⱼ − Bᵢⱼ)²。所以答题说「SVD 最优」时，一定要写出被最小化的那个量，否则等于没说。</p><p class="sx">🎯 会考：SVD 的最优性指标 = Frobenius 重构误差。</p></div></div></article><article class="slide" id="p31"><div class="slide-h"><span class="pno">P31</span><h3>定理：最优秩 k 近似</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p031.png" alt="L7 第31页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>正式定理（Eckart–Young）：设 A = U Σ Vᵀ，把 Σ 的第 k+1 到 r 个对角元换成 0 得到 S，则 B = U S Vᵀ 是 A 在 rank(B) = k 约束下的最优近似，即 B 解 min_B ‖A − B‖_F。这解释了为什么截断奇异值不是偷懒，而是数学最优——定理保证没有别的秩 k 矩阵能比它更接近 A。记忆点：定理只管固定秩下的最优，不管 r 该怎么选；先定 r，再截断，两件事不要混。</p><p class="sx">🎯 定理名 Eckart–Young；问「为什么截断最优」就答这条。</p></div></div></article><article class="slide" id="p32"><div class="slide-h"><span class="pno">P32</span><h3>怎么选 r：90% 能量</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p032.png" alt="L7 第32页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>选 r 的实用准则：定义一组奇异值的能量（energy）= 它们的平方和；要求保留的奇异值占总能量至少 90%。用例子算：12.4² + 9.5² + 1.3² = 153.76 + 90.25 + 1.69 = 245.7 是总能量；丢掉 1.3 后剩 244，占比超过 99%，所以取 r = 2 已经足够。自己验算：244 ÷ 245.7 ≈ 99.3%，远超 90% 的门槛。注意这是经验准则：如果数据本身近似秩 1，能量也会很快到 90%，此时没必要硬留两个概念。</p><p class="sx">🎯 会算：能量比 = Σᵢ≤ᵣ σᵢ² / Σᵢ σᵢ²，别忘平方。</p></div></div></article><article class="slide" id="p33"><div class="slide-h"><span class="pno">P33</span><h3>能量与选 r 示意（图页）</h3></div><div class="slide-b"><img src="slides/L7/p033.png" alt="L7 第33页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>图页（抽取后无文字），配合上一页的「能量与选 r」。看这类图只抓两点：前几个奇异值下降很快（说明数据确实低秩、值得降维）；累计能量曲线在某个 r 处超过 90%，那就是可以停的地方。记住 90% 是课件给的常用阈值，不是定理，答简答题时写成「常取使累计能量超过 90% 的最小 r」最稳。</p></div></div></article><article class="slide" id="p34"><div class="slide-h"><span class="pno">P34</span><h3>幂迭代求主特征对</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p034.png" alt="L7 第34页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>转入「SVD 怎么算」：先解决子问题——对对称矩阵（symmetric matrix，满足 Mᵢⱼ = Mⱼᵢ）求主特征值（最大的特征值）和对应特征向量。方法是幂迭代（power iteration）：任取初始猜测 x₀，反复计算 x_{k+1} = Mx_k / ‖Mx_k‖，也就是「乘一次 M、再单位化」，直到相邻两次 x 几乎不变。为什么要归一化：不归一化的话数值会越乘越大，归一化后只比较方向。</p><p class="sx">🎯 会写步骤：x←Mx，再归一化；反复直到收敛。</p></div></div></article><article class="slide" id="p35"><div class="slide-h"><span class="pno">P35</span><h3>幂迭代手算例</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p035.png" alt="L7 第35页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>手算一遍：M = [[1,2],[2,3]]，取 x₀ = [1,1]。第一步 Mx₀ = [3,5]，范数 √34 ≈ 5.83，x₁ = [0.51, 0.86]；第二步 Mx₁ = [2.23, 3.60]，范数 √17.93 ≈ 4.23，x₂ = [0.53, 0.85]。两次迭代就基本稳定，真实主特征向量约 [0.53, 0.85]。考试若给这种 2×2 小矩阵，照此算两步即可。注意 Mx 是矩阵乘向量，不是逐元素相乘；之所以两三步就收敛，是因为每乘一次，非主方向的分量相对主方向就被拉开一点。</p><p class="sx">🎯 会算两步：向量乘 M → 求范数 → 除以范数。</p></div></div></article><article class="slide" id="p36"><div class="slide-h"><span class="pno">P36</span><h3>用 xᵀMx 求特征值</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p036.png" alt="L7 第36页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>拿到特征向量后怎么求特征值？用 λ = xᵀMx（Rayleigh 商）。推导：若 Mx = λx，两边左乘 xᵀ 得 xᵀMx = λxᵀx，而单位化后 xᵀx = 1，所以 λ = xᵀMx。例子：x = [0.53, 0.85] 时 Mx = [2.23, 3.60]，xᵀMx = 0.53×2.23 + 0.85×3.60 ≈ 1.18 + 3.06 = 4.25，与真实 λ = 2 + √5 ≈ 4.236 的差别只是舍入误差。若 x 没单位化，公式要写成 λ = xᵀMx / xᵀx；另外这个 λ 必然就是最大特征值，因为 x 已经收敛到主特征向量。</p><p class="sx">🎯 会算：λ = xᵀ(Mx)；这一步常被漏掉。</p></div></div></article><article class="slide" id="p37"><div class="slide-h"><span class="pno">P37</span><h3>缩并求第二特征对</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p037.png" alt="L7 第37页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>怎么求第二个特征对？用缩并（deflation）：M* = M − λxxᵀ，把已经找到的那一层贡献减掉，再对 M* 用幂迭代，得到的就是原矩阵的次大特征对。例：M* = [[1,2],[2,3]] − 4.25 × [[0.53],[0.85]] × [0.53, 0.85] ≈ [[−0.19, 0.09],[0.09, −0.07]]，它的主特征值就是 λ₂ ≈ −0.24。为什么减完就能拿次大：λxxᵀ 恰好是 M 在主方向上的全部投影，减掉后主方向分量为 0。</p><p class="sx">🎯 会考三步：求主特征对 → 减 λxxᵀ → 再迭代。</p></div></div></article><article class="slide" id="p38"><div class="slide-h"><span class="pno">P38</span><h3>AᵀA 与特征分解</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p038.png" alt="L7 第38页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>开始证明「算 SVD 可以转成算 AᵀA 的特征分解」。设 A = U Σ Vᵀ：转置得 Aᵀ = V Σᵀ Uᵀ = V Σ Uᵀ；于是 AᵀA = V Σ Uᵀ U Σ Vᵀ = V Σ² Vᵀ。这里用了两件事：U 正交所以 UᵀU = I；Σ 是对角阵所以 Σᵀ = Σ。两边再右乘 V，得 AᵀA V = V Σ²。这段是本章最常考的推导，建议自己从 A = U Σ Vᵀ 默写一遍；注意全程不需要知道 U 具体是什么，只要知道它的列正交就已足够。</p><p class="sx">🎯 会推三步：转置规则、UᵀU=I、Σ 对角所以 Σᵀ=Σ。</p></div></div></article><article class="slide" id="p39"><div class="slide-h"><span class="pno">P39</span><h3>V、Σ 来自 AᵀA 特征对</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p039.png" alt="L7 第39页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>由 AᵀA V = V Σ² 得结论：V 的第 i 列是 AᵀA 的特征向量，对应特征值是 Σ² 的第 i 个对角元；所以对 AᵀA 做特征分解就同时得到 V 和 Σ，奇异值 = 特征值的平方根（σᵢ = √λᵢ）。同理 A Aᵀ 的特征分解给出 U。实用路线：先算较小的那个（AᵀA 是 n×n、AAᵀ 是 m×m），特征分解得 V、Σ，再求 U。所以「算 SVD」在实现上就是「对 AᵀA 做特征分解」。</p><p class="sx">🎯 会考关系式 σᵢ=√λᵢ；选 n×n 还是 m×m 由谁小决定。</p></div></div></article><article class="slide" id="p40"><div class="slide-h"><span class="pno">P40</span><h3>SVD 的复杂度</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p040.png" alt="L7 第40页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>实用信息：完整 SVD 的代价是 O(nm²) 或 O(n²m)，取两者较小者，等价于 O(mn·min(m,n))。如果只要奇异值、只要前 k 个奇异向量、或者矩阵稀疏（sparse），工作量会明显更小。实际实现用 LINPACK、LAPACK 以及 Matlab、Mathematica 这类库，考试不需要手写完整 SVD。m、n 谁大谁小决定你该从哪边算起，答题写成 min 形式最稳。</p><p class="sx">🎯 会写复杂度；记住「只要前 k 个时更便宜」，这是随机化 SVD 的动机。</p></div></div></article><article class="slide" id="p41"><div class="slide-h"><span class="pno">P41</span><h3>过渡：从会算到会用</h3></div><div class="slide-b"><img src="slides/L7/p041.png" alt="L7 第41页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>图页/过渡页（抽取后无文字），把全讲从「SVD 怎么算」切到「SVD 怎么用」。前面 p34 到 p40 解决算法，后面 p42 到 p47 用同一个 7×5 例子演示用途：把查询映射到概念空间找相似用户、压缩存储、以及在概念空间里做比较。看到这页就提醒自己：公式已经讲完，接下来全是套用。</p></div></div></article><article class="slide" id="p42"><div class="slide-h"><span class="pno">P42</span><h3>查询：谁喜欢 Matrix</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p042.png" alt="L7 第42页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>提出实战问题：怎么找出喜欢《Matrix》的用户？难点是原始空间里大多数用户根本没评过 Matrix，没法直接算相似度。思路是先把查询（query）映射到概念空间（concept space），再在低维概念空间里比较——这样即使两人没有共同评分，也能通过概念坐标判断口味是否相近。</p><p class="sx">🎯 会考思路：原始空间映射到概念空间，再做相似度。</p></div></div></article><article class="slide" id="p43"><div class="slide-h"><span class="pno">P43</span><h3>构造查询向量 q</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p043.png" alt="L7 第43页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>第一步构造查询向量：把 Matrix 打 5 分、其余电影 0 分，得到行向量 q = [5, 0, 0, 0, 0]（五列顺序是 Matrix、Alien、Serenity、Casablanca、Amelie）。它和用户评分的表示方式完全一样，只是只有一个非零项。第二步：把它投影到概念空间——与每个概念向量 vᵢ 做内积（inner product）。为什么查询要用同一种表示：只有在同一个空间里，内积才对得上「相似度」这个含义。</p><p class="sx">🎯 易错：q 是行向量、长度 n（电影数），别和用户数混淆。</p></div></div></article><article class="slide" id="p44"><div class="slide-h"><span class="pno">P44</span><h3>内积投影到 v1、v2</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p044.png" alt="L7 第44页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>具体算内积：q·v₁ = 5 × 0.56 = 2.8，q·v₂ = 5 × 0.12 = 0.6。图上把 q 分解到 v₁、v₂ 两个方向，投影长度就是这些内积。所以「投影到概念空间」就是分别算 q 在每个概念向量上的分量——只有 q 的非零维才会贡献，这也是为什么查询向量通常很稀疏。验证一下：V 的第一列 0.56 是 Matrix 在 SciFi 概念的坐标，乘评分 5 就是它在概念上的总量。</p><p class="sx">🎯 会算：q·vᵢ 只需乘对应的非零评分。</p></div></div></article><article class="slide" id="p45"><div class="slide-h"><span class="pno">P45</span><h3>紧凑写法：q_concept = qV</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p045.png" alt="L7 第45页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>把所有内积写成一个矩阵乘法：q_concept = qV（1×n 乘 n×r 得 1×r）。例：q = [5,0,0,0,0]，V 的 5 行是五部电影的 (SciFi, Romance) 坐标，于是 q_concept = [2.8, 0.6]。原始空间里的一个查询 q 被压缩成两个数——这就是「把查询映射进概念空间」的操作定义，考试常直接考 qV 这一步。注意 V 是 n×r（每行一部电影），所以 qV 得到 1×r；写成 Vᵀ 形状就不对了。</p><p class="sx">🎯 会背：q_concept = qV；注意是行向量右乘 V，不是乘 Vᵀ。</p></div></div></article><article class="slide" id="p46"><div class="slide-h"><span class="pno">P46</span><h3>用户也能映射进概念空间</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p046.png" alt="L7 第46页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>同样的办法处理用户：d = [0, 4, 5, 0, 0] 表示给 Alien 打 4 分、Serenity 打 5 分。d_concept = dV = 4×[0.59, −0.02] + 5×[0.56, 0.12] = [5.16, 0.52] ≈ [5.2, 0.4]。所以任何人只要有一行评分，就能被压缩成概念空间里的几个坐标；这一步和 L9 推荐系统里的「用户画像向量」完全同源。自己验算：4×0.59 + 5×0.56 = 2.36 + 2.8 = 5.16。对比 q 只评 Matrix 得到 [2.8, 0.6]，两者第一分量都很大，说明都被判定为爱看科幻。</p><p class="sx">🎯 会算：d 的非零位置决定用 V 的哪几行加权。</p></div></div></article><article class="slide" id="p47"><div class="slide-h"><span class="pno">P47</span><h3>零重叠也能算相似</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p047.png" alt="L7 第47页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>本页点出结论：q 只评过 Matrix，d 只评过 Alien 和 Serenity，两人的共同评分是零，原始空间根本没法比；但投影后 q_concept = [2.8, 0.6]、d_concept = [5.2, 0.4]，两者分量同号、方向接近，余弦相似度接近 1。也就是说：概念空间通过共享的潜在因子，让「没有任何交集」的两个用户也能被判为相似。</p><p class="sx">🎯 会考结论：概念空间可解决稀疏、无重叠情况下的相似度计算。</p></div></div></article><article class="slide" id="p48"><div class="slide-h"><span class="pno">P48</span><h3>SVD 的优缺点</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p048.png" alt="L7 第48页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>给 SVD 打分。优点：在 Frobenius 范数下给出最优的低秩近似。缺点两条：①可解释性问题——每个奇异向量都是所有原始行、列的线性组合，说不清它对应哪个真实特征；②不稀疏——奇异向量几乎处处非零，U、V 都是稠密矩阵，存起来依然很贵。这两条缺点直接引出后面的 CUR 分解。</p><p class="sx">🎯 会考对比：SVD 最优但稠密、难解释；CUR 可解释、稀疏、有重复。</p></div></div></article><article class="slide" id="p49"><div class="slide-h"><span class="pno">P49</span><h3>SVD 视频（链接页）</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p049.png" alt="L7 第49页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>本页只有一个 SVD 教学视频链接，属补充材料。没条件看视频的话，记住几何直觉：A = U Σ Vᵀ 相当于旋转—拉伸—旋转，奇异值就是各方向被拉伸的倍数。</p><p class="sx">🎯 视频页不会考；记住旋转—拉伸—旋转的几何图像即可。</p></div></div></article><article class="slide" id="p50"><div class="slide-h"><span class="pno">P50</span><h3>过渡：稀疏矩阵与稠密因子</h3></div><div class="slide-b"><img src="slides/L7/p050.png" alt="L7 第50页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>图页/过渡页（抽取后无文字），位置在 SVD 缺点之后、CUR 之前。核心一句话：真实的数据矩阵 A 往往非常稀疏（文本、图、作者-会议矩阵都如此），但 SVD 得到的 U、V 是稠密的。看到这页就提醒自己：下一页要介绍一种只用 A 的真实行和列、从而保持稀疏的分解——CUR。</p></div></div></article><article class="slide" id="p51"><div class="slide-h"><span class="pno">P51</span><h3>CUR 的动机</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p051.png" alt="L7 第51页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>引出 CUR：我们要分解的 A 常常非常稀疏，但 SVD 得到的 U、V 完全不稀疏，既费存储又难解释。CUR 分解（CUR decomposition）的对策是：只用 A 中随机选出的若干行和列来构造分解，于是基向量就是原始的行和列，矩阵保持稀疏、结果也更容易解释。</p><p class="sx">🎯 会考：CUR 用真实列 C、行 R 构造函数库；动机是稀疏与可解释。</p></div></div></article><article class="slide" id="p52"><div class="slide-h"><span class="pno">P52</span><h3>CUR：目标与形状</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p052.png" alt="L7 第52页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>目标是把 A 表示成 C U R 的乘积，使 ‖A − C U R‖_F 尽量小。C 由 A 的若干真实列组成（m×c），R 由 A 的若干真实行组成（r×n），中间 U 是 c×r 的小矩阵。图里把 A 拆成三段并标出维数。注意 U 不是原始数据的一部分，它是为了把 C 和 R 拼回 A 而算出来的胶水：C 的坐标要翻译成 R 的坐标，全靠这个 U。</p><p class="sx">🎯 必背形状：C m×c、U c×r、R r×n；C、R 必须是 A 的真实列、行。</p></div></div></article><article class="slide" id="p53"><div class="slide-h"><span class="pno">P53</span><h3>U 来自交集 W 的伪逆</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p053.png" alt="L7 第53页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>补上约束与 U 的来历：C 和 R 必须是 A 的真实列和行；U 由 C 与 R 的交集 W 决定——W 就是被选中的那些列与行的交叉部分（c×r）。图上用阴影标出 A 中被 C 覆盖的列、被 R 覆盖的行，以及两者交叠的 W。直觉：C 和 R 都取自 A，只有交集的缩放系数能保证两边对齐。</p><p class="sx">🎯 会考：W = C 与 R 的交集，U = W 的伪逆。</p></div></div></article><article class="slide" id="p54"><div class="slide-h"><span class="pno">P54</span><h3>伪逆的算法</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p054.png" alt="L7 第54页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>伪逆（pseudoinverse）怎么算：对 W 做 SVD，W = X Z Yᵀ，则 W⁺ = Y Z⁺ Xᵀ，其中 Z⁺ 把每个非零奇异值取倒数（Z⁺ᵢᵢ = 1/Zᵢᵢ）。于是 U = Y(Z⁺)Xᵀ。为什么伪逆管用：当 W 可逆时 W⁻¹ = Y Z⁻¹ Xᵀ（利用 X、Y 正交、Z 对角），伪逆就是真逆；W 不满秩时它只对非零奇异值取倒数，正好躲开除零。注意 Z⁺ 是伪逆的奇异值矩阵，不是 Z 的转置，别混淆。</p><p class="sx">🎯 会考：Z⁺ 只对非零奇异值取倒数；满秩时伪逆等于真逆。</p></div></div></article><article class="slide" id="p55"><div class="slide-h"><span class="pno">P55</span><h3>按重要度非均匀采样</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p055.png" alt="L7 第55页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>要降低期望误差，行和列不能均匀地抽，必须非均匀。一行或一列的重要性 = 其 Frobenius 范数的平方 = 元素平方和，采样概率与重要性成正比。例：[3,4,5] 的重要性是 9+16+25 = 50，[3,0,1] 是 9+0+1 = 10，所以第一行被抽中的概率是第二行的 5 倍。这也解释了为什么范数大的行列会被重复选中。</p><p class="sx">🎯 会算：importance = Σxᵢ²；概率与 importance 成正比。</p></div></div></article><article class="slide" id="p56"><div class="slide-h"><span class="pno">P56</span><h3>列采样算法</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p056.png" alt="L7 第56页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>给出列采样算法（行同理）：按 pᵢ = importanceᵢ / Σ importance 独立抽取 c 次，抽到第 i 列就可能不止一次；标准实现还会把选中的列乘以 1/√(c·pᵢ) 做缩放，以保证无偏。课件特别强调这是随机化算法（randomized algorithm）：同一列可以被重复抽中——所以输出里出现重复列是正常现象，不是程序出错。</p><p class="sx">🎯 易错：重复采样是设计的一部分；缺缩放会产生偏差。</p></div></div></article><article class="slide" id="p57"><div class="slide-h"><span class="pno">P57</span><h3>CUR 的直观解释</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p057.png" alt="L7 第57页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>给出 CUR 的粗略直觉：采样概率按元素平方和，所以离原点远的行、列更容易被选中；在没有离群点的平滑数据里，这些方向恰好是方差最大的方向。例子：两团云呈一定角度分开时，SVD 的轴必须互相正交，会落在两团云中间；CUR 会直接选中两团云各自的方向——更贴近真实结构，但两条轴可能几乎重复。</p><p class="sx">🎯 会考对比：SVD 轴正交但可能折中；CUR 轴真实但可能冗余。</p></div></div></article><article class="slide" id="p58"><div class="slide-h"><span class="pno">P58</span><h3>CUR 的误差保证</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p058.png" alt="L7 第58页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>误差保证：取 c = O(k log k / ε²) 列、同样多的行，则 ‖A − C U R‖_F ≤ (2 + ε)·‖A − Aₖ‖_F 以 98% 的概率成立——也就是只要最优秩-k 近似误差的一个常数倍。实践里更简单：对目标秩 k，取大约 4k 行和 4k 列。图里把 SVD 的误差、最优秩-k 近似 Aₖ 与 CUR 的误差画在一起对比。含义是：用常数倍的误差，换只看几百行几百列的存储，非常划算。</p><p class="sx">🎯 会背：误差 ≤ (2+ε)‖A−Aₖ‖_F，概率 98%；实践取 c = r = 4k。</p></div></div></article><article class="slide" id="p59"><div class="slide-h"><span class="pno">P59</span><h3>CUR 的优缺点</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p059.png" alt="L7 第59页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>CUR 的优缺点：优点是①好解释——基向量就是真实的列和行，可以直接说「这个方向对应这位作者、那个会议」；②基稀疏，存储省。缺点：范数大的行和列会被反复抽到，产生重复（duplicate），既浪费采样预算，又可能漏掉范数小但方向重要的行列。</p><p class="sx">🎯 会考三点：可解释、稀疏、可能重复；正好和 SVD 互补。</p></div></div></article><article class="slide" id="p60"><div class="slide-h"><span class="pno">P60</span><h3>SVD 与 CUR 的存储对比</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p060.png" alt="L7 第60页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>用存储量收尾：A 常常巨大但稀疏；SVD 的 U（m×r）和 V（n×r）是大而稠密，Σ 小而稠密，这是 SVD 在超大稀疏矩阵上的瓶颈；CUR 的 C、R 直接取自 A，所以大但稀疏，中间 U 是 c×r 的小矩阵，稀疏且小。结论：数据越稀疏、越大，CUR 的存储优势越明显。一句话记：SVD 把稀疏换成了稠密，CUR 把稠密换成了稀疏但重复。</p><p class="sx">🎯 会考这张对比：SVD 瓶颈是稠密因子；CUR 瓶颈是重复行列。</p></div></div></article><article class="slide" id="p61"><div class="slide-h"><span class="pno">P61</span><h3>实例：DBLP 作者-会议矩阵</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p061.png" alt="L7 第61页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>真实例子：DBLP 文献数据的作者-会议矩阵，Aᵢⱼ = 作者 i 在会议 j 发表的论文数，428,000 行作者 × 3,659 列会议，极其稀疏。要降维就必须回答三个工程问题：要花多少时间（time）、重构误差多大（error）、需要多少空间（space）。这三个量就是下一页实验图的三个评价维度。</p><p class="sx">🎯 会记数字 428K × 3659；这是超高稀疏矩阵的典型规模。</p></div></div></article><article class="slide" id="p62"><div class="slide-h"><span class="pno">P62</span><h3>SVD vs CUR 实验对比</h3><span class="ch-tag hot">考点</span></div><div class="slide-b"><img src="slides/L7/p062.png" alt="L7 第62页课件原图" loading="lazy" decoding="async"><div class="slide-t"><p>实验结论页：对比 SVD、CUR 和去重版 CUR 的准确率、空间比与 CPU 时间。准确率定义为 1 − 相对平方误差和；空间比 = 输出矩阵元素数 / 输入矩阵元素数。结论：CUR 的空间比与 CPU 时间都远小于 SVD（因为只存采样到的行列），准确率略低；去重版 CUR 通过避免重复采样，把准确率补回来一些。</p><p class="sx">🎯 会考三指标定义：accuracy = 1 − 相对 SSE；space ratio = 输出元素/输入元素。</p></div></div></article></section></main>
+<div class="pnav"><a href="L6.html">← L6 ML II</a><a href="L8.html" style="text-align:right">L8 可视化 →</a></div><footer>依据 9 个课件（L1–L9）整理 · 半期范围 L1–L7（第七章 降维为终点）· L8/L9 为拓展 · <span class="extra">课外补充</span> 为帮助理解而添加、非课件原文。<br>本复习站完全离线：拷贝整个「复习站」文件夹到任何电脑，双击 index.html 即可。</footer>
+<button id="totop" type="button" aria-label="回到顶部">↑</button>
+<script src="assets/app.js"></script>
+</body>
+</html>

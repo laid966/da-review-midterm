@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#4c5fd5">
+<title>Data Analytics 半期复习站 · L1–L7 逐页精讲</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div id="prog"></div>
+<header class="hero">
+  <div class="hero-in">
+    <div class="kicker">CIE6006 / MCE5918 &nbsp;·&nbsp; Data Analytics</div>
+    <h1>半期复习站 · 逐页精讲版<br><span style="font-size:.6em;font-weight:600;opacity:.95">L1 导论 → L7 降维（半期到此）· 730 页课件原图 + 中文逐页讲解</span></h1>
+    <p class="sub">重点笔记 / 逐页精讲 / 公式速查 / 模拟卷 / 3 天计划 · 中文讲解 + 英文术语</p>
+    <div class="scope">
+      <b>半期考试范围：第 1–7 章</b>（以「L7-DR 半期到此」为准）<br>
+      L8 数据可视化、L9 推荐系统 <b>不在半期范围内</b>，作为拓展附在最后。
+      <div class="row">
+        <span class="pillc">L1 导论</span><span class="pillc">L2 SQL</span><span class="pillc">L3 相似性 I</span><span class="pillc">L4 相似性 II</span><span class="pillc">L5 机器学习 I</span><span class="pillc">L6 机器学习 II</span><span class="pillc">L7 降维</span><span class="pillc out">L8 可视化</span><span class="pillc out">L9 推荐</span>
+      </div>
+      <div class="cdown">⏳ <b id="cdays">3 天</b> 至半期考试</div>
+    </div>
+  </div>
+</header>
+<nav class="tabs"><a href="#overview">考纲地图</a><a href="index.html" class="active" style="display:none">首页</a><a href="L1.html">L1 导论</a><a href="L2.html">L2 SQL</a><a href="L3.html">L3 相似 I</a><a href="L4.html">L4 相似 II</a><a href="L5.html">L5 ML I</a><a href="L6.html">L6 ML II</a><a href="L7.html">L7 降维</a><a href="L8.html" class="out">L8 可视化</a><a href="L9.html" class="out">L9 推荐</a><a href="index.html#cross">公式速查</a><a href="index.html#quiz">模拟卷</a><a href="index.html#plan">3 天计划</a><span class="sp"></span><button id="expand" data-open="0" type="button">展开全部答案</button><button id="theme" type="button" aria-label="切换深色模式">☾</button></nav>
+<main><div class="usenote">📴 <b>完全离线使用</b>：本「复习站」是一个文件夹，不需要网络、不需要启动任何程序。把整个 <b>复习站</b> 文件夹拷进 U 盘或任何电脑，双击 <b>index.html</b>（或双击外面的「打开复习站.bat」）即可。也可以在浏览器地址栏输入：<code>file:///E:/研一上选课/5918/复习站/index.html</code><br>💡 每讲页面 = 上半部分「重点笔记」（考点卡/公式/易错/自测） + 下半部分「逐页精讲」（730 页课件原图，每页配中文讲解）。</div><section class="sec" id="lectures"><div class="ch-head"><h2>📚 九讲入口</h2><p class="ch-sub">L1–L7 半期范围（逐页精讲）；L8/L9 拓展（原文浏览）。</p></div><div class="lcards"><a class="lcard" href="L1.html"><h3>L1 · 导论</h3><p>数据时代、大数据 5V、数据科学生命周期、分析类型、过拟合/欠拟合、伦理</p><div class="tagrow"><span class="ch-tag mid">中频</span><span class="ch-tag">逐页精讲 66 页</span></div></a><a class="lcard" href="L2.html"><h3>L2 · SQL</h3><p>关系代数、SELECT-FROM-WHERE、聚合分组、NULL 三值逻辑、JOIN、子查询、索引</p><div class="tagrow"><span class="ch-tag hot">高频</span><span class="ch-tag">逐页精讲 109 页</span></div></a><a class="lcard" href="L3.html"><h3>L3 · 相似 I</h3><p>Jaccard/余弦/编辑距离、MinHash、LSH banding、S 曲线与调参</p><div class="tagrow"><span class="ch-tag hot">高频</span><span class="ch-tag">逐页精讲 55 页</span></div></a><a class="lcard" href="L4.html"><h3>L4 · 相似 II</h3><p>LSH 家族：p-稳定分桶、余弦超平面、MinHash；相似连接、海量去重</p><div class="tagrow"><span class="ch-tag mid">中频</span><span class="ch-tag">逐页精讲 58 页</span></div></a><a class="lcard" href="L5.html"><h3>L5 · ML I</h3><p>T-E-P 框架、LR/KNN/决策树/SVM/集成/CNN、混淆矩阵与 ROC/AUC、正则化</p><div class="tagrow"><span class="ch-tag hot">最高频</span><span class="ch-tag">逐页精讲 140 页</span></div></a><a class="lcard" href="L6.html"><h3>L6 · ML II</h3><p>维度灾难、k-means 与 k-means++、层次聚类、BFR（2d+1 统计量/马氏距离）、CURE</p><div class="tagrow"><span class="ch-tag hot">高频</span><span class="ch-tag">逐页精讲 72 页</span></div></a><a class="lcard" href="L7.html"><h3>L7 · 降维</h3><p>SVD 与特征分解、PCA 步骤与方差解释、秩-k 近似/Eckart-Young、CUR</p><div class="tagrow"><span class="ch-tag hot">高频 · 压轴</span><span class="ch-tag">逐页精讲 62 页</span></div></a><a class="lcard out" href="L8.html"><h3>L8 · 可视化</h3><p>视觉编码、通道与颜色、标记/交互、可视化流程</p><div class="tagrow"><span class="ch-tag cold">不考</span><span class="ch-tag">原文浏览 71 页</span></div></a><a class="lcard out" href="L9.html"><h3>L9 · 推荐</h3><p>效用矩阵、MF/ALS、SVD++、时间模型、Netflix Prize</p><div class="tagrow"><span class="ch-tag cold">不考</span><span class="ch-tag">原文浏览 97 页</span></div></a><a class="lcard" href="index.html#cross"><h3>🧮 公式速查</h3><p>全部计算公式一页汇总 + 20 组易混概念对照</p><div class="tagrow"><span class="ch-tag hot">考前必看</span></div></a><a class="lcard" href="index.html#quiz"><h3>📝 模拟卷</h3><p>18 选择 + 6 简答 + 6 计算，答案可折叠</p><div class="tagrow"><span class="ch-tag hot">30 题</span></div></a><a class="lcard" href="index.html#plan"><h3>🗓 3 天冲刺计划</h3><p>Day1–Day3 安排 + 只剩 1 天应急版 + 考前 30 分钟</p><div class="tagrow"><span class="ch-tag hot">时间紧先看这里</span></div></a></div></section><section class="ch" id="overview">
+  <div class="ch-head">
+    <div class="ch-badge">00</div>
+    <div>
+      <h2>考纲地图：这份手册怎么用<span class="en">Scope Map</span><span class="ch-tag hot">先看这页</span></h2>
+      <p class="ch-sub">先花 5 分钟弄清"考到哪、哪些必考、哪些可以放弃"，比盲目背书效率高得多。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📌 一句话结论</h3>
+    <p>半期考 <b>L1–L7 七讲</b>：导论、SQL、相似性搜索 I/II、机器学习 I/II、<b>降维（第七章，半期到此）</b>。L8 可视化、L9 推荐系统<b>不在范围内</b>，本手册仍完整收录（标了「拓展」），有余力再看。</p>
+    <p class="note">复习优先级（按性价比）：<b>L7 降维 ≈ L5 机器学习 I &gt; L2 SQL &gt; L3+L4 相似性搜索 &gt; L6 聚类 &gt; L1 导论</b>。L5 页数最多（140 页）但考点最标准化；L7 是最后一讲，老师常把压轴计算题放这里。</p>
+  </div>
+
+  <div class="card">
+    <h3>🗺️ 各讲 · 考纲速览</h3>
+    <p class="note">"权重"是按页数、公式密度、能否出计算题给出的<b>复习建议</b>，非官方分值。</p>
+    <div class="concept">
+      <h4>L1 数据分析导论 <span class="en">Introduction</span> <span class="ch-tag cold">权重 中低</span></h4>
+      <p>66 页 · <b>最可能考法</b>：概念选择题——相关≠因果的三种解释、欠拟合 vs 过拟合、工具与技术层次。</p>
+    </div>
+    <div class="concept">
+      <h4>L2 SQL <span class="en">SQL</span> <span class="ch-tag hot">权重 高</span></h4>
+      <p>109 页 · <b>最可能考法</b>：写查询、读查询说结果、JOIN 语义、GROUP BY/HAVING、NULL 陷阱、集合运算。</p>
+    </div>
+    <div class="concept">
+      <h4>L3 相似性搜索 I <span class="en">Similarity Search I</span> <span class="ch-tag hot">权重 高</span></h4>
+      <p>55 页 · <b>最可能考法</b>：Jaccard 计算、Min-Hash 签名与概率、LSH 公式 1−(1−sʳ)ᵇ 与参数方向。</p>
+    </div>
+    <div class="concept">
+      <h4>L4 相似性搜索 II <span class="en">Similarity Search II</span> <span class="ch-tag hot">权重 高</span></h4>
+      <p>58 页 · <b>最可能考法</b>：(d₁,d₂,p₁,p₂)-sensitive 定义、AND/OR 构造、S-curve 推阈值、余弦/欧氏 LSH。</p>
+    </div>
+    <div class="concept">
+      <h4>L5 机器学习基础 I <span class="en">ML Basics I</span> <span class="ch-tag hot">权重 最高</span></h4>
+      <p>140 页 · <b>最可能考法</b>：混淆矩阵算指标、算法对比（SVM/KNN/DT/RF）、CNN 结构与参数计算、训练技巧。</p>
+    </div>
+    <div class="concept">
+      <h4>L6 机器学习基础 II <span class="en">ML Basics II</span> <span class="ch-tag mid">权重 中高</span></h4>
+      <p>72 页 · <b>最可能考法</b>：k-means 迭代计算、层次聚类合并顺序、BFR 的 2d+1 与三集合、CURE 思想。</p>
+    </div>
+    <div class="concept">
+      <h4>L7 降维 <span class="en">Dimensionality Reduction</span> <span class="ch-tag hot">权重 最高 · 半期终点</span></h4>
+      <p>62 页 · <b>最可能考法</b>：SVD 分解与三块含义、最优低秩近似与误差、SVD vs CUR、查询映射。</p>
+    </div>
+    <div class="concept">
+      <h4>L8 数据可视化 <span class="en">Data Visualization</span> <span class="ch-tag cold">拓展 · 超出半期范围</span></h4>
+      <p>71 页 · 不作为半期考点；与 L1 的可视化话题呼应，可当背景阅读。</p>
+    </div>
+    <div class="concept">
+      <h4>L9 推荐系统 <span class="en">Recommendation Systems</span> <span class="ch-tag cold">拓展 · 超出半期范围</span></h4>
+      <p>97 页 · 不作为半期考点；但它把 L7 的 SVD、L3 的相似度直接用起来，是很好的串联材料。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🧭 七讲知识骨架（一张图看懂全课逻辑）</h3>
+    <pre class="dia">          ┌─────────── L1 导论 ───────────┐
+          │ 数据从哪来 → 怎么处理 → 陷阱    │
+          └──────────────┬────────────────┘
+                         │ 需要"存 + 查"
+                   ┌─────▼─────┐
+                   │  L2 SQL   │ 表/键/查询/聚合
+                   └─────┬─────┘
+     ┌───────────────────┴──────────────────┐
+     │ 数据大、脏 → 先找"相似"                │
+┌────▼────┐          ┌────────────┐          │
+│L3 相似 I│─────────▶│L4 相似 II  │          │
+│Shingling│ 同一套   │距离公理/家族│          │
+│Min-Hash │ 形式化   │余弦/欧氏   │          │
+└────┬────┘          └─────┬──────┘          │
+     │ 干净数据 → 学模型    │                  │
+┌────▼──────┐      ┌───────▼──────┐          │
+│L5 ML 基础 I│      │L6 ML 基础 II │          │
+│监督+CNN+指标│     │无监督+聚类    │          │
+└────┬──────┘      └───────┬──────┘          │
+     │ 维度太高 → 降维      │                  │
+     └──────────┬──────────┘                 │
+           ┌────▼────┐                        │
+           │ L7 降维 │ SVD/低秩/CUR ← 半期到此│
+           └────┬────┘                        │
+     ┌──────────┴──────────┐                 │
+┌────▼─────┐        ┌──────▼─────┐           │
+│L8 可视化  │        │L9 推荐系统  │ ← 拓展     │
+└──────────┘        └────────────┘           │
+</pre>
+    <p class="note">串起来看：<b>SQL</b> 管"怎么取数"，<b>相似性搜索</b> 管"在大数据里找相似对象"，<b>ML</b> 管"建模预测"，<b>降维</b> 管"维度太高怎么办"。考题常跨讲：L7 的 SVD 直接服务于 L9 推荐系统，L3 的 Jaccard 直接变成 L9 的用户相似度。</p>
+  </div>
+
+  <div class="card">
+    <h3>📝 题型预判与作答策略</h3>
+    <div class="concept">
+      <h4>选择 / 判断 <span class="ch-tag cold">约 30–40%</span></h4>
+      <p>背"定义 + 反例"。重点：相关≠因果、过拟合、UNION vs UNION ALL、LSH 参数方向、precision/recall。</p>
+    </div>
+    <div class="concept">
+      <h4>简答 / 对比 <span class="ch-tag cold">约 25–30%</span></h4>
+      <p>准备 10 组对比模板：4 种 JOIN、SVD vs CUR、层次 vs k-means、user-user vs item-item、InfoVis vs SciVis……</p>
+    </div>
+    <div class="concept">
+      <h4>计算 <span class="ch-tag cold">约 25–35%</span></h4>
+      <p>只考这几类：Jaccard/Min-Hash、LSH 概率 1−(1−sʳ)ᵇ、混淆矩阵指标、k-means 一轮迭代、SVD 低秩近似误差。练到 3 分钟算完。</p>
+    </div>
+    <div class="concept">
+      <h4>SQL 写查询 <span class="ch-tag cold">约 10–15%</span></h4>
+      <p>背模板：JOIN + GROUP BY + HAVING；IN/EXISTS 嵌套；LEFT JOIN 找"没有"。写完检查聚合列与 GROUP BY。</p>
+    </div>
+    <p class="note">计算题给步骤分：<b>公式 → 代入 → 中间结果 → 结论</b>。数字算错但公式对了也能拿大半。</p>
+  </div>
+
+  <div class="mnemonic"><b>记忆口诀（全课）</b>：<b>导论看陷阱，SQL 看语义，相似看概率，学习看指标，聚类看距离，降维看分解</b>。</div>
+</section>
+<section class="ch" id="cross">
+  <div class="ch-head">
+    <div class="ch-badge">∑</div>
+    <div>
+      <h2>公式速查 · 概念对照<span class="en">Cheat Sheet</span><span class="ch-tag hot">考前必背</span></h2>
+      <p class="ch-sub">所有能出计算题的公式 + 所有容易被出成对比题的概念，集中在这里。考前 30 分钟只看这一节。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📐 公式总表（按讲次）</h3>
+    <table class="cmp">
+      <thead><tr><th>模块</th><th>公式</th><th>说明 / 考点</th></tr></thead>
+      <tbody>
+        <tr><td rowspan="2">L3 Jaccard</td><td class="math">J(A,B) = |A ∩ B| / |A ∪ B|</td><td>集合相似度，0–1。文档相似度用它（不是欧氏距离）。</td></tr>
+        <tr><td class="math">Pr[ h(C₁) = h(C₂) ] = J(C₁,C₂)</td><td><b>Min-Hash 的核心性质</b>：单个哈希函数命中概率 = Jaccard。必考证明/解释。</td></tr>
+        <tr><td rowspan="3">L3/L4 LSH</td><td class="math">P = 1 − (1 − sʳ)ᵇ</td><td>b 个 band、每 band r 行，相似度 s 的两个文档成为候选对的概率。</td></tr>
+        <tr><td class="math">s* ≈ (1/b)^(1/r)</td><td>S-curve 的阈值近似位置；b↑ 阈值↓（召回↑），r↑ 阈值↑（精度↑）。</td></tr>
+        <tr><td class="math">AND: p → pʳ ｜ OR: p → 1 − (1−p)ᵇ</td><td>r 次 AND 压低下概率，b 次 OR 抬高上概率，拼起来就是陡峭 S-curve。</td></tr>
+        <tr><td rowspan="2">L4 距离的 LSH</td><td class="math">P[同桶] = 1 − θ/π</td><td>余弦距离 + 随机超平面。θ=π/2 时 P=0.5，即"距离阈值 0.5"。</td></tr>
+        <tr><td class="math">P[同桶] ≥ 1 − d/a</td><td>欧氏距离 + 直线分桶（桶宽 a），前提 d &lt; a/2。a 越大越容易同桶。</td></tr>
+        <tr><td rowspan="6">L5 评价指标</td><td class="math">Accuracy = (TP+TN) / (TP+FP+FN+TN)</td><td>类别不平衡时会"虚高"，是经典陷阱。</td></tr>
+        <tr><td class="math">Precision = TP / (TP + FP)</td><td>"说是正例的里面有多少真是"——查准率。</td></tr>
+        <tr><td class="math">Recall = TP / (TP + FN)</td><td>= Sensitivity，查全率；把阈值降低可以刷到 100% 但 Precision 崩。</td></tr>
+        <tr><td class="math">Specificity = TN / (TN + FP)</td><td>负类召回。</td></tr>
+        <tr><td class="math">F₁ = 2·P·R / (P + R)</td><td>调和平均，偏向较小的一方。</td></tr>
+        <tr><td class="math">IoU = TP / (TP + FP + FN)</td><td>= |A∩B| / |A∪B|；mIoU 是各类 IoU 的均值（分割任务）。</td></tr>
+        <tr><td rowspan="2">L6 聚类</td><td class="math">J = ∑ᵢ ∑_{x∈Cᵢ} ‖x − μᵢ‖²</td><td>k-means 目标函数（SSE）；每轮"分配 + 更新质心"单调不增。</td></tr>
+        <tr><td class="math">2d + 1 个值</td><td>BFR 用 (N, SUM, SUMSQ) 概括一个簇，d 维 → 2d+1。考点：为什么内存 O(簇数) 而非 O(点数)。</td></tr>
+        <tr><td rowspan="4">L7 降维</td><td class="math">A = U Σ Vᵀ</td><td>m×n = (m×r)(r×r)(r×n)。U、V 列/行正交，Σ 对角奇异值降序。</td></tr>
+        <tr><td class="math">Aₖ = Uₖ Σₖ Vₖᵀ</td><td>取前 k 个奇异值/向量 = 最优 rank-k 近似（Frobenius 范数意义下）。</td></tr>
+        <tr><td class="math">‖A − Aₖ‖_F = √(σ²_{k+1} + … + σ²_r)</td><td>低秩近似误差 = 丢掉的那些奇异值平方和开根。<b>最爱考的计算。</b></td></tr>
+        <tr><td class="math">q_concept = q · V</td><td>把新查询映射到"概念空间"，再算相似度。</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>🔀 必背概念对照（对比题模板）</h3>
+    <table class="cmp">
+      <thead><tr><th>易混对</th><th>区别一句话</th></tr></thead>
+      <tbody>
+        <tr><td>相关 Correlation vs 因果 Causation</td><td>相关只是"数值同向变化"；因果需要满足"改 X 会导致 Y 变"。相关可由因果、共同原因（confounder）、纯巧合（spurious）三种原因造成。</td></tr>
+        <tr><td>欠拟合 Underfitting vs 过拟合 Overfitting</td><td>模型太简单（训练/测试都差）vs 模型太复杂（训练好、测试差）。前者加复杂度，后者加数据/正则/简化。</td></tr>
+        <tr><td>Data Mining vs Machine Learning vs Visualization</td><td>挖模式（描述）vs 建模型做预测（预测）vs 用图讲清结论（沟通）。</td></tr>
+        <tr><td>INNER JOIN vs OUTER JOIN</td><td>INNER 丢不匹配行；LEFT/RIGHT/FULL 保留一侧/两侧的"孤儿行"，缺失列补 NULL。</td></tr>
+        <tr><td>UNION vs UNION ALL</td><td>UNION 去重（集合语义），UNION ALL 不去重（多重集语义，更快）。</td></tr>
+        <tr><td>WHERE vs HAVING</td><td>WHERE 在分组前过滤元组；HAVING 在 GROUP BY 之后过滤"组"。</td></tr>
+        <tr><td>Min-Hash vs LSH</td><td>Min-Hash 把"长集合"压成"短签名"（保相似度）；LSH 把"签名"分桶，只比较可能相似的对（省计算）。两者是流水线的两步。</td></tr>
+        <tr><td>监督 vs 无监督</td><td>有标签学映射（分类/回归）vs 无标签找结构（聚类/降维）。</td></tr>
+        <tr><td>Precision vs Recall</td><td>查得准（报的里面真有多少）vs 查得全（真的里面抓到多少）。此消彼长，用 F₁ 折中。</td></tr>
+        <tr><td>层次聚类 vs k-means</td><td>层次：不需要 k、给树状图、O(N²) 级；k-means：需要 k、快、对初始化敏感、只适合球形簇。</td></tr>
+        <tr><td>Single link vs Complete link</td><td>单链用"最近一对点"距离（会 chaining 拉长条），全链用"最远一对点"（倾向紧凑球）。</td></tr>
+        <tr><td>BFR vs CURE</td><td>BFR 假设簇是"轴对齐高斯"（用均值/方差概括）；CURE 用"多个代表点 + 收缩"处理任意形状，两遍扫描。</td></tr>
+        <tr><td>SVD vs CUR</td><td>SVD 最优但 U/V 是"抽象概念"，不可解释、稠密；CUR 用真实的行列，易解释、稀疏、近似误差更大。</td></tr>
+        <tr><td>PCA vs SVD</td><td>本质同一件事：PCA = 对中心化后的数据做 SVD，主成分 = V 的列。</td></tr>
+        <tr><td>InfoVis vs SciVis</td><td>信息可视化处理抽象数据（金融、社交）；科学可视化处理有物理空间坐标的数据（流体、医学）。</td></tr>
+        <tr><td>基于内容 vs 协同过滤</td><td>用物品自身特征画像（无需他人数据，但有冷启动特征难题）vs 用"别人的评分"（无需特征，但稀疏/冷启动）。</td></tr>
+        <tr><td>User-user vs Item-item CF</td><td>找相似用户推荐他喜欢的 vs 找相似物品（更稳定，物品数常远小于用户数）。</td></tr>
+        <tr><td>GD vs SGD</td><td>全量梯度（稳、慢）vs 单样本/小批量（快、抖、能跳出局部）。</td></tr>
+        <tr><td>BatchNorm vs LayerNorm</td><td>按 batch 维统计 vs 按单样本特征维统计（与 batch 大小无关，适合序列）。</td></tr>
+        <tr><td>Pooling vs Stride</td><td>池化降采样并带来平移不变性；stride 是卷积自己跳着走。都降分辨率，但池化无可学习参数。</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>🔢 数字与默认参数（选择题最爱）</h3>
+    <ul class="dot">
+      <li><b>L3</b>：文档去重例子 N = 100 万；示例参数 50 个哈希函数、<b>r = 5、b = 10</b>；2-shingle 例：D = abcab → {ab, bc, ca}。</li>
+      <li><b>L4</b>：余弦 LSH 用随机超平面（random hyperplanes）；欧氏 LSH 用随机直线 + 桶宽 a。</li>
+      <li><b>L5</b>：AlexNet（2012）5 个卷积层 + 2 个全连接层；<b>Xavier 初始化配 tanh</b>；Adam 是最常用的自适应方法。</li>
+      <li><b>L6</b>：BFR 每个簇用 <b>2d+1</b> 个值；CURE 两遍扫描（pass 1 抽样聚类、pass 2 全量分配）。</li>
+      <li><b>L7</b>：SVD 中 U 是 "user-to-concept"，Σ 是"概念强度"，Vᵀ 是 "concept-to-movie"。</li>
+      <li><b>L9（拓展）</b>：Netflix 数据 1 亿评分 / 48 万用户 / 17770 部电影；冠军 RMSE <b>0.8563</b>，全局均值基线 <b>1.1296</b>。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>✍️ 三类题的作答模板</h3>
+    <div class="concept">
+      <h4>对比题：三段式</h4>
+      <p>①各给一句定义 → ②列出 2–3 个维度上的差异（输入/输出、复杂度、假设、优缺点）→ ③一句"所以该用谁"。</p>
+    </div>
+    <div class="concept">
+      <h4>计算题：四步</h4>
+      <p>①写公式（拿公式分）→ ②代数值 → ③中间结果写清楚（阅卷看步骤）→ ④结论带单位/解释（比如"约 99.96%，即几乎所有相似对都被找到"）。</p>
+    </div>
+    <div class="concept">
+      <h4>SQL 题：先写骨架再补细节</h4>
+      <p>SELECT … FROM … JOIN … ON … WHERE … GROUP BY … HAVING … ORDER BY …；写完检查：聚合列是否都在 GROUP BY 里、NULL 会不会被漏掉（要"没有"的记录用 LEFT JOIN + IS NULL）。</p>
+    </div>
+  </div>
+
+  <div class="mnemonic"><b>记忆口诀</b>：<b>Jaccard 交集比并集，MinHash 概率等于它，LSH 一带一概率，1 减 (1 减 s 的 r 次) 的 b 次方</b>；<b>精确率看报出的，召回率看漏掉的，F1 取调和</b>；<b>SVD 三个矩阵，U 是概念、Σ 是强弱、V 是物品</b>。</div>
+</section>
+<section class="ch" id="quiz">
+  <div class="ch-head">
+    <div class="ch-badge">卷</div>
+    <div>
+      <h2>模拟卷（60 分钟・可折叠答案）<span class="en">Mock Exam</span><span class="ch-tag hot">真题风格</span></h2>
+      <p class="ch-sub">按半期范围 L1–L7 出的自测卷：18 道选择 + 6 道简答 + 5 道计算。先闭卷做，再点开核对；答对 80% 以上基本稳了。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>一、选择题（每题 2 分，共 36 分）</h3>
+    <details class="q"><summary>Q1. 研究显示"冰淇淋销量"与"溺水人数"高度相关。最合理的结论是？</summary>
+      <div class="q-a"><p><span class="ans">答案：D</span></p>
+      <p>A. 吃冰淇淋导致溺水　B. 溺水导致人们买冰淇淋　C. 这是纯随机巧合，无法解释　D. 存在共同原因（气温/夏季），属于"相关不等于因果"</p>
+      <p>相关可由三种原因造成：X→Y、Y→X、共同的第三变量 Z（confounder），也可纯属巧合（spurious correlation）。</p></div>
+    </details>
+    <details class="q"><summary>Q2. 某模型训练集误差 2%，测试集误差 28%，最可能的问题是？</summary>
+      <div class="q-a"><p><span class="ans">答案：B 过拟合（overfitting）</span>：模型过于"贴合"训练数据。对策：更多数据、正则化、降低模型复杂度、早停。</p></div>
+    </details>
+    <details class="q"><summary>Q3. 表 Students 有 3 行，其中 1 行 gpa 为 NULL。SELECT COUNT(*), COUNT(gpa) FROM Students 的结果是？</summary>
+      <div class="q-a"><p><span class="ans">答案：</span>COUNT(*) = 3，COUNT(gpa) = 2。</p>
+      <p>COUNT(*) 数行；COUNT(列) 忽略 NULL。同理 SUM/AVG/MIN/MAX 都跳过 NULL（AVG 是"非空值的平均"，不是把 NULL 当 0）。</p></div>
+    </details>
+    <details class="q"><summary>Q4. 对 R 和 S 做笛卡尔积（无连接条件），R 有 4 行、S 有 5 行，结果有多少行？</summary>
+      <div class="q-a"><p><span class="ans">答案：</span>20 行。</p>
+      <p>JOIN 的语义是"先做笛卡尔积，再用 ON/WHERE 过滤"，理解这一点就能解释为什么漏写连接条件会得到爆炸的行数。</p></div>
+    </details>
+    <details class="q"><summary>Q5. UNION 与 UNION ALL 的差别是？</summary>
+      <div class="q-a"><p><span class="ans">答案：</span>UNION 做集合语义（去重），UNION ALL 保留重复（多重集语义）。</p>
+      <p>课件强调 SQL 默认是 <b>multiset</b> 语义：SELECT 不去重（要 DISTINCT）、UNION ALL 不去重。UNION 因为要去重通常更慢。</p></div>
+    </details>
+    <details class="q"><summary>Q6. 想"按系分组后，只保留平均分大于 80 的系"，应该用哪个子句？</summary>
+      <div class="q-a"><p><span class="ans">答案：HAVING</span></p>
+      <p>WHERE 在分组<b>之前</b>过滤行，不能用于聚合结果；HAVING 在 GROUP BY 之后过滤组。完整写法：SELECT dept, AVG(gpa) FROM Students GROUP BY dept HAVING AVG(gpa) &gt; 80。</p></div>
+    </details>
+    <details class="q"><summary>Q7. Shingling 这一步的目的是？</summary>
+      <div class="q-a"><p><span class="ans">答案：</span>把文档转换为 <b>k-shingle 集合</b>（长度 k 的连续 token 序列），从而可以用集合相似度（Jaccard）比较两篇文档。</p>
+      <p>k 太小时常见短语会误判相似（如 the, and），k 太大则对改动过于敏感；课件例：k=2，D=abcab → {ab, bc, ca}（相邻 k 个字符）。</p></div>
+    </details>
+    <details class="q"><summary>Q8. 用 100 个 Min-Hash 函数得到签名，两文档有 62 个位置相同。估计的 Jaccard 相似度是？</summary>
+      <div class="q-a"><p><span class="ans">答案：0.62</span>（62/100）。签名相同位置的比例就是 Jaccard 的无偏估计，哈希函数越多估计越准。</p></div>
+    </details>
+    <details class="q"><summary>Q9. LSH 中<b>增大 band 数 b</b>（r 不变），S-curve 会怎样变化？</summary>
+      <div class="q-a"><p><span class="ans">答案：</span>阈值左移（变小）→ 更多对成为候选 → 召回率↑、候选集变大、精确率可能↓。</p>
+      <p>因为 P = 1 − (1 − sʳ)ᵇ：b 增大使同一 s 下 P 更大。反之增大 r（每 band 行数）会抬高阈值、让曲线更陡。</p></div>
+    </details>
+    <details class="q"><summary>Q10. 一个哈希函数族被称为 (d₁,d₂,p₁,p₂)-sensitive，需要满足？</summary>
+      <div class="q-a"><p><span class="ans">答案：</span>若 d(x,y) ≤ d₁ 则 Pr[h(x)=h(y)] ≥ p₁；若 d(x,y) ≥ d₂ 则 Pr[h(x)=h(y)] ≤ p₂（其中 d₁ &lt; d₂、p₁ &gt; p₂）。</p>
+      <p>即"近的更可能同桶、远的更不可能同桶"；两个概率差距越大，LSH 越好用。</p></div>
+    </details>
+    <details class="q"><summary>Q11. 余弦距离 LSH 用随机超平面，两向量夹角 θ=60°（π/3），它们被哈希到同一桶的概率是？</summary>
+      <div class="q-a"><p><span class="ans">答案：</span>P = 1 − θ/π = 1 − 1/3 = <b>2/3 ≈ 0.667</b>。</p>
+      <p>余弦距离 d = θ/π，所以 P = 1 − d，距离越近越容易同桶。</p></div>
+    </details>
+    <details class="q"><summary>Q12. 数据 99% 是负类，模型把所有样本都判为负类。下列说法正确的是？</summary>
+      <div class="q-a"><p><span class="ans">答案：</span>Accuracy 高达 99%，但 Recall = 0、F1 = 0，模型毫无实用价值。</p>
+      <p>这就是"类别不平衡下 accuracy 会骗人"，应看 precision/recall/F1、PR 曲线或 ROC-AUC。</p></div>
+    </details>
+    <details class="q"><summary>Q13. 降低分类阈值（更倾向判为正例），会怎样影响指标？</summary>
+      <div class="q-a"><p><span class="ans">答案：</span>Recall↑、Precision↓（FP 变多）。100% recall 很容易：把阈值降到最低，但那样 precision 极低。</p></div>
+    </details>
+    <details class="q"><summary>Q14. k-means 每次运行结果可能不同，原因是？</summary>
+      <div class="q-a"><p><span class="ans">答案：</span>目标函数非凸、<b>对初始质心敏感</b>，不同初始化会收敛到不同局部最优。缓解：多次随机初始化取 SSE 最小、k-means++、先用层次聚类给初始中心。</p></div>
+    </details>
+    <details class="q"><summary>Q15. BFR 算法中 DS（discard set）指的是？</summary>
+      <div class="q-a"><p><span class="ans">答案：</span>离某个簇质心足够近、可以被"丢弃"（只保留统计摘要）的点集；与它并列的还有 CS（compressed set，压缩集）和 RS（retained set，保留集）。</p>
+      <p>每个簇只需保存 (N, SUM, SUMSQ) 共 2d+1 个值，因此内存只与簇数有关。</p></div>
+    </details>
+    <details class="q"><summary>Q16. SVD 中 A = U Σ Vᵀ，下列说法错误的是？</summary>
+      <div class="q-a"><p><span class="ans">答案：</span>"V 的列是用户到概念的映射"是错的——<b>U 的列</b>（左奇异向量）才是 user-to-concept，<b>V 的行</b>（右奇异向量的转置）是 concept-to-movie。</p>
+      <p>Σ 对角线是奇异值，表示每个"概念"的强度，按降序排列。</p></div>
+    </details>
+    <details class="q"><summary>Q17. 相比 SVD，CUR 分解的主要优势是？</summary>
+      <div class="q-a"><p><span class="ans">答案：</span>用<b>真实的列和行</b>（C 取自 A 的列、R 取自 A 的行）作为基，<b>可解释</b>，且能保持稀疏性。</p>
+      <p>代价是近似误差通常大于 SVD；SVD 在 Frobenius 范数下是最优低秩近似，但 U/V 是抽象的稠密向量。</p></div>
+    </details>
+    <details class="q"><summary>Q18. 层次聚类用 single link（单链）的主要缺点是？</summary>
+      <div class="q-a"><p><span class="ans">答案：</span><b>Chaining（链式效应）</b>：只要两个簇各有一个点较近就合并，容易把细长的簇连成一片，无法分开。</p>
+      <p>complete link（全链，最远点距离）倾向产生紧凑的球形簇；average link 取平均距离。</p></div>
+    </details>
+  </div>
+
+  <div class="card">
+    <h3>二、简答题（每题 6 分，共 36 分）</h3>
+    <details class="q"><summary>S1. 解释"相关不等于因果"，并给出相关关系的三种可能来源。</summary>
+      <div class="q-a"><p><b>要点：</b>①X 导致 Y；②Y 导致 X（方向相反）；③第三个变量 Z 同时影响 X 和 Y（confounder，如气温同时影响冰淇淋销量和溺水人数）；④纯巧合 spurious correlation（如"尼古拉斯·凯奇电影数"与"泳池溺亡数"）。</p>
+      <p><b>补充得分点：</b>要确立因果需要对照实验/随机化，或因果推断方法，一般观测数据只能说明关联。</p></div>
+    </details>
+    <details class="q"><summary>S2. 证明/解释：为什么 Min-Hash 满足 Pr[h(C₁)=h(C₂)] = Jaccard(C₁,C₂)？</summary>
+      <div class="q-a"><p><b>要点：</b>把行分成三类：a = 两列都为 1、b = 仅 C₁ 为 1、c = 仅 C₂ 为 1。</p>
+      <p>随机置换行后，从上往下扫，<b>第一个"有 1 的行"</b>必然落在 a ∪ b ∪ c 中，且均匀分布在这 a+b+c 行里，每种情况概率相等。只有当它落在 a 类（两列都为 1）时，两列的最小行号才相同。</p>
+      <p>所以 Pr[相同] = a/(a+b+c) = |C₁∩C₂| / |C₁∪C₂| = Jaccard。</p></div>
+    </details>
+    <details class="q"><summary>S3. 说明 LSH 中 b（band 数）和 r（每 band 行数）分别如何影响 S-curve，以及怎么选？</summary>
+      <div class="q-a"><p><b>要点：</b>P = 1 − (1 − sʳ)ᵇ。</p>
+      <p>①r 控制曲线的<b>陡峭程度</b>：r 越大曲线越陡（从"几乎不可分"到"几乎全收"的过渡区越窄）。②b 控制曲线整体<b>左右平移</b>：b 越大越往左（阈值降低）。③阈值近似 s* ≈ (1/b)^(1/r)。</p>
+      <p>选法：先定住 b·r = 哈希函数总数，再按"希望在哪相似度处开始大量召回"来调；课件例子是 50 个哈希取 r=5、b=10。</p></div>
+    </details>
+    <details class="q"><summary>S4. 为什么类别不平衡时 Accuracy 不可靠？应该看什么指标？</summary>
+      <div class="q-a"><p><b>要点：</b>Accuracy = (TP+TN)/N 把两类同等对待；当负类占 99% 时，全判负即可拿 99%，但正类 Recall = 0。</p>
+      <p>应看：Precision、Recall、F1、PR 曲线（不平衡时比 ROC 更能看出问题）、ROC-AUC；或做重采样/类别加权/调整阈值。</p></div>
+    </details>
+    <details class="q"><summary>S5. 卷积神经网络相比全连接网络的两个核心设计是什么？各带来什么好处？</summary>
+      <div class="q-a"><p><b>要点：</b>①<b>稀疏连接</b>（局部感受野）：每个隐藏单元只连输入的一个局部 patch，符合图像的局部相关性，大幅减少参数。②<b>权值共享</b>（同一个 filter 滑过全图）：参数量与图像大小无关，并带来平移等变性/不变性。</p>
+      <p>配合 pooling 进一步降维、扩大感受野；深层堆叠使感受野逐层变大（高层看到更大范围）。</p></div>
+    </details>
+    <details class="q"><summary>S6. 比较 SVD 与 CUR：各自原理、优缺点、适用场景。</summary>
+      <div class="q-a"><p><b>要点：</b>SVD：A = UΣVᵀ，取前 k 个奇异值得到最优 rank-k 近似（Frobenius 范数下误差最小）；缺点：U、V 稠密且是抽象线性组合，难解释、存储大。</p>
+      <p>CUR：A ≈ C·U·R，C 为采样到的<b>真实列</b>、R 为真实行、U 由行列交集 W 求得；优点：可解释（"为什么推荐这部"能追溯到真实用户/电影）、保持稀疏、计算/存储友好；缺点：误差一般更大（随机采样，按列/行范数平方的概率抽样以降低期望误差）。</p>
+      <p>场景：只要最优压缩/降维用 SVD；需要可解释、大规模稀疏矩阵用 CUR。</p></div>
+    </details>
+  </div>
+
+  <div class="card">
+    <h3>三、计算题（共 28 分）</h3>
+    <details class="q"><summary>C1（8 分）LSH 参数：b = 20、r = 5，求 s = 0.8 与 s = 0.3 时成为候选对的概率。</summary>
+      <div class="q-a">
+        <p>公式：P = 1 − (1 − sʳ)ᵇ，r = 5、b = 20。</p>
+        <p><b>s = 0.8：</b>s⁵ = 0.32768 → 1 − 0.32768 = 0.67232 → 0.67232²⁰ ≈ 3.56×10⁻⁴ → P ≈ <b>0.9996（99.96%）</b></p>
+        <p><b>s = 0.3：</b>s⁵ = 0.00243 → 0.99757²⁰ ≈ 0.9525 → P ≈ <b>0.0475（4.75%）</b></p>
+        <p><b>结论：</b>这个参数组合的阈值大致落在 0.5–0.6 之间，相似度 0.8 的几乎全被找到，0.3 的基本被过滤掉——这正是 LSH 想要的"S 曲线"效果。</p>
+      </div>
+    </details>
+    <details class="q"><summary>C2（6 分）Min-Hash 签名：全集 {r1..r5}，C₁={r1,r3,r5}，C₂={r3,r4,r5}；h₁: r1→2, r2→4, r3→1, r4→5, r5→3；h₂: r1→4, r2→2, r3→5, r4→1, r5→3。求两列签名与相似度估计，并比较真实 Jaccard。</summary>
+      <div class="q-a">
+        <p><b>h₁：</b>C₁ 的值 {2,1,3} → min = 1；C₂ 的值 {1,5,3} → min = 1 → <b>相同</b>。</p>
+        <p><b>h₂：</b>C₁ 的值 {4,5,3} → min = 3；C₂ 的值 {5,1,3} → min = 1 → <b>不同</b>。</p>
+        <p>签名：C₁ = (1,3)，C₂ = (1,1)；估计相似度 = 1/2 = <b>0.5</b>。</p>
+        <p>真实 Jaccard：∩ = {r3,r5}（2 个），∪ = {r1,r3,r4,r5}（4 个）→ J = 2/4 = <b>0.5</b>。</p>
+        <p>本题恰好相等；一般只有 2 个哈希函数时误差很大，哈希函数越多估计越接近真值。</p>
+      </div>
+    </details>
+    <details class="q"><summary>C3（6 分）混淆矩阵：TP=30、FP=10、FN=20、TN=40。求 Accuracy、Precision、Recall、F₁、Specificity。</summary>
+      <div class="q-a">
+        <p>总数 N = 100。</p>
+        <p>Accuracy = (30+40)/100 = <b>0.70</b></p>
+        <p>Precision = 30/(30+10) = <b>0.75</b></p>
+        <p>Recall = 30/(30+20) = <b>0.60</b></p>
+        <p>F₁ = 2×0.75×0.60/(0.75+0.60) = 0.90/1.35 = <b>0.667</b></p>
+        <p>Specificity = 40/(40+10) = <b>0.80</b></p>
+      </div>
+    </details>
+    <details class="q"><summary>C4（4 分）某矩阵奇异值为 σ = (10, 5, 2, 0)。求 ‖A‖_F、rank-2 近似的误差、rank-2 保留的"能量"比例。</summary>
+      <div class="q-a">
+        <p>‖A‖_F = √(10²+5²+2²+0²) = √129 ≈ <b>11.36</b></p>
+        <p>rank-2 误差 = √(σ₃²+σ₄²) = √(4+0) = <b>2</b>（即 ‖A−A₂‖_F = 2）</p>
+        <p>保留能量 = (10²+5²)/129 = 125/129 ≈ <b>96.9%</b></p>
+        <p>要点：秩为 3（第 4 个奇异值为 0），所以 k=3 就是无损重建；误差公式是"被丢掉的奇异值平方和开根"。</p>
+      </div>
+    </details>
+    <details class="q"><summary>C5（4 分）k-means 一轮迭代：一维点 {1,2,3,10,11,12}，k=2，初始质心 c₁=1、c₂=12。写出分配、更新后的质心与最终 SSE。</summary>
+      <div class="q-a">
+        <p><b>分配：</b>1,2,3 距 c₁=1 更近 → 簇1 = {1,2,3}；10,11,12 距 c₂=12 更近 → 簇2 = {10,11,12}。</p>
+        <p><b>更新：</b>μ₁ = (1+2+3)/3 = 2，μ₂ = (10+11+12)/3 = 11。</p>
+        <p><b>再分配：</b>以 2、11 为质心，1,2,3 仍归簇1（3 距 2 为 1，距 11 为 8），10,11,12 仍归簇2 → <b>已收敛</b>。</p>
+        <p><b>SSE：</b>簇1：(1−2)²+(2−2)²+(3−2)² = 2；簇2：(10−11)²+0+(12−11)² = 2 → 总 SSE = <b>4</b>。</p>
+        <p>注意：若初始化选成 c₁=1、c₂=3，则可能收敛到 {1,2,3} 与 {10,11,12} 之外的糟糕局部解——说明初始化很重要。</p>
+      </div>
+    </details>
+    <details class="q"><summary>C6（4 分，SQL）给定 Students(sid, name, dept, gpa)、Courses(cid, dept)，写出"每个系中 GPA 高于 3.5 的学生人数，只保留人数≥2 的系，并按人数降序"。</summary>
+      <div class="q-a">
+        <p><span class="ans">参考：</span></p>
+        <p class="math">SELECT dept, COUNT(*) AS cnt FROM Students WHERE gpa &gt; 3.5 GROUP BY dept HAVING COUNT(*) &gt;= 2 ORDER BY cnt DESC;</p>
+        <p>要点：WHERE 先过滤行（gpa &gt; 3.5），GROUP BY 分组，HAVING 过滤组（人数），ORDER BY 排序。若学生可能 gpa 为 NULL，NULL 不满足 gpa &gt; 3.5，会被自然排除。</p>
+      </div>
+    </details>
+  </div>
+
+  <div class="card">
+    <h3>📊 自评标准</h3>
+    <table class="cmp">
+      <thead><tr><th>得分</th><th>结论</th><th>下一步</th></tr></thead>
+      <tbody>
+        <tr><td>≥ 80 分</td><td>掌握良好</td><td>只看「公式速查」+ 易错点，重点补简答表述完整度。</td></tr>
+        <tr><td>60–79 分</td><td>基本过关</td><td>重做错题对应章节的「随堂自测」，把 L5 指标和 L7 SVD 过一遍。</td></tr>
+        <tr><td>&lt; 60 分</td><td>需系统重看</td><td>按「3 天计划」Day1–Day2 逐章过，优先 L2/L5/L7。</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+<section class="ch" id="plan">
+  <div class="ch-head">
+    <div class="ch-badge">⏳</div>
+    <div>
+      <h2>3 天冲刺计划<span class="en">3-Day Plan</span><span class="ch-tag mid">照做就行</span></h2>
+      <p class="ch-sub">按"先框架后细节、先计算后背诵"的顺序排。每天 4–5 小时有效学习即可，别通宵。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📅 Day 1：打地基（L1 + L2 + L3 + L4）</h3>
+    <table class="cmp">
+      <thead><tr><th>时段</th><th>内容</th><th>产出（必须动手）</th></tr></thead>
+      <tbody>
+        <tr><td>90 min</td><td>L1 导论 + L2 SQL 的 SELECT/JOIN 部分</td><td>默写 4 种 JOIN 的语义；写出 3 条"相关≠因果"的三种解释</td></tr>
+        <tr><td>90 min</td><td>L2 的聚合、GROUP BY/HAVING、嵌套与 NULL</td><td>手写 5 条查询：分组统计、HAVING、IN、EXISTS、LEFT JOIN 找缺失</td></tr>
+        <tr><td>90 min</td><td>L3 Shingling / Min-Hash / LSH</td><td>手算 1 道 Jaccard、1 道 Min-Hash 签名、1 道 LSH 概率</td></tr>
+        <tr><td>60 min</td><td>L4 距离公理、AND/OR 构造、余弦/欧氏 LSH</td><td>画出 S-curve 草图并标出 b↑/r↑ 的变化方向</td></tr>
+        <tr><td>30 min</td><td>复习：只看今天做错的题</td><td>建一个"错题清单"，只记"错因"一句话</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>📅 Day 2：主战场（L5 + L6）</h3>
+    <table class="cmp">
+      <thead><tr><th>时段</th><th>内容</th><th>产出（必须动手）</th></tr></thead>
+      <tbody>
+        <tr><td>100 min</td><td>L5 监督算法：回归/逻辑回归/KNN/SVM/DT/RF</td><td>做一张"算法—假设—优缺点—超参"四列表</td></tr>
+        <tr><td>100 min</td><td>L5 CNN：稀疏连接/权值共享/卷积参数/padding/stride/pooling/BN</td><td>手算 1 道卷积输出尺寸：(H−F+2P)/S+1；写清 5 种归一化的区别</td></tr>
+        <tr><td>80 min</td><td>L5 评价指标</td><td>默写混淆矩阵 4 格 + 5 个指标公式，自己出 1 道数算题并算对</td></tr>
+        <tr><td>90 min</td><td>L6 聚类：层次/k-means/BFR/CURE</td><td>手算 1 道 k-means 两轮迭代；写出 BFR 的 DS/CS/RS 与 2d+1</td></tr>
+        <tr><td>30 min</td><td>错题清单回看</td><td>补充 Day1 遗留</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>📅 Day 3：压轴 + 模考（L7 + 全卷）</h3>
+    <table class="cmp">
+      <thead><tr><th>时段</th><th>内容</th><th>产出（必须动手）</th></tr></thead>
+      <tbody>
+        <tr><td>100 min</td><td>L7 SVD：A=UΣVᵀ 的三块含义、降维做法、最优低秩近似</td><td>用课件里的 user-movie 例子口述 U/Σ/Vᵀ 各代表什么</td></tr>
+        <tr><td>60 min</td><td>L7 CUR、幂迭代、由 AᵀA 求 SVD</td><td>写清 CUR 的 C/U/R 与采样概率；对比 SVD 三句话</td></tr>
+        <tr><td>90 min</td><td>做本手册「模拟卷」（闭卷计时）</td><td>对答案，统计失分类型（概念/计算/表述）</td></tr>
+        <tr><td>60 min</td><td>跨章速查：公式表 + 对照表</td><td>把记不住的公式抄在一张 A4 上（考前只看它）</td></tr>
+        <tr><td>30 min</td><td>只看错题清单 + 记忆口诀</td><td>早睡，别熬夜刷题</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>🆘 只剩 1 天怎么办（应急版）</h3>
+    <ul class="kp">
+      <li><b>2 小时</b>：背「公式速查」全部公式 + 20 组概念对照（这一节就是为应急写的）。</li>
+      <li><b>2 小时</b>：L7 SVD（含义 + 低秩近似计算）→ 最可能出压轴题。</li>
+      <li><b>2 小时</b>：L5 混淆矩阵与指标（纯计算，性价比最高）。</li>
+      <li><b>1 小时</b>：L2 SQL 模板（JOIN + GROUP BY + HAVING + IN/EXISTS）。</li>
+      <li><b>1 小时</b>：L3/L4 LSH 概率公式 + 参数方向。</li>
+      <li><b>跳过</b>：L1 细节、L6 的 BFR/CURE 推导、L8/L9 全部。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>⏱ 考前 30 分钟：只看这 6 条</h3>
+    <ol class="steps">
+      <li><b>相关≠因果</b>的三种解释：X→Y、Y→X、共同原因 Z；观测数据不能直接证明因果。</li>
+      <li><b>SQL</b>：JOIN 语义 = 笛卡尔积后过滤；WHERE 过滤行、HAVING 过滤组；NULL 不参与 COUNT(列)/比较。</li>
+      <li><b>LSH</b>：P = 1 − (1 − sʳ)ᵇ。b↑ → 阈值↓（召回↑）；r↑ → 曲线更陡（阈值↑）。</li>
+      <li><b>指标</b>：P = TP/(TP+FP)，R = TP/(TP+FN)，F₁ = 2PR/(P+R)；不平衡时 accuracy 会骗人。</li>
+      <li><b>k-means</b>：目标 SSE，两步循环（分配→更新质心），对初始化敏感；层次聚类不需要 k。</li>
+      <li><b>SVD</b>：A = UΣVᵀ；取前 k 个 = 最优低秩近似；误差 = √(σ²_{k+1}+…)，U 是概念、Σ 是强度、Vᵀ 是物品。</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h3>🚫 最容易丢分的 8 个细节</h3>
+    <ul class="dot">
+      <li>算 LSH 概率时把 b 和 r 写反（b 是 band 数，在指数外层；r 是行数，在 s 的指数上）。</li>
+      <li>F₁ 用算术平均而不是调和平均。</li>
+      <li>precision 和 recall 的分子分母写反（P 的分母是"预测为正"，R 的分母是"实际为正"）。</li>
+      <li>SVD 里把 U 和 V 的"行/列"含义搞混。</li>
+      <li>k-means 更新质心时忘了除以簇内点数。</li>
+      <li>SQL 的 HAVING 写成 WHERE，或 GROUP BY 漏写非聚合列。</li>
+      <li>Min-Hash 签名是取"最小行号"，不是取最大值。</li>
+      <li>比较 UNION（去重）与 UNION ALL（不去重）时说法含糊。</li>
+    </ul>
+  </div>
+
+  <div class="mnemonic"><b>最后一句</b>：考试时先扫一遍全卷，<b>把计算题和 SQL 题先做掉</b>（分值确定、不易受措辞影响），选择题拿不准就用"定义 + 反例"排除，简答题先写结论句再展开——老师是按点给分的。</div>
+</section>
+</main>
+<footer>依据 9 个课件（L1–L9）整理 · 半期范围 L1–L7（第七章 降维为终点）· L8/L9 为拓展 · <span class="extra">课外补充</span> 为帮助理解而添加、非课件原文。<br>本复习站完全离线：拷贝整个「复习站」文件夹到任何电脑，双击 index.html 即可。</footer>
+<button id="totop" type="button" aria-label="回到顶部">↑</button>
+<script src="assets/app.js"></script>
+</body>
+</html>
