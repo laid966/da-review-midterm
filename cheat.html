@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Data Analytics 半期 Cheat Sheet（L2–L7）</title>
+<style>
+@page{size:A4;margin:0}
+*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{margin:0;font-family:"Segoe UI","Microsoft YaHei",sans-serif;color:#111;background:#fff}
+.sheet{width:210mm;height:296.4mm;padding:4mm 5mm 3mm;page-break-after:always;position:relative;overflow:hidden}
+.sheet:last-child{page-break-after:auto}
+.top{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1.2pt solid #222;padding-bottom:.8mm;margin-bottom:1.5mm;font-size:8.2px}
+.top b{font-size:10px}
+.cols{column-count:3;column-gap:3.4mm;height:283mm;font-size:7.4px;line-height:1.3}
+.b{break-inside:avoid;border:.5pt solid #9a9a9a;border-radius:2px;padding:.8mm 1.2mm 1mm;margin:0 0 1.2mm}
+.b>h4{margin:-.8mm -1.2mm .8mm;font-size:8.2px;color:#fff;padding:.6mm 1.4mm;border-radius:1.5px 1.5px 0 0;letter-spacing:.2px}
+.h-sql h4{background:#0b5394}.h-ss h4{background:#2e6b1f}.h-ml h4{background:#a02c2c}.h-cl h4{background:#6b3fa0}.h-dr h4{background:#b45309}.h-mc h4{background:#333}.h-fm h4{background:#111}
+p{margin:0 0 .7mm}
+ul{margin:.3mm 0 .8mm 3mm;padding:0}li{margin:0 0 .25mm}
+.r{margin:0 0 .5mm}
+.k{color:#b00;font-weight:700}
+.g{color:#0a6b0a}
+.f,.fm{font-family:Consolas,"Courier New",monospace}
+.fm{background:#eef1fb;border-left:1.6pt solid #4c5fd5;padding:.5mm 1mm;margin:.6mm 0;font-size:7.5px;break-inside:avoid;display:block}
+.f{background:#f2f2f2;padding:0 .6px;border-radius:1.5px}
+table{width:100%;border-collapse:collapse;font-size:7px;margin:.5mm 0 .8mm}
+td,th{border:.4pt solid #aaa;padding:.25mm .7mm;vertical-align:top;line-height:1.22}
+th{background:#eee}
+.eg{background:#fff8e6;border-left:1.6pt solid #d9a400;padding:.5mm 1mm;margin:.5mm 0;display:block;break-inside:avoid}
+b.t{color:#0b5394}
+.warn{color:#b00;font-weight:700}
+</style>
+</head>
+<body>
+
+<!-- ================= SIDE A ================= -->
+<div class="sheet" id="sideA">
+<div class="top"><b>Data Analytics 半期 Cheat Sheet · A面（大题解题手册 80′）</b><span>范围 L2 SQL · L3/L4 相似性搜索 · L5/L6 机器学习 · L7 降维 ｜ 10 MCQ(20′)+4 大题(80′) ｜ <span class="warn">⚠ 带校园卡</span></span></div>
+<div class="cols">
+
+<div class="b h-sql"><h4>① SQL（L2）· 骨架与执行顺序</h4>
+<div class="fm">SELECT [DISTINCT] 列|*|聚合 FROM 表 [WHERE 行条件] [GROUP BY 列] [HAVING 组条件] [ORDER BY 列 ASC|DESC]</div>
+<div class="r"><b>执行顺序</b>：FROM(连接/笛卡尔积)→WHERE(筛行,<span class="k">不能用聚合</span>)→GROUP BY→HAVING(筛组,<b>可用聚合</b>)→SELECT(算列/DISTINCT)→ORDER BY。</div>
+<div class="r">投影<b>不自动去重</b>；要唯一值必须写 DISTINCT。ORDER BY 默认 ASC；并列(tie)用第二排序列破平。</div>
+</div>
+
+<div class="b h-sql"><h4>① SQL · 连接与「算行数」三步法</h4>
+<div class="r"><b>三种连接写法</b>：<span class="f">FROM A,B WHERE A.k=B.k</span> ≡ <span class="f">FROM A JOIN B ON A.k=B.k</span>（内连接）；<span class="f">LEFT/RIGHT/FULL OUTER JOIN</span> 保留未匹配行，对面补 NULL。</div>
+<div class="r"><b>行数题三步</b>：①笛卡尔积行数=|A|×|B| ②按 WHERE 逐行过滤 ③投影（<span class="k">无 DISTINCT 则重复行保留</span>，结果是 multiset）。</div>
+<span class="eg"><b>例1</b> R.A={1,3}，S.B={(2,3),(3,4),(3,5)}，<span class="f">SELECT R.A FROM R,S WHERE R.A=S.B</span>：2×3=6 组合→留下 (3,(3,4))、(3,(3,5))→输出 <b>(3),(3) 两行</b>。<br><b>例2</b> 4×3=12 组合→条件只剩 1 行。<b>例3</b> LEFT JOIN 结果行数=内连接行数+左表未匹配行数=3+1=<b>4 行</b>。</span>
+<div class="r"><b>反连接</b>（在A不在B）：<span class="f">A LEFT JOIN B ON A.k=B.k WHERE B.k IS NULL</span>。</div>
+<div class="r"><b>OR 陷阱</b>：<span class="f">SELECT DISTINCT R.A FROM R,S,T WHERE R.A=S.A OR R.A=T.A</span> 看似 R∩(S∪T)，但 FROM 是三表笛卡尔积——<span class="k">只要 S 或 T 有空表，结果整体为空</span>；两查询都加 DISTINCT 才谈等价。</div>
+</div>
+
+<div class="b h-sql"><h4>① SQL · NULL 三值逻辑（必考）</h4>
+<div class="r">TRUE=1，FALSE=0，<b>UNKNOWN=0.5</b>；任何含 NULL 的比较→0.5（<span class="k">连 NULL=NULL 也是 0.5</span>）。</div>
+<div class="fm">AND=min(C1,C2)　OR=max(C1,C2)　NOT=1−C1　WHERE 只保留结果=1 的行</div>
+<span class="eg"><b>经典陷阱</b>：<span class="f">WHERE age&lt;25 OR age&gt;=25</span> 会漏掉 age=NULL 的行（max(0.5,0.5)=0.5≠1）→ 补 <span class="f">OR age IS NULL</span>。判断必须用 <b>IS NULL / IS NOT NULL</b>，不能 =NULL。</span>
+<div class="r"><b>聚合与 NULL</b>：SUM/AVG/MIN/MAX 自动跳过 NULL；<span class="f">COUNT(*)</span>=全部行，<span class="f">COUNT(col)</span>=该列非 NULL 行，<span class="f">COUNT(DISTINCT col)</span>=不同值数；AVG(col)=SUM/COUNT(col)。列全 NULL 时 SUM→NULL、COUNT→0。</div>
+</div>
+
+<div class="b h-sql"><h4>① SQL · 嵌套、集合运算、约束</h4>
+<div class="r"><b>嵌套</b>：IN(值/子查询)；EXISTS(相关子查询，看行是否存在)；<b>全称量词</b>「所有产品都≥100」→<span class="f">SELECT c FROM Comp c WHERE NOT EXISTS (SELECT * FROM Prod p WHERE p.c=c.c AND p.price&lt;100)</span>（找反例取非）。<span class="f">x&gt;ANY(...)</span>=大于最小值；<span class="f">x&gt;ALL(...)</span>=大于最大值。</div>
+<div class="r"><b>集合运算</b>：UNION(去重)/UNION ALL(全保留，省去去重更快)；INTERSECT、EXCEPT <b>默认集合语义自动去重</b>；bag 语义计数：λ(UNION ALL)=λX(t)+λY(t)。</div>
+<div class="r"><b>改写</b>：R∩S→JOIN 全列相等(+DISTINCT) 或 EXISTS；R−S→NOT EXISTS 或反连接。</div>
+<div class="r"><b>主键</b>唯一+非空(自动建索引)；<b>外键</b> <span class="f">FOREIGN KEY(cid) REFERENCES Course(id)</span>：插入悬空引用→<b>拒绝</b>；删父行三策略：<b>拒绝 / CASCADE 级联删 / SET NULL</b>。</div>
+<div class="r"><b>索引</b>(B-tree)：加速 WHERE/JOIN，<span class="k">拖慢增删改</span>。<b>LIKE</b>：%任意串、_单字符。DDL=CREATE/DROP/ALTER；DML=SELECT/INSERT/UPDATE/DELETE。</div>
+</div>
+
+<div class="b h-sql"><h4>① SQL · 聚合与 GROUP BY 手算（三步语义）</h4>
+<div class="r">五个聚合：SUM/COUNT/MIN/MAX/AVG；<b>除 COUNT(*) 外都作用于单列</b>；AVG=SUM/COUNT(col)。</div>
+<div class="fm">GROUP BY 三步：①WHERE 筛行 ②按分组列分组 ③组内算聚合→每组输出一行；HAVING 事后再筛组（可含聚合）</div>
+<span class="eg"><b>课件手算例</b> Purchase(bagel 1×20、banana 0.5×10、banana 1×10、bagel 1.5×20)：<span class="f">SELECT product, SUM(price*quantity) AS TotalSales FROM Purchase WHERE date&gt;'10/1/2005' GROUP BY product</span> → bagel=1×20+1.5×20=<b>50</b>，banana=0.5×10+1×10=<b>15</b>；全表 SUM(price*quantity)=<b>65</b>。<span class="warn">SUM(price*quantity)≠SUM(price)×SUM(quantity)</span>（逐行先乘再累加）。</span>
+</div>
+
+<div class="b h-sql"><h4>① SQL · 六大题型模板（对号入座）</h4>
+<div class="r">①<b>哪些 Y 满足 X</b>：JOIN+WHERE+<b>DISTINCT</b>(防连接放大重复行)。②<b>最贵/最便宜</b>：MAX/MIN(聚合) 或 ORDER BY…DESC 取首行；「价格=最高价」需子查询嵌套。③<b>每类统计</b>：GROUP BY 类+SUM/COUNT/AVG，组筛选用 HAVING。④<b>在 A 不在 B</b>：NOT EXISTS / LEFT JOIN…WHERE B.k IS NULL / EXCEPT。⑤<b>全称「所有…都」</b>：NOT EXISTS(找反例取非)；<b>存在「至少一个」</b>：EXISTS/IN。⑥<b>自比较</b>(比同类平均贵等)：同表起两个别名 p1,p2 相关子查询。</div>
+</div>
+
+<div class="b h-ss"><h4>② 相似性搜索（L3/L4）· 度量换算</h4>
+<div class="fm">Jaccard s=|A∩B|/|A∪B|，d=1−s ｜ 余弦 s=A·B/(‖A‖‖B‖)=cosθ，d=θ/π ｜ 欧氏 ‖A−B‖₂ ｜ Hamming=不同位数</div>
+<div class="r">例：交3并8→s=3/8=0.375，d=5/8；cosθ=0.5→θ=60°→d=1/3。<b>编辑距离 DP</b>（字符串/DNA）：表 (n+1)×(m+1)，首行=i、首列=j：</div>
+<div class="fm">E[i][j]=min( E[i−1][j−1]+(字符不同?1:0), E[i−1][j]+1, E[i][j−1]+1 )　答案=E[n][m]</div>
+<span class="eg"><b>迷你例</b> d("ac","abc")=1：E[1][1]=0(a=a)，E[1][2]=1(插 b)，E[2][3]=1(c=c)；填表每格三方向取 min。</span>
+<div class="r">度量公理：非负、同一性、对称、三角不等式（Jaccard 距离、编辑距离都满足）。</div>
+</div>
+
+<div class="b h-ss"><h4>② MinHash+LSH 计算模板（大题必考）</h4>
+<div class="r"><b>MinHash</b>：P[两集合签名位相同]=Jaccard s。签名长 k 条，估计 ŝ=相同行数/k。</div>
+<div class="r"><b>Banding</b>：签名切成 <b>b 个 band × 每 band r 行</b>（k=b·r）；整 band 全同→哈希进同桶→<b>候选对</b>。</div>
+<div class="fm">四步模板：①P(band全同)=t^r ②P(不全同)=1−t^r ③P(b个band都不同)=(1−t^r)^b ④P(候选)=1−(1−t^r)^b　　阈值(拐点) t*≈(1/b)^(1/r)</div>
+<span class="eg"><b>课件例</b>（s=0.8 找相似对，b=20，r=5，k=100）：0.8⁵=0.328→(1−0.328)²⁰≈<b>0.00035=漏检率FN</b>；不相似对 s=0.3：0.3⁵=0.00243→1−(1−0.00243)²⁰≈<b>4.74%=误报率FP</b>。</span>
+<div class="r"><b>调参</b>：b↑→候选多（FP↑FN↓）；r↑→更严（FP↓FN↑）；改 b=10,r=10→FP 骤降、FN 上升。<b>S 曲线</b>：横轴 t 纵轴 P(候选)；s 右侧曲线到 1 之间面积=FN，左侧曲线下面积=FP。</div>
+<div class="r"><b>规模账</b>：10万文档×100签名×4B=<b>40MB</b>；全对比较 C(n,2)=n(n−1)/2，10⁹ 网页≈<b>5×10¹⁷ 对</b>（按 10¹¹ 对/天也要几十年）→必须 LSH 只比同桶。</div>
+<table>
+<tr><th>(b,r)</th><th>FN(s=0.8)</th><th>FP(s=0.3)</th><th>特点</th></tr>
+<tr><td>(20,5)</td><td>0.035%</td><td>4.74%</td><td>抓得全，误报多</td></tr>
+<tr><td>(10,10)</td><td>≈32%</td><td>≈0.006%</td><td>误报少，漏检狠</td></tr>
+</table>
+<div class="r">拐点 t*=(1/b)^(1/r)≈阈值 s 处最平衡；要压 FP 加 r、要压 FN 加 b。</div>
+</div>
+
+<div class="b h-ss"><h4>② LSH 家族与概率放大（L4）</h4>
+<table>
+<tr><th>度量</th><th>哈希函数</th><th>碰撞概率</th></tr>
+<tr><td>Jaccard</td><td>MinHash 分 band</td><td>P=s；band 全同=候选</td></tr>
+<tr><td>余弦</td><td>随机超平面 h(x)=sign(v·x)</td><td>P[分界]=θ/π（simhash 拼指纹）</td></tr>
+<tr><td>欧氏</td><td>p-稳定分桶 floor((v·p+x)/a)，x∈[0,a)</td><td>d≤a 时 P[同桶]≥1−d/a</td></tr>
+<tr><td>Hamming</td><td>位采样（80% 相似→每位同 P=0.8）</td><td>band OR：1−(1−0.8^r)^b</td></tr>
+</table>
+<div class="r"><b>放大</b>：概率 p 的族→AND(k 次)=p^k；OR(k 次)=1−(1−p)^k；级联(r,b)=1−(1−p^r)^b（与 banding 同式）。<b>OR 抬召回、AND 压误报</b>，组合调出让相似对→≈1、不相似对→≈0。</div>
+<div class="r">欧氏直觉：投影到随机直线，点落在桶边界 a 内的概率≤d/a→<b>越近越容易同桶</b>。多组 (v,x) 投影拼签名。</div>
+</div>
+
+<div class="b h-ml"><h4>③ 机器学习（L5）· 混淆矩阵与指标（必考计算）</h4>
+<table>
+<tr><th></th><th>预测+</th><th>预测−</th></tr>
+<tr><td><b>实际+</b></td><td>TP</td><td>FN(漏报)</td></tr>
+<tr><td><b>实际−</b></td><td>FP(误报)</td><td>TN</td></tr>
+</table>
+<div class="fm">Acc=(TP+TN)/总　Precision=TP/(TP+FP)　Recall(TPR)=TP/(TP+FN)　Spec=TN/(TN+FP)　F1=2TP/(2TP+FP+FN)=2PR/(P+R)</div>
+<span class="eg"><b>课件例</b>：TP=9，FP=2，FN=1，TN=8（总20）→Acc=17/20=<b>0.85</b>，Pr=9/11≈<b>0.81</b>，Rec=9/10=<b>0.9</b>，Spec=8/10=<b>0.8</b>，F1≈<b>0.857</b>。</span>
+<div class="r"><b>阈值</b>默认 0.5；调高(→0.6)：TP、FP 都减→<b>Precision↑ Recall↓</b>（更挑）。<b>ROC</b>：x=FPR=1−Spec，y=TPR=Recall；AUROC=曲线下面积（0.5=随机，1=完美）。<b>PR 曲线</b>：x=Rec，y=Pr，面积=AUPRC。<b>类别不平衡</b>（患病率&lt;5%）：全预测阴性 Accuracy 也虚高→失真；此时 <span class="k">Accuracy&lt;AUROC&lt;AUPRC</span>，看 AUPRC。</div>
+<div class="r"><b>IoU</b>=预测框∩真值框/预测框∪真值框；IoU≥0.5 判检测正确；mIoU=各类平均。<b>CV 四任务</b>：分类(整图→标签)、定位/检测(框+类)、语义分割(每像素→类)。</div>
+</div>
+
+<div class="b h-ml"><h4>③ ML 算法要点（选择+简答）</h4>
+<div class="r"><b>Mitchell 学习定义(T-E-P)</b>：在任务 T 上，凭经验 E，性能度量 P 随经验改善。</div>
+<div class="r"><b>KNN</b>：无训练(懒惰)；k 近邻投票/平均；k 与特征尺度敏感。<b>LR</b>：σ(z)=1/(1+e⁻ᶻ)，σ(w·x+b)≥0.5 ⟺ w·x+b≥0，边界=超平面。</div>
+<div class="r"><b>决策树</b>：熵 <span class="f">H=−Σp·log₂p</span>（纯=0，二等分=1，9:1≈0.47）；<b>信息增益</b> IG=H(D)−Σ(|Dᵥ|/|D|)·H(Dᵥ)，贪心选 IG 最大属性分裂。<b>数字例</b>：H(12:8)=−(0.6log₂0.6+0.4log₂0.4)=0.442+0.529=<b>0.971</b>；H(9:1)≈0.47；H(20:0)=0；若分裂后两组全纯→IG=0.971−0=0.971。</div>
+<div class="r"><b>SVM</b>：点到边界 <span class="f">|w·x+w₀|/‖w‖</span>；<b>间隔=2/‖w‖</b> 最大化；只有<b>支持向量</b>决定边界；软间隔 min‖w‖²+CΣξ（C 大→不容错→易过拟合）；<b>核技巧</b> K(x,y)=φ(x)·φ(y)，RBF：K=e^(−γ‖x−y‖²)。</div>
+<div class="r"><b>CNN 尺寸公式</b>：<span class="f">n_out=floor((n_in+2p−k)/s)+1</span>（p 补边、k 核、s 步长）。例 n=5,k=3,p=1,s=2→floor(4/2)+1=<b>3</b>；输出 3×3×2=两个核各算一层。每核对<b>全部输入通道求和</b>+bias。池化(max/avg)无参数，2×2 s2→减半。</div>
+<div class="r"><b>参数账</b>：全连接 224×224×3→4096 ≈150529×4096≈<b>6 亿参数</b>；CNN 靠<b>权值共享+稀疏连接</b>砍参数。AlexNet@ImageNet：<b>100 万图/1000 类/2×GPU/约 1 周/6000 万参数</b>。</div>
+</div>
+
+<div class="b h-ml"><h4>③ ML 训练与过拟合</h4>
+<div class="r"><b>初始化</b>：全 0 不行（神经元对称，梯度相同永远一样）；Xavier σ²=1/n；He(ReLU) σ²=2/n。</div>
+<div class="r"><b>学习率</b>：大→震荡/发散，小→太慢；Momentum 累积惯性冲平台；Adam=自适应逐参数学习率。<b>mini-batch</b>=速度与梯度噪声折中。<b>BN</b>=批内标准化再 γ,β 变换→分布稳、可用大 lr、加速收敛。</div>
+<div class="r"><b>CNN 反向传播</b>：权值共享→同一核的梯度=各位置梯度<b>累加</b>；max 池化梯度只回传给最大值位置。</div>
+<div class="r"><b>过拟合</b>：train 误差↓ val 误差↑；对策=加数据/L2(weight decay)/L1(稀疏)/dropout/早停/减复杂度。<b>欠拟合</b>：两者都高→加特征加容量。</div>
+</div>
+
+<div class="b h-cl"><h4>④ 聚类（L6）· k-means（必考手算）</h4>
+<div class="fm">目标 min SSE=ΣᵢΣ_{x∈Cᵢ}‖x−cᵢ‖²　Lloyd：①选k初始质心 ②分配:每点→最近质心 ③更新:cᵢ=mean(Cᵢ) ④重复②③至不变</div>
+<span class="eg"><b>课件例</b>（一维 0,1,5,6；k=2；初始 c=(0,6)）：分配 {0,1},{5,6}→更新 c=(<b>0.5,5.5</b>)→再分配无人换簇→收敛；SSE=4×0.5²=<b>1</b>。</span>
+<div class="r">NP-hard→启发式；<b>初始化敏感</b>→多跑取 SSE 最小；<b>k-means++</b>：选下一质心概率 ∝ <b>D(x)²</b>（D=到最近已选质心距离）。<b>选 k</b>：肘部法（SSE-k 曲线拐点）。<b>局限</b>：球形/等大小簇、对离群点敏感；centroid=均值(人造点)，k-medoids/clustroid=真实代表点(离簇内点和最近)→更稳健。</div>
+</div>
+
+<div class="b h-cl"><h4>④ 层次聚类 · BFR · CURE</h4>
+<div class="r"><b>Agglomerative</b>：每点一簇→反复合并最近两簇→<b>dendrogram</b>（叶=n 点，<b>高度=合并时簇间距离</b>，横切一刀=k 簇）。<b>链接</b>：单链=最近点对距离(<span class="k">链化效应</span>→长条)；全链=最远点对(紧凑球形)；平均/质心折中。<b>停止</b>：给定 k / 距离&gt;阈值 t / 剩单点。</div>
+<div class="r"><b>BFR</b>(磁盘大数据)：假设簇=轴对齐正态(各维独立→对角协方差)。<b>DS</b>(近质心→并入后<b>丢弃</b>)/<b>CS</b>(彼此近未归队→内存聚类)/<b>RS</b>(孤立→原样保留)。流程：读一批→近的进 DS→其余+旧 RS 内存聚→CS/RS→合并 CS→循环，最后 CS/RS 并入最近簇。</div>
+<div class="fm">2d+1 统计量：N、SUM(d维)、SUMSQ(d维)；均值=SUM/N；方差=SUMSQ/N−(SUM/N)²；合并簇=三项逐项相加</div>
+<div class="fm">马氏距离 d_M=√(Σᵢ((xᵢ−mᵢ)/σᵢ)²)；d_M&lt;√d→1σ内(68%)；&lt;2√d→2σ内(95%)→阈值常取 2√d</div>
+<span class="eg"><b>课件例</b>：m=(2,3)，σ=(1,2)，x=(4,5)→y=((4−2)/1,(5−3)/2)=(2,1)→d_M=√(4+1)=<b>√5≈2.24</b>；√2≈1.41 拒(1σ)，2√2≈2.83 收(2σ)。</span>
+<div class="r"><b>CURE</b>(任意形状)：抽样→层次聚类→每簇多个代表点向质心<b>收缩 α=0.2</b>→用代表点分配全量。<b>维度灾难</b>：d 维保持体积 0.001 需边长 0.001^(1/d)（10 维→0.5）；距离集中→聚类失效。</div>
+</div>
+
+<div class="b h-dr"><h4>⑤ 降维（L7）· SVD 与 PCA（压轴必考）</h4>
+<div class="fm">A(m×n)=U(m×m)Σ(m×n)Vᵀ(n×n)：U 列=AAᵀ 特征向量，V 列=AᵀA 特征向量，σᵢ=√λᵢ≥0 降序；秩=非零 σ 数；几何=旋转Vᵀ→拉伸Σ→旋转U</div>
+<div class="r"><b>必默写推导</b>：A=UΣVᵀ ⇒ AᵀA=VΣᵀUᵀUΣVᵀ=<b>VΣ²Vᵀ</b>（用 UᵀU=I、Σᵀ=Σ）；同理 AAᵀ=UΣ²Uᵀ；AᵀAV=VΣ²。</div>
+<div class="r"><b>PCA 五步</b>：①X 中心化(每列减均值) ②协方差 C=XᵀX/(n−1) ③特征分解 C ④λ 降序取前 k 个特征向量拼 W ⑤投影 <b>Y=XW</b>。等价：PCA 方向=中心化 X 的<b>右奇异向量 V</b>；<b>最大方差方向=最小重构误差方向</b>。</div>
+</div>
+
+<div class="b h-dr"><h4>⑤ 降维 · 手算模板（照抄步骤）</h4>
+<div class="fm">2×2 特征值：λ=(tr±√(tr²−4det))/2　例 M=[[1,2],[2,3]]：tr=4,det=−1→λ=(4±√20)/2≈4.236 / −0.236</div>
+<span class="eg"><b>幂迭代</b>（找主特征对）：x←Mx/‖Mx‖。x₀=[1,1]：Mx=[3,5]，‖Mx‖=√34≈5.83→x₁=[0.51,0.86]；再：Mx₁=[2.23,3.60]，‖·‖=√17.93→x₂≈[<b>0.53,0.85</b>]收敛；λ=xᵀMx≈<b>4.25</b>。<br><b>Deflation 缩并</b>：M*=M−λxxᵀ（主方向清零）→例 M*≈[[−0.19,0.09],[0.09,−0.07]]→再迭代得 λ₂≈−0.24（理论 2−√5≈−0.236）。<br><b>验证 UΣ 坐标</b>：u₁σ₁=(0.13×12.4, 0.68×12.4)=(1.61,8.43)。</span>
+</div>
+
+<div class="b h-dr"><h4>⑤ 低秩近似 · 能量 · CUR</h4>
+<div class="fm">秩k近似 A_k=Σ_{i≤k}σᵢuᵢvᵢᵀ（其余σ置0）；Eckart-Young：A_k=Frobenius 范数下最优 rank-k；误差=‖A−A_k‖_F=√(σ_{k+1}²+…+σ_r²)</div>
+<div class="r">Frobenius：‖A‖_F=√(ΣΣaᵢⱼ²)=√(Σσᵢ²)。<b>能量(方差解释)比</b>=σₖ²/Σσᵢ²；例：153.76+90.25+1.69=245.7→留前 2：<b>244/245.7≈99.3%</b>。存储：k(m+n+1) vs mn。<b>去噪</b>=小 σ 视作噪声置零；<b>推荐</b>=低秩补全缺失项。<b>数字例</b>：σ²=153.76/90.25/1.69→留前 2 保 99.3% 能量，rank-2 误差=√1.69=<b>1.3</b>。</div>
+<div class="r"><b>CUR</b>：按概率(∝列/行范数²，leverage)抽 c 列 r 行，各乘 <b>1/√(c·pᵢ)</b> 缩放保无偏；U≈C⁺AR⁺(伪逆)。<b>CUR vs SVD</b>：真实行列→<b>可解释、保稀疏</b>；SVD 向量稠密、正交、误差最优。</div>
+</div>
+
+</div></div>
+
+<!-- ================= SIDE B ================= -->
+<div class="sheet" id="sideB">
+<div class="top"><b>Data Analytics 半期 Cheat Sheet · B面（选择题概念辨析 + 全公式速查）</b><span>MCQ 10×2′ ｜ 先排除含 always/never/only 的绝对化选项 ｜ <span class="warn">⚠ 带校园卡</span></span></div>
+<div class="cols">
+
+<div class="b h-mc"><h4>Ⅰ L2 SQL 概念辨析（选择题大户）</h4>
+<table>
+<tr><th>对比</th><th>左</th><th>右</th></tr>
+<tr><td>WHERE / HAVING</td><td>筛行，分组前，<b>禁聚合</b></td><td>筛组，分组后，可聚合</td></tr>
+<tr><td>UNION / UNION ALL</td><td>去重（集合语义）</td><td>保留重复(bag)，省去重更快</td></tr>
+<tr><td>IN / EXISTS / ANY·ALL</td><td>成员资格(可非相关)</td><td>EXISTS 行存在(相关子查询)；&gt;ANY=比最小大，&gt;ALL=比最大大</td></tr>
+<tr><td>INNER / LEFT JOIN</td><td>只留匹配行</td><td>左表全保留，未匹配右侧 NULL</td></tr>
+<tr><td>COUNT(*) / COUNT(col) / COUNT(DISTINCT col)</td><td>所有行</td><td>非 NULL 行 / 不同值个数</td></tr>
+<tr><td>DDL / DML</td><td>CREATE·DROP·ALTER</td><td>SELECT·INSERT·UPDATE·DELETE</td></tr>
+<tr><td>主键 / 外键</td><td>唯一+非空+自动索引</td><td>引用约束：拒绝/CASCADE/SET NULL</td></tr>
+<tr><td>LIKE 通配</td><td>% 任意长度串</td><td>_ 恰好一个字符</td></tr>
+</table>
+<div class="r"><b>NULL 口诀</b>：比较得 0.5；AND=min、OR=max、NOT=1−x；WHERE 只留 1；判空只能 IS (NOT) NULL；聚合跳过 NULL 但 COUNT(*) 不跳。<b>集合 vs multiset</b>：默认去重(集合)，ALL 切换成计数语义 λ(UNION ALL)=λX+λY。</div>
+<div class="r"><b>索引</b>：查询快、写入慢；<b>DISTINCT</b>：消连接放大的重复；嵌套 IN 版与三表连接版<b>都加 DISTINCT 才等价</b>。</div>
+</div>
+
+<div class="b h-mc"><h4>Ⅱ L3/L4 相似性搜索辨析</h4>
+<table>
+<tr><th>度量</th><th>适用</th><th>sim→dist</th></tr>
+<tr><td>Jaccard</td><td>集合/关键词/文档</td><td>d=1−s</td></tr>
+<tr><td>余弦</td><td>向量方向(文本 TF)</td><td>d=θ/π 或 1−cosθ</td></tr>
+<tr><td>编辑距离</td><td>字符串/ DNA/拼写</td><td>本身就是距离</td></tr>
+<tr><td>欧氏</td><td>空间点</td><td>—</td></tr>
+<tr><td>Hamming</td><td>二进制指纹</td><td>不同位数</td></tr>
+</table>
+<div class="r"><b>LSH 家族配对</b>：Jaccard→MinHash banding(P=s)；余弦→随机超平面 sign(v·x)，P[分开]=θ/π；欧氏→p-稳定桶 floor((v·p+x)/a)，P[同桶]≥1−d/a；Hamming→位采样。<b>敏感族</b>=碰撞概率等于相似度。</div>
+<div class="r"><b>b、r 效果</b>：b↑候选多(FP↑FN↓)；r↑更严(FP↓FN↑)；S 曲线 P=1−(1−t^r)^b，拐点 t*=(1/b)^(1/r)；右面积=FN 左面积=FP。<b>放大</b>：AND=p^k，OR=1−(1−p)^k。<b>为什么 LSH</b>：C(n,2) 全对不可行(10⁹ 页→5×10¹⁷ 对)→只比同桶。<b>MinHash 原理</b>：随机排列下最小元素相同 ⟺ 该元素落在交集，P=Jaccard。</div>
+</div>
+
+<div class="b h-mc"><h4>Ⅲ L5 机器学习辨析</h4>
+<div class="r"><b>三类学习</b>：监督(有标签→分类/回归)、无监督(无标签→聚类/降维)、强化(奖励信号序贯决策)。<b>回归 vs 分类</b>：连续值 vs 离散标签。<b>T-E-P</b>(Mitchell)：任务-经验-性能。</div>
+<div class="r"><b>P vs R 取舍</b>：FP 代价高(垃圾邮件误杀)→重 Precision；FN 代价高(疾病漏诊)→重 Recall；F1=两者调和平均(不平衡时用)。<b>阈值</b>↑→P↑R↓。<b>AUROC</b> 0.5 随机/1 完美；稀有类看 AUPRC；<span class="k">Accuracy&lt;AUROC&lt;AUPRC</span>。</div>
+<div class="r"><b>KNN</b>：非参数/懒惰学习。<b>决策树</b>：熵 0=纯；选 IG 最大属性；贪心。<b>SVM</b>：间隔 2/‖w‖；只有支持向量决定边界；C 大→不容错易过拟合；核=隐式高维内积(RBF)。</div>
+<div class="r"><b>CNN 组件作用</b>：卷积=局部感受野+权值共享(砍参数)；池化=降采样+平移不变(max/avg 无参数)；激活=非线性(ReLU)；BN=稳定分布、可大 lr；dropout=防过拟合。<b>全 0 初始化</b>→对称破不了。<b>Xavier σ²=1/n；He σ²=2/n</b>。<b>lr</b> 大震荡小龟速；Momentum 冲平台；Adam 自适应。</div>
+<div class="r"><b>过拟合</b>：train↓val↑→数据/L1L2/dropout/早停/减复杂度；<b>欠拟合</b>：都高→加容量。<b>CV 任务输出</b>：分类=标签、检测=框+类(IoU≥0.5 对)、分割=逐像素。<b>AlexNet</b>：1M 图/1000 类/2GPU/1 周/60M 参数；全连接 224²×3→4096≈6 亿参数→必须卷积。</div>
+</div>
+
+<div class="b h-mc"><h4>Ⅳ L6 聚类辨析</h4>
+<div class="r"><b>centroid(均值,人造点) vs clustroid(簇内真实点,到其余点距离和最小)</b>→后者抗离群。<b>单链</b>=最近点对→<span class="k">链化</span>适合长条；<b>全链</b>=最远点对→紧凑球形；平均/质心折中。<b>dendrogram</b>：高度=合并距离、横切得 k。<b>停止</b>：定 k/阈值 t/剩单点。</div>
+<div class="r"><b>k-means 失效场景</b>：非球形、簇大小悬殊、离群点多、初始化差→k-means++(P∝D²)/多跑。<b>BFR 三集合</b>：DS 已归队丢弃、CS 抱团未归队、RS 散兵原样留。<b>2d+1</b>：N+SUM+SUMSQ（轴对齐→对角协方差→不用存 d×d，否则爆内存）。</div>
+<div class="r"><b>马氏 vs 欧氏</b>：各维先除以 σ→把椭圆簇「掰圆」再量距离；阈值 √d(1σ,68%)/2√d(2σ,95%)。<b>CURE</b>：多代表点+向质心收缩 0.2→任意形状。<b>维度灾难</b>：体积缩水(边长 0.001^(1/d))、距离集中、稀疏→先降维再聚类。</div>
+</div>
+
+<div class="b h-mc"><h4>Ⅴ L7 降维辨析</h4>
+<div class="r"><b>SVD vs 特征分解</b>：SVD 任意 m×n 都有(U,V 正交、Σ≥0 降序)；特征分解仅方阵可对角化时；对称阵特征向量正交。<b>AᵀA→V、AAᵀ→U、λ=σ²</b>。<b>秩</b>=非零奇异值数。<b>PCA</b>=协方差 XᵀX/(n−1) 的特征向量=中心化 X 的右奇异向量；最大方差⟺最小重构误差。</div>
+<div class="r"><b>Eckart-Young</b>：截断=Frobenius 最优 rank-k；误差=√(σ_{k+1}²+…)。<b>能量比</b>=σₖ²/Σσᵢ²，选 k 使≈99%。<b>置零 vs 截断</b>：把小 σ 置 0=低秩近似(维度不变，等价)。<b>CUR</b>：真实行列、可解释、保稀疏、采样 p∝范数²、缩放 1/√(c·p)；SVD：稠密正交、误差最优。<b>幂迭代</b>：x←Mx/‖Mx‖→主特征向量，λ=xᵀMx；<b>deflation</b>：M−λxxᵀ 逐层剥离。<b>降维收益</b>：存储/速度/可视化/去噪；<b>代价</b>：信息损失、可解释性降。特征提取(组合新特征,PCA) vs 特征选择(挑原特征子集)。</div>
+</div>
+
+<div class="b h-fm"><h4>Ⅵ 全公式一页速查（考前 10 分钟扫这里）</h4>
+<div class="fm">Jaccard s=|A∩B|/|A∪B|, d=1−s ｜ cos s=A·B/(‖A‖‖B‖), d=θ/π ｜ 编辑 E[i][j]=min(E[i−1][j−1]+δ, E[i−1][j]+1, E[i][j−1]+1)
+MinHash P=s ｜ LSH P(候选)=1−(1−t^r)^b, t*=(1/b)^(1/r) ｜ 超平面 P=θ/π ｜ p-稳定 P(同桶)≥1−d/a ｜ AND p^k, OR 1−(1−p)^k ｜ 对数 C(n,2)=n(n−1)/2
+NULL: AND=min OR=max NOT=1−x ｜ λ(UNION ALL)=λX+λY ｜ WHERE 只留 TRUE
+H=−Σp·log₂p ｜ IG=H(D)−Σ(|Dᵥ|/|D|)H(Dᵥ) ｜ σ(z)=1/(1+e⁻ᶻ) ｜ 间隔=2/‖w‖, 点距=|w·x+w₀|/‖w‖ ｜ RBF K=e^(−γ‖x−y‖²)
+CNN n_out=floor((n_in+2p−k)/s)+1 ｜ 全连接参数=(in+1)×out ｜ Xavier σ²=1/n, He σ²=2/n
+Acc=(TP+TN)/N ｜ P=TP/(TP+FP) ｜ R=TP/(TP+FN) ｜ Spec=TN/(TN+FP) ｜ F1=2TP/(2TP+FP+FN) ｜ FPR=1−Spec ｜ IoU=|∩|/|∪|
+SSE=ΣΣ‖x−cᵢ‖² ｜ cᵢ=mean(Cᵢ) ｜ k-means++ P∝D(x)² ｜ 方差=SUMSQ/N−(SUM/N)² ｜ 2d+1=N,SUM,SUMSQ
+d_M=√(Σ((xᵢ−mᵢ)/σᵢ)²), 阈值√d / 2√d ｜ CURE 收缩 α=0.2 ｜ 体积边长=V^(1/d)
+A=UΣVᵀ ｜ AᵀA=VΣ²Vᵀ, AAᵀ=UΣ²Uᵀ, σ=√λ ｜ λ₂ₓ₂=(tr±√(tr²−4det))/2 ｜ C=XᵀX/(n−1), Y=XW
+A_k=Σσᵢuᵢvᵢᵀ, 误差=√(Σ_{i&gt;k}σᵢ²) ｜ 能量=σₖ²/Σσᵢ² ｜ ‖A‖_F=√Σσᵢ² ｜ CUR: p∝‖col‖², ×1/√(c·p), U=C⁺AR⁺ ｜ 幂迭代 x←Mx/‖Mx‖, λ=xᵀMx ｜ deflation M*=M−λxxᵀ</div>
+</div>
+
+<div class="b h-mc"><h4>Ⅶ 英中术语对照（考卷是英文！）</h4>
+<div class="r"><b>SQL</b>：relation 表 · tuple 行 · attribute 列 · multiset(bag) 多重集 · Cartesian product 笛卡尔积 · projection 投影(选列) · selection 选择(筛行) · inner/outer join 内/外连接 · anti-join 反连接 · correlated subquery 相关子查询 · three-valued logic 三值逻辑 · aggregate 聚合 · constraint 约束 · primary/foreign key 主/外键 · referential integrity 引用完整性 · CASCADE 级联 · index 索引</div>
+<div class="r"><b>相似搜索</b>：similarity search 相似性搜索 · Jaccard/cosine/edit distance 杰卡德/余弦/编辑距离 · shingle 碎片 · signature matrix 签名矩阵 · banding 分band · band/row/bucket band/行/桶 · candidate pair 候选对 · S-curve S曲线 · threshold 阈值 · false positive/negative 误报/漏检 · LSH 局部敏感哈希 · random hyperplane 随机超平面 · simhash 相似哈希 · p-stable p-稳定分布 · amplification 放大 · near-duplicate 近重复</div>
+<div class="r"><b>ML</b>：supervised/unsupervised/reinforcement 监督/无监督/强化 · classification/regression 分类/回归 · confusion matrix 混淆矩阵 · precision 精确率 · recall(sensitivity) 召回率 · specificity 特异度 · prevalence 正类占比 · IoU 交并比 · detection/segmentation 检测/分割 · convolution 卷积 · kernel/filter 卷积核 · stride/padding 步长/补边 · pooling 池化 · activation 激活 · backprop 反向传播 · learning rate 学习率 · mini-batch 小批量 · batch normalization 批归一化 · dropout 随机失活 · over/underfitting 过/欠拟合 · regularization 正则化 · support vector 支持向量 · margin 间隔 · soft margin 软间隔 · kernel trick 核技巧 · entropy 熵 · information gain 信息增益</div>
+<div class="r"><b>聚类</b>：dendrogram 树状图 · agglomerative 凝聚式 · single/complete-link 单链/全链 · chaining effect 链化效应 · centroid 质心(均值) · clustroid/medoid 簇代表点 · elbow method 肘部法 · curse of dimensionality 维度灾难 · Mahalanobis distance 马氏距离 · discard/compress/retained set 丢弃/压缩/保留集 · axis-aligned Gaussian 轴对齐高斯 · leverage score 杠杆分数</div>
+<div class="r"><b>降维</b>：dimensionality reduction 降维 · feature extraction/selection 特征提取/选择 · SVD 奇异值分解 · singular value 奇异值 · eigenvector/eigenvalue 特征向量/特征值 · covariance 协方差 · PCA 主成分分析 · centering 中心化 · power iteration 幂迭代 · deflation 缩并 · rank-k approximation 秩k近似 · Eckart-Young 最优低秩定理 · Frobenius norm F范数 · variance explained 方差解释比 · pseudo-inverse 伪逆 · sparse/dense 稀疏/稠密</div>
+</div>
+
+<div class="b h-mc"><h4>Ⅷ 判断速测（先自测，✗ 的记正确版）</h4>
+<table>
+<tr><th>说法</th><th>√✗</th><th>纠正</th></tr>
+<tr><td>编辑距离越大越相似</td><td class="k">✗</td><td>越小越相似</td></tr>
+<tr><td>MinHash 碰撞概率=1−Jaccard</td><td class="k">✗</td><td>=Jaccard s 本身</td></tr>
+<tr><td>AUROC=0.5 是完美模型</td><td class="k">✗</td><td>0.5=瞎猜，1 才完美</td></tr>
+<tr><td>SVM 的 C 越大正则越强</td><td class="k">✗</td><td>C 大→不容错→正则弱易过拟合</td></tr>
+<tr><td>SVM 边界由所有样本决定</td><td class="k">✗</td><td>只由支持向量决定</td></tr>
+<tr><td>池化层有可学习参数</td><td class="k">✗</td><td>max/avg 池化无参数</td></tr>
+<tr><td>全 0 初始化的网络能正常学习</td><td class="k">✗</td><td>对称破不了→必须随机初始化</td></tr>
+<tr><td>k-means 必收敛到全局最优</td><td class="k">✗</td><td>只保证局部最优→多跑/k-means++</td></tr>
+<tr><td>k-means++ 均匀随机选初始质心</td><td class="k">✗</td><td>P∝D(x)²（离已选越远越易中）</td></tr>
+<tr><td>单链聚合易产生链化效应</td><td class="g">✓</td><td>全链才给紧凑簇</td></tr>
+<tr><td>BFR 要存 d×d 协方差</td><td class="k">✗</td><td>轴对齐→只存 2d+1（N,SUM,SUMSQ）</td></tr>
+<tr><td>马氏距离=欧氏距离</td><td class="k">✗</td><td>各维先除 σ 再算（把椭圆掰圆）</td></tr>
+<tr><td>SVD 的奇异值可以为负</td><td class="k">✗</td><td>σ=√λ≥0，按降序排</td></tr>
+<tr><td>PCA 不中心化也没关系</td><td class="k">✗</td><td>必须先每列减均值</td></tr>
+<tr><td>rank-k 误差=√(σ₁²+…+σ_k²)</td><td class="k">✗</td><td>=√(σ_{k+1}²+…)，是<b>被扔掉的</b></td></tr>
+<tr><td>CUR 比 SVD 可解释</td><td class="g">✓</td><td>用真实行列；SVD 向量稠密</td></tr>
+<tr><td>UNION ALL 比 UNION 慢</td><td class="k">✗</td><td>不去重反而更快</td></tr>
+</table>
+</div>
+
+<div class="b h-fm"><h4>Ⅸ 数字速记（课件原值，选择题直接对号）</h4>
+<div class="fm">LSH：0.8⁵=0.328→(1−0.328)²⁰≈0.00035(FN)；0.3⁵=0.00243→4.74%(FP)；k=100=b·r；10万文档签名=40MB；10⁹页→5×10¹⁷对；10¹¹对/天
+指标：TP9/FP2/FN1/TN8→Acc .85 Pr .81 Rec .9 Spec .8 F1 .857；IoU≥0.5；AUROC .5=随机；H(9:1)≈0.47 H(12:8)≈0.97
+CNN：floor((5+2−3)/2)+1=3；全连接224²·3→4096≈6亿参；AlexNet：1M图/1000类/2GPU/1周/60M参；Xavier 1/n，He 2/n
+聚类：0,1,5,6→c=(0.5,5.5)，SSE=1；d_M=√5≈2.24 vs √2≈1.41、2√2≈2.83；CURE α=0.2；0.001^(1/10)=0.5
+SQL：bagel=50，banana=15，全表 SUM(price*quantity)=65；R{1,3}×S{(2,3),(3,4),(3,5)}→输出 (3),(3) 两行；LEFT JOIN 3+1=4 行
+降维：λ=(4±√20)/2≈4.236/−0.236；√34≈5.83→[0.51,0.86]→[0.53,0.85]，λ≈4.25；M*≈[[−0.19,0.09],[0.09,−0.07]]；能量 153.76+90.25+1.69=245.7，244/245.7≈99.3%</div>
+</div>
+
+<div class="b h-fm"><h4>Ⅹ MCQ 高频易错坑集</h4>
+<div class="r">precision≠accuracy；centroid(均值点)≠clustroid(真实点)；WHERE 不能有聚合、HAVING 可以；NULL=NULL→UNKNOWN，只能 IS NULL；COUNT(*) 不跳 NULL，COUNT(col) 跳，SUM/AVG 跳；UNION 去重、UNION ALL 不去；INTERSECT/EXCEPT 默认去重；IN 嵌套与 JOIN 改写<b>都加 DISTINCT 才等价</b>；笛卡尔积里有空表→结果整体为空。</div>
+<div class="r">b↑→FP↑FN↓，r↑ 反之；S 曲线拐点=(1/b)^(1/r)；s 右侧面积=FN、左侧=FP；MinHash 碰撞概率=Jaccard 本身（不是 1−Jaccard）；超平面 P=θ/π；p-稳定 P(同桶)≥1−d/a 只在 d≤a 时。</div>
+<div class="r">阈值↑→P↑R↓（不会双升）；稀有类 Accuracy 虚高：Accuracy&lt;AUROC&lt;AUPRC；FPR=1−Spec；F1 是调和平均（≤算术平均）；全 0 初始化→对称破不了；He=2/n(ReLU)、Xavier=1/n；SVM 边界只由支持向量决定；C 大→不容错→易过拟合；lr 大→震荡发散。</div>
+<div class="r">单链→链化/长条簇（不是紧凑）；全链→紧凑；dendrogram 高度=合并时距离；BFR 存 <b>2d+1</b> 个数（不是 d²）；方差=SUMSQ/N−(SUM/N)²；马氏先除 σ 再算欧氏；k-means++ 概率∝D(x)<b>²</b>；肘部法看 SSE-k 拐点。</div>
+<div class="r">AᵀA 的特征向量是 <b>V</b>（不是 U）；σ=√λ≥0；秩=非零 σ 数；rank-k 误差=<b>被扔掉</b>的 σ² 和开根；Eckart-Young 对 Frobenius 范数最优；能量比=σₖ²/Σσᵢ²；PCA 必须先中心化；CUR 抽样 p∝范数²、缩放 1/√(c·p)；deflation 减 λxxᵀ；幂迭代每步必须归一化。</div>
+</div>
+
+<div class="b h-mc"><h4>Ⅺ 读图要点（选择题看图经典失分点）</h4>
+<div class="r"><b>S 曲线</b>：横轴=相似度 t，纵轴=P(成候选)；<b>拐点≈阈值</b>；s 右侧曲线与 1 之间=FN 区，左侧曲线下方=FP 区；r 越大曲线越陡（越像阶跃）。</div>
+<div class="r"><b>ROC</b>：横=FPR(=1−Spec)，纵=TPR(=Recall)；对角线=随机猜(AUROC=0.5)；越贴<b>左上角</b>越好(1.0)。<b>PR 曲线</b>：横=Recall 纵=Precision，稀有类比较模型看 AUPRC。</div>
+<div class="r"><b>树状图</b>：纵轴=合并时的簇间距离；横切一刀→下方连通块数=k；长竖线=该簇稳定。单链的图常有「链条」状逐步合并。</div>
+<div class="r"><b>肘部图</b>：横=k 纵=SSE，取拐弯点；k 超过真簇数后 SSE 只缓慢下降。<b>能量图</b>：横=k 纵=累计 σ² 占比，取达 ~99% 的最小 k。</div>
+</div>
+
+<div class="b h-fm"><h4>Ⅻ 考场策略（4 大题 ×20′）</h4>
+<div class="r"><b>时间</b>：MCQ ≤15′(1.5′/题)，大题各 ~20′；先扫全卷挑最熟的开始。</div>
+<div class="r"><b>大题答题模板</b>：①写定义/公式 ②代题目数字 ③逐步算（保留中间结果）④回应问题（几行/哪类/比率含义）。算不完也要把公式和步骤写上拿过程分。</div>
+<div class="r"><b>高频大题预测</b>：SQL 写查询+算结果行数；LSH 给 s,b,r 算 FP/FN 或选参数；混淆矩阵算五指标+阈值影响；k-means 一轮迭代（分配+更新+SSE）或马氏距离判归簇；2×2 矩阵 PCA/幂迭代/deflation 或秩-k 近似能量比。</div>
+<div class="r"><b>MCQ 排坑</b>：绝对化词先排除；不等号方向(Acc&lt;AUROC&lt;AUPRC、P∝FP、R∝FN)；术语张冠李戴(precision≠accuracy、centroid≠clustroid、单链≠全链)；数字级快速估算。</div>
+</div>
+
+</div></div>
+</body>
+</html>
